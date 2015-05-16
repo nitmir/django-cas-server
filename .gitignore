@@ -1,0 +1,6 @@
+*.pyc
+
+bootstrap3
+cas/
+db.sqlite3
+manage.py

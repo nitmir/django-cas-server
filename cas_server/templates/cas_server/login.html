@@ -1,0 +1,24 @@
+{% extends "cas_server/base.html" %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% block bootstrap3_extra_head %}
+<link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+{% endblock %}
+{% block bootstrap3_content %}
+<div class="container">
+<div class="row">
+<div class="col-md-3"></div>
+<div class="col-md-6">
+{% bootstrap_messages %}
+      <form class="form-signin" method="post">
+        <h2 class="form-signin-heading">Merci de se connecter</h2>
+{% csrf_token %}
+{% bootstrap_form form %}
+{% bootstrap_button 'Connection' size='lg' button_type="submit" button_class="btn-block"%}
+      </form>
+</div>
+<div class="col-md-3"></div>
+</div>
+    </div> <!-- /container -->
+{% endblock %}
+

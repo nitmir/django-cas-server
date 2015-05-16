@@ -2,8 +2,7 @@ import urlparse
 import urllib
 
 def update_url(url, params):
-    url = urlparse.urlparse(url)
-    url_parts = list(urlparse.urlparse(service))
+    url_parts = list(urlparse.urlparse(url))
     query = dict(urlparse.parse_qsl(url_parts[4]))
     query.update(params)
     url_parts[4] = urllib.urlencode(query)

@@ -24,6 +24,7 @@ def login(request):
     form = None
     service_pattern = None
     renewed = False
+    warned = False
     if request.method == 'POST':
         service = request.POST.get('service')
         renew = True if request.POST.get('renew') else False
@@ -38,6 +39,7 @@ def login(request):
                 request.session["warn"] = True if form.cleaned_data.get("warn") else False
                 request.session["authenticated"] = True
                 renewed = True
+                warned = True
             else:
                 _logout(request)
     else:
@@ -64,7 +66,7 @@ def login(request):
                 # is the current user allowed on this service
                 service_pattern.check_user(user)
                 # if the user has asked to be warned before any login to a service (no transparent SSO)
-                if request.session["warn"]:
+                if request.session["warn"] and not warned:
                     return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew),'service':service})
                 else:
                     return redirect(user.get_service_url(service, service_pattern, renew=renew)) # redirect, using method ?

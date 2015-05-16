@@ -88,6 +88,10 @@ def login(request):
             if gateway:
                 list(messages.get_messages(request)) # clean messages before leaving the django app
                 return redirect(service)
+            if request.session.get("authenticated") and renew:
+                messages.add_message(request, messages.WARNING, u"Demande de réautentification par le service %s." % service)
+            else:
+                messages.add_message(request, messages.WARNING, u"Demande d'autentification par le service %s." % service)
         return render(request, settings.CAS_LOGIN_TEMPLATE, {'form':form})
 
 def logout(request):

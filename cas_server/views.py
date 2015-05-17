@@ -1,4 +1,6 @@
 # ⁻*- coding: utf-8 -*-
+import default_settings
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from django.conf import settings
@@ -76,6 +78,8 @@ def login(request):
                 messages.add_message(request, messages.ERROR, u"Nom d'utilisateur non autorisé")
             except models.BadFilter:
                 messages.add_message(request, messages.ERROR, u"Caractéristique utilisateur non autorisé")
+            except models.UserFieldNotDefined:
+                messages.add_message(request, messages.ERROR, u"L'attribut %s est nécessaire pour utiliser ce service" % service_pattern.user_field)
 
             # if gateway is set and auth failed redirect to the service without authentication
             if gateway:
@@ -155,11 +159,13 @@ def psValidate(request, typ=['ST']):
                 else:
                     attributes.append((key, value))
             params = {'username':ticket.user.username, 'attributes':attributes, 'proxies':proxies}
+            if ticket.service_pattern.user_field and ticket.user.attributs.get(ticket.service_pattern.user_field):
+                params['username'] = ticket.user.attributs.get(ticket.service_pattern.user_field)
             if pgtUrl and pgtUrl.startswith("https://"):
-                pattern = modele.ServicePattern(pgtUrl)
+                pattern = models.ServicePattern.validate(pgtUrl)
                 if pattern.proxy:
                     proxyid = models._gen_ticket('PGTIOU')
-                    pticket = models.ProxyGrantingTicket.objects.create(user=ticket.user, service=pgtUrl)
+                    pticket = models.ProxyGrantingTicket.objects.create(user=ticket.user, service=pgtUrl, service_pattern=pattern)
                     url = utils.update_url(pgtUrl, {'pgtIou':proxyid, 'pgtId':pticket.value})
                     try:
                         r = requests.get(url, verify=settings.CAS_PROXY_CA_CERTIFICATE_PATH)
@@ -174,7 +180,7 @@ def psValidate(request, typ=['ST']):
                     return render(request, "cas_server/serviceValidateError.xml", {'code':'INVALID_PROXY_CALLBACK'}, content_type="text/xml; charset=utf-8")
             else:
                 return render(request, "cas_server/serviceValidate.xml", params, content_type="text/xml; charset=utf-8")
-        except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist):
+        except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist, models.ServicePattern.DoesNotExist):
             return render(request, "cas_server/serviceValidateError.xml", {'code':'INVALID_TICKET'}, content_type="text/xml; charset=utf-8")
     else:
         return render(request, "cas_server/serviceValidateError.xml", {'code':'INVALID_REQUEST'}, content_type="text/xml; charset=utf-8")
@@ -189,11 +195,13 @@ def proxy(request):
     targetService = request.GET.get('targetService')
     if pgt and targetService:
         try:
+            pattern = models.ServicePattern.validate(targetService)
             ticket = models.ProxyGrantingTicket.objects.get(value=pgt, creation__gt=(datetime.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
-            pticket = models.ProxyTicket.objects.create(user=ticket.user, service=targetService)
+            pattern.check_user(ticket.user)
+            pticket = models.ProxyTicket.objects.create(user=ticket.user, service=targetService, service_pattern=ticket.service_pattern)
             pticket.proxies.create(url=ticket.service)
             return render(request, "cas_server/proxy.xml", {'ticket':pticket.value}, content_type="text/xml; charset=utf-8")
-        except models.ProxyGrantingTicket.DoesNotExist:
+        except (models.ProxyGrantingTicket.DoesNotExist, models.ServicePattern.DoesNotExist, models.BadUsername, models.BadFilter):
             return render(request, "cas_server/serviceValidateError.xml", {'code':'INVALID_TICKET'}, content_type="text/xml; charset=utf-8")
     else:
         return render(request, "cas_server/serviceValidateError.xml", {'code':'INVALID_REQUEST'}, content_type="text/xml; charset=utf-8")

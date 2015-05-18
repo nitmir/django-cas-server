@@ -11,7 +11,9 @@ import os
 import time
 import random
 import string
-import requests
+
+from concurrent.futures import ThreadPoolExecutor
+from requests_futures.sessions import FuturesSession
 
 import utils
 def _gen_ticket(prefix):
@@ -36,23 +38,42 @@ class User(models.Model):
         return self.username
 
     def logout(self, request):
+        async_list = []
+        session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
         for ticket in ServiceTicket.objects.filter(user=self):
-            ticket.logout(request)
+            async_list.append(ticket.logout(request, session))
             ticket.delete()
         for ticket in ProxyTicket.objects.filter(user=self):
-            ticket.logout(request)
+            async_list.append(ticket.logout(request, session))
             ticket.delete()
         for ticket in ProxyGrantingTicket.objects.filter(user=self):
-            ticket.logout(request)
+            async_list.append(ticket.logout(request, session))
             ticket.delete()
+        for future in async_list:
+            try:
+                future.result()
+            except Exception as e:
+                messages.add_message(request, messages.WARNING, u'Erreur lors de la déconnexion des services %s' % e)
 
     def delete(self):
         super(User, self).delete()
 
-    def get_service_url(self, service, service_pattern, renew):
-        attributs = [s.strip() for s in service_pattern.attributs.split(',')]
-        ticket = ServiceTicket.objects.create(user=self, attributs = dict([(k, v) for (k, v) in self.attributs.items() if k in attributs]), service=service, renew=renew, service_pattern=service_pattern)
+
+    def get_ticket(self, TicketClass, service, service_pattern, renew): 
+        attributs = dict((a.name, a.replace if a.replace else a.name) for a in service_pattern.attributs.all())
+        replacements = dict((a.name, (a.pattern, a.replace)) for a in service_pattern.replacements.all())
+        service_attributs = {}
+        for (k,v) in self.attributs.items():
+            if k in attributs:
+                if k in replacements:
+                    v = re.sub(replacements[k][0], replacements[k][1], v)
+                service_attributs[attributs[k]] = v
+        ticket = TicketClass.objects.create(user=self, attributs = service_attributs, service=service, renew=renew, service_pattern=service_pattern)
         ticket.save()
+        return ticket
+
+    def get_service_url(self, service, service_pattern, renew):
+        ticket = self.get_ticket(ServiceTicket, service, service_pattern, renew)
         url = utils.update_url(service, {'ticket':ticket.value})
         return url
 
@@ -67,21 +88,31 @@ class ServicePattern(models.Model):
         ordering = ("pos", )
 
     pos = models.IntegerField(default=100)
+    name = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text="Un nom pour le service")
     pattern = models.CharField(max_length=255, unique=True)
     user_field = models.CharField(max_length=255, default="", blank=True, help_text="Nom de l'attribut transmit comme username, vide = login")
-    usernames = models.CharField(max_length=255, default="", blank=True, help_text="Liste d'utilisateurs acceptés séparé par des virgules, vide = tous les utilisateur")
-    attributs = models.CharField(max_length=255, default="", blank=True, help_text="Liste des nom d'attributs à transmettre au service, séparé par une virgule. vide = aucun")
+    #usernames = models.CharField(max_length=255, default="", blank=True, help_text="Liste d'utilisateurs acceptés séparé par des virgules, vide = tous les utilisateur")
+    #attributs = models.CharField(max_length=255, default="", blank=True, help_text="Liste des nom d'attributs à transmettre au service, séparé par une virgule. vide = aucun")
+    restrict_users = models.BooleanField(default=False, help_text="Limiter les utilisateur autorisé a se connecté a ce service à celle ci-dessous")
     proxy = models.BooleanField(default=False,  help_text="Un ProxyGrantingTicket peut être délivré au service pour s'authentifier en temps que l'utilisateur sur d'autres services")
-    filter = models.CharField(max_length=255, default="", blank=True, help_text="Une lambda fonction pour filtrer sur les utilisateur où leurs attribut, arg1: username, arg2:attrs_dict. vide = pas de filtre")
+    #filter = models.CharField(max_length=255, default="", blank=True, help_text="Une lambda fonction pour filtrer sur les utilisateur où leurs attribut, arg1: username, arg2:attrs_dict. vide = pas de filtre")
 
     def __unicode__(self):
         return u"%s: %s" % (self.pos, self.pattern)
 
     def check_user(self, user):
-        if self.usernames and not user.username in self.usernames.split(','):
+        if self.restrict_users and not self.usernames.filter(value=user.username):
             raise BadUsername()
-        if self.filter and self.filter.startswith("lambda") and not eval(str(self.filter))(user.username, user.attributs):
-            raise BadFilter()
+        for f in self.filters.all():
+            if isinstance(user.attributs[f.attribut], list):
+                l = user.attributs[f.attribut]
+            else:
+                l = [user.attributs[f.attribut]]
+            for v in l:
+                if re.match(f.pattern, str(v)):
+                    break
+            else:
+                raise BadFilter('%s do not match %s %s' % (f.pattern, f.attribut, user.attributs[f.attribut]) )
         if self.user_field and not user.attributs.get(self.user_field):
             raise UserFieldNotDefined()
         return True
@@ -94,6 +125,36 @@ class ServicePattern(models.Model):
                 return s
         raise cls.DoesNotExist()
 
+class Usernames(models.Model):
+    value = models.CharField(max_length=255)
+    service_pattern = models.ForeignKey(ServicePattern, related_name="usernames")
+class ReplaceAttributName(models.Model):
+    name = models.CharField(max_length=255, unique=True, help_text=u"nom d'un attributs à transmettre au service")
+    replace = models.CharField(max_length=255, blank=True, help_text=u"nom sous lequel l'attribut sera présenté au service. vide = inchangé")
+    service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")
+
+    def __unicode__(self):
+        if not self.replace:
+            return self.name
+        else:
+            return u"%s → %s" % (self.name, self.replace)
+
+class FilterAttributValue(models.Model):
+    attribut = models.CharField(max_length=255, help_text=u"Nom de l'attribut devant vérifier pattern")
+    pattern = models.CharField(max_length=255, help_text=u"Une expression régulière")
+    service_pattern = models.ForeignKey(ServicePattern, related_name="filters")
+
+    def __unicode__(self):
+        return u"%s %s" % (self.attribut, self.pattern)
+
+class ReplaceAttributValue(models.Model):
+    attribut = models.CharField(max_length=255, help_text=u"Nom de l'attribut dont la valeur doit être modifié")
+    pattern = models.CharField(max_length=255, help_text=u"Une expression régulière de ce qui doit être modifié")
+    replace = models.CharField(max_length=255, blank=True, help_text=u"Par quoi le remplacer, les groupes sont capturé par \\1, \\2 …")
+    service_pattern = models.ForeignKey(ServicePattern, related_name="replacements")
+
+    def __unicode__(self):
+        return u"%s %s %s" % (self.attribut, self.pattern, self.replace)
 
 
 class Ticket(models.Model):
@@ -110,7 +171,7 @@ class Ticket(models.Model):
     def __unicode__(self):
         return u"%s: %s %s" % (self.user, self.value, self.service)
 
-    def logout(self, request):
+    def logout(self, request, session):
         #if self.validate:
             xml = """<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
@@ -119,7 +180,7 @@ class Ticket(models.Model):
   </samlp:LogoutRequest>""" % {'id' : os.urandom(20).encode("hex"), 'datetime' : int(time.time()), 'ticket': self.value}
             headers = {'Content-Type': 'text/xml'}
             try:
-                requests.post(self.service.encode('utf-8'), data=xml.encode('utf-8'), headers=headers)
+                return session.post(self.service.encode('utf-8'), data=xml.encode('utf-8'), headers=headers)
             except Exception as e:
                 messages.add_message(request, messages.WARNING, u'Erreur lors de la déconnexion du service %s:\n%s' % (self.service, e))
 

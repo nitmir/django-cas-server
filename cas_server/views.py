@@ -69,7 +69,7 @@ def login(request):
                 service_pattern.check_user(user)
                 # if the user has asked to be warned before any login to a service (no transparent SSO)
                 if request.session["warn"] and not warned:
-                    return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew),'service':service})
+                    return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew),'service':service, 'name': service_pattern.name})
                 else:
                     return redirect(user.get_service_url(service, service_pattern, renew=renew)) # redirect, using method ?
             except models.ServicePattern.DoesNotExist:
@@ -89,13 +89,17 @@ def login(request):
         return render(request, settings.CAS_LOGGED_TEMPLATE, {})
     else:
         if service:
-            if gateway:
-                list(messages.get_messages(request)) # clean messages before leaving the django app
-                return redirect(service)
-            if request.session.get("authenticated") and renew:
-                messages.add_message(request, messages.WARNING, u"Demande de réautentification par le service %s." % service)
-            else:
-                messages.add_message(request, messages.WARNING, u"Demande d'autentification par le service %s." % service)
+            try:
+                service_pattern = models.ServicePattern.validate(service)
+                if gateway:
+                    list(messages.get_messages(request)) # clean messages before leaving the django app
+                    return redirect(service)
+                if request.session.get("authenticated") and renew:
+                    messages.add_message(request, messages.WARNING, u"Demande de réautentification par le service %s (%s)." % (service_pattern.name, service))
+                else:
+                    messages.add_message(request, messages.WARNING, u"Demande d'autentification par le service %s (%s)." % (service_pattern.name, service))
+            except models.ServicePattern.DoesNotExist:
+                messages.add_message(request, messages.ERROR, u'Service %s non autorisé.' % service)
         return render(request, settings.CAS_LOGIN_TEMPLATE, {'form':form})
 
 def logout(request):
@@ -198,7 +202,7 @@ def proxy(request):
             pattern = models.ServicePattern.validate(targetService)
             ticket = models.ProxyGrantingTicket.objects.get(value=pgt, creation__gt=(datetime.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
             pattern.check_user(ticket.user)
-            pticket = models.ProxyTicket.objects.create(user=ticket.user, service=targetService, service_pattern=ticket.service_pattern)
+            pticket = ticket.user.get_ticket(models.ProxyTicket, targetService, pattern, False)
             pticket.proxies.create(url=ticket.service)
             return render(request, "cas_server/proxy.xml", {'ticket':pticket.value}, content_type="text/xml; charset=utf-8")
         except (models.ProxyGrantingTicket.DoesNotExist, models.ServicePattern.DoesNotExist, models.BadUsername, models.BadFilter):

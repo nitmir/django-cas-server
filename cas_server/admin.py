@@ -19,8 +19,22 @@ class ProxyGrantingInline(admin.TabularInline):
 class UserAdmin(admin.ModelAdmin):
     inlines = (ServiceTicketInline, ProxyTicketInline, ProxyGrantingInline)
 
+class UsernamesInline(admin.TabularInline):
+    model = Usernames
+    extra = 0
+class ReplaceAttributNameInline(admin.TabularInline):
+    model = ReplaceAttributName
+    extra = 0
+class ReplaceAttributValueInline(admin.TabularInline):
+    model = ReplaceAttributValue
+    extra = 0
+class FilterAttributValueInline(admin.TabularInline):
+    model = FilterAttributValue
+    extra = 0
+
 class ServicePatternAdmin(admin.ModelAdmin):
-    list_display = ('pos', 'pattern', 'proxy')
+    inlines = (UsernamesInline, ReplaceAttributNameInline, ReplaceAttributValueInline, FilterAttributValueInline)
+    list_display = ('pos', 'name', 'pattern', 'proxy')
 
 
 admin.site.register(User, UserAdmin)

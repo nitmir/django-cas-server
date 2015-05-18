@@ -82,8 +82,6 @@ class ServicePattern(models.Model):
             raise BadUsername()
         if self.filter and self.filter.startswith("lambda") and not eval(str(self.filter))(user.username, user.attributs):
             raise BadFilter()
-        print self.user_field
-        print user.attributs.get(self.user_field)
         if self.user_field and not user.attributs.get(self.user_field):
             raise UserFieldNotDefined()
         return True

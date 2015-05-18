@@ -128,8 +128,11 @@ class ServicePattern(models.Model):
 class Usernames(models.Model):
     value = models.CharField(max_length=255)
     service_pattern = models.ForeignKey(ServicePattern, related_name="usernames")
+
 class ReplaceAttributName(models.Model):
-    name = models.CharField(max_length=255, unique=True, help_text=u"nom d'un attributs à transmettre au service")
+    class Meta:
+        unique_together = ('name', 'service_pattern')
+    name = models.CharField(max_length=255, help_text=u"nom d'un attributs à transmettre au service")
     replace = models.CharField(max_length=255, blank=True, help_text=u"nom sous lequel l'attribut sera présenté au service. vide = inchangé")
     service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")
 

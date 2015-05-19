@@ -37,6 +37,7 @@ def login(request):
             form = forms.UserCredential(request.POST, initial={'service':service,'method':method,'warn':request.session.get("warn")})
             if form.is_valid():
                 user = models.User.objects.get(username=form.cleaned_data['username'])
+                request.session.set_expiry(0)
                 request.session["username"] = form.cleaned_data['username']
                 request.session["warn"] = True if form.cleaned_data.get("warn") else False
                 request.session["authenticated"] = True

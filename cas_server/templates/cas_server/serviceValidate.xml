@@ -5,6 +5,9 @@
 {% for key, value in attributes %}      <cas:{{key}}>{{value}}</cas:{{key}}>
 {% endfor %}
     </cas:attributes>
+{% for key, value in attributes %}
+<cas:attribute name="{{key}}" value="{{value}}"/>
+{% endfor %}
 {% if proxyGrantingTicket %}
     <cas:proxyGrantingTicket>{{proxyGrantingTicket}}</cas:proxyGrantingTicket>
 {% endif %}

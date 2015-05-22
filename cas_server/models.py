@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib import messages
 from picklefield.fields import PickledObjectField
+from django.utils.translation import ugettext as _
 
 import re
 import os
@@ -53,7 +54,7 @@ class User(models.Model):
             try:
                 future.result()
             except Exception as e:
-                messages.add_message(request, messages.WARNING, u'Erreur lors de la déconnexion des services %s' % e)
+                messages.add_message(request, messages.WARNING, _(u'Error during service logout %s') % e)
 
     def delete(self):
         super(User, self).delete()
@@ -185,7 +186,7 @@ class Ticket(models.Model):
             try:
                 return session.post(self.service.encode('utf-8'), data=xml.encode('utf-8'), headers=headers)
             except Exception as e:
-                messages.add_message(request, messages.WARNING, u'Erreur lors de la déconnexion du service %s:\n%s' % (self.service, e))
+                messages.add_message(request, messages.WARNING, _(u'Error during service logout %(service)s:\n%(error)s') % {'service': self.service, 'error':e})
 
 class ServiceTicket(Ticket):
     value = models.CharField(max_length=255, default=_gen_st, unique=True)

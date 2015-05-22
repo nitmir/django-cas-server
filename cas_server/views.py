@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import ugettext as _
 
 import requests
 from datetime import datetime, timedelta
@@ -70,24 +71,25 @@ def login(request):
                 service_pattern.check_user(user)
                 # if the user has asked to be warned before any login to a service (no transparent SSO)
                 if request.session["warn"] and not warned:
-                    return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew),'service':service, 'name': service_pattern.name})
+                    messages.add_message(request, messages.WARNING, _(u"Authentication has been required by service %(name)s (%(url)s)") % {'name':service_pattern.name, 'url':service})
+                    return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew)})
                 else:
                     return redirect(user.get_service_url(service, service_pattern, renew=renew)) # redirect, using method ?
             except models.ServicePattern.DoesNotExist:
-                messages.add_message(request, messages.ERROR, u'Service %s non autorisé.' % service)
+                messages.add_message(request, messages.ERROR, _(u'Service %(url)s non allowed.') % {'url' : service})
             except models.BadUsername:
-                messages.add_message(request, messages.ERROR, u"Nom d'utilisateur non autorisé")
+                messages.add_message(request, messages.ERROR, _(u"Username non allowed"))
             except models.BadFilter:
-                messages.add_message(request, messages.ERROR, u"Caractéristique utilisateur non autorisé")
+                messages.add_message(request, messages.ERROR, _(u"User charateristics non allowed"))
             except models.UserFieldNotDefined:
-                messages.add_message(request, messages.ERROR, u"L'attribut %s est nécessaire pour utiliser ce service" % service_pattern.user_field)
+                messages.add_message(request, messages.ERROR, _(u"The attribut %(field)s is needed to use that service") % {'field':service_pattern.user_field})
 
             # if gateway is set and auth failed redirect to the service without authentication
             if gateway:
                 list(messages.get_messages(request)) # clean messages before leaving the django app
                 return redirect(service)
 
-        return render(request, settings.CAS_LOGGED_TEMPLATE, {})
+        return render(request, settings.CAS_LOGGED_TEMPLATE, {'session':request.session})
     else:
         if service:
             try:
@@ -96,11 +98,11 @@ def login(request):
                     list(messages.get_messages(request)) # clean messages before leaving the django app
                     return redirect(service)
                 if request.session.get("authenticated") and renew:
-                    messages.add_message(request, messages.WARNING, u"Demande de réautentification par le service %s (%s)." % (service_pattern.name, service))
+                    messages.add_message(request, messages.WARNING, _(u"Authentication renewal required by service %(name)s (%(url)s).") % {'name':service_pattern.name, 'url':service})
                 else:
-                    messages.add_message(request, messages.WARNING, u"Demande d'autentification par le service %s (%s)." % (service_pattern.name, service))
+                    messages.add_message(request, messages.WARNING, _(u"Authentication required by service %(name)s (%(url)s).") % {'name':service_pattern.name, 'url':service})
             except models.ServicePattern.DoesNotExist:
-                messages.add_message(request, messages.ERROR, u'Service %s non autorisé.' % service)
+                messages.add_message(request, messages.ERROR, _(u'Service %s non allowed') % service)
         return render(request, settings.CAS_LOGIN_TEMPLATE, {'form':form})
 
 def logout(request):
@@ -116,7 +118,7 @@ def logout(request):
         return redirect(service)
     # else redirect to login page
     else:
-        messages.add_message(request, messages.SUCCESS, u'Déconnecté avec succès')
+        messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
         return redirect("login")
 
 def validate(request):

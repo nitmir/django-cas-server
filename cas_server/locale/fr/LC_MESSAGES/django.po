@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cas_server\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-22 17:42+0200\n"
+"PO-Revision-Date: 2015-05-22 17:53+0100\n"
+"Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
+"Language-Team: django <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#: forms.py:10
+msgid "login"
+msgstr "Identifiant"
+
+#: forms.py:12
+msgid "password"
+msgstr "mot de passe"
+
+#: forms.py:14
+msgid "warn"
+msgstr "Prévenez-moi avant d'accéder à d'autres services."
+
+#: models.py:57
+#, python-format
+msgid "Error during service logout %s"
+msgstr "Une erreur est survenue durant la déconnexion du service %s"
+
+#: models.py:189
+#, python-format
+msgid ""
+"Error during service logout %(service)s:\n"
+"%(error)s"
+msgstr ""
+"Une erreur est survenue durant la déconnexion du service %(service)s:"
+"%(error)s"
+
+#: templates/cas_server/logged.html:14
+msgid "Logged"
+msgstr ""
+"<h3>Connexion réussie</h3>Vous vous êtes authentifié(e) auprès du Service "
+"Central d'Authentification.<br/>Pour des raisons de sécurité, veuillez vous "
+"déconnecter et fermer votre navigateur lorsque vous avez fini d'accéder aux "
+"services authentifiés."
+
+#: templates/cas_server/logged.html:15
+msgid "Logout"
+msgstr "Se déconnecter"
+
+#: templates/cas_server/login.html:15
+msgid "Please loggin"
+msgstr "Merci de se connecter"
+
+#: templates/cas_server/login.html:18
+msgid "Login"
+msgstr "Connexion"
+
+#: templates/cas_server/warn.html:14
+msgid "Connect to the service"
+msgstr "Se connecter au service"
+
+#: views.py:74
+#, python-format
+msgid "Authentication has been required by service %(name)s (%(url)s)"
+msgstr ""
+"Une demande d'authentification a été émise pour le service %(name)s "
+"(%(url)s)."
+
+#: views.py:79
+#, python-format
+msgid "Service %(url)s non allowed."
+msgstr "le service %(url)s n'est pas autorisé."
+
+#: views.py:81
+msgid "Username non allowed"
+msgstr "Nom d'utilisateur non authorisé"
+
+#: views.py:83
+msgid "User charateristics non allowed"
+msgstr "Caractéristique utilisateur non autorisée"
+
+#: views.py:85
+#, python-format
+msgid "The attribut %(field)s is needed to use that service"
+msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
+
+#: views.py:101
+#, python-format
+msgid "Authentication renewal required by service %(name)s (%(url)s)."
+msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
+
+#: views.py:103
+#, python-format
+msgid "Authentication required by service %(name)s (%(url)s)."
+msgstr "Authentification requise par le service %(name)s (%(url)s)."
+
+#: views.py:105
+#, python-format
+msgid "Service %s non allowed"
+msgstr "Le service %s n'est pas autorisé"
+
+#: views.py:121
+msgid "Successfully logout"
+msgstr ""
+"<h3>Déconnexion réussie</h3>\n"
+"Vous vous êtes déconnecté(e) du Service Central d'Authentification.<br/>Pour "
+"des raisons de sécurité, veuillez fermer votre navigateur."
+
+#~ msgid ""
+#~ "Une demande d'authentification a été émise pour le service %(name)s "
+#~ "(%(url)s)"
+#~ msgstr ""
+#~ "Une demande d'authentification a été émise pour le service %(name)s "
+#~ "(%(url)s)"

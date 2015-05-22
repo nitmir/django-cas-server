@@ -2,15 +2,16 @@ import default_settings
 
 from django import forms
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 import models
 
 class UserCredential(forms.Form):
-    username = forms.CharField(label='login')
+    username = forms.CharField(label=_('login'))
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
-    password = forms.CharField(label='password', widget=forms.PasswordInput)
+    password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
-    warn = forms.BooleanField(label='warn', required=False)
+    warn = forms.BooleanField(label=_('warn'), required=False)
 
     def __init__(self, *args, **kwargs):
         super(UserCredential, self).__init__(*args, **kwargs)

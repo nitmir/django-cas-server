@@ -252,3 +252,5 @@ def samlValidate(request):
             return render(request, "cas_server/samlValidateError.xml", {'code':'VersionMismatch'}, content_type="text/xml; charset=utf-8")
         except models.ServiceTicket.DoesNotExist:
             return render(request, "cas_server/samlValidateError.xml", {'code':'AuthnFailed'}, content_type="text/xml; charset=utf-8")
+    else:
+        return redirect("login")

@@ -1,0 +1,15 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header />
+  <SOAP-ENV:Body>
+    <Response xmlns="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion"
+    xmlns:samlp="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IssueInstant="{{IssueInstant}}"
+    MajorVersion="1" MinorVersion="1" Recipient="{{Recipient}}"
+    ResponseID="{{ResponseID}}">
+      <Status>
+        <StatusCode Value="samlp:{{code}}">
+        </StatusCode>
+      </Status>
+    </Response>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

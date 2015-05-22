@@ -14,5 +14,6 @@ urlpatterns = patterns('',
     url('^proxy$', views.proxy, name='proxy'),
     url('^p3/serviceValidate$', views.p3_serviceValidate, name='p3_serviceValidate'),
     url('^p3/proxyValidate$', views.p3_proxyValidate, name='p3_proxyValidate'),
+    url('^samlValidate$', views.samlValidate, name='samlValidate'),
 )
 

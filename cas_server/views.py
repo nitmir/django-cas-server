@@ -5,10 +5,12 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from django.conf import settings
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 
 import requests
 from datetime import datetime, timedelta
+from lxml import etree
 
 import utils
 import forms
@@ -218,3 +220,35 @@ def p3_serviceValidate(request):
 
 def p3_proxyValidate(request):
     return proxyValidate(request)
+
+@csrf_exempt
+def samlValidate(request):
+    if request.method == 'POST':
+        target = request.GET.get('TARGET')
+        root = etree.fromstring(request.body)
+        try:
+            auth_req = root.getchildren()[1].getchildren()[0]
+            IssueInstant = auth_req.attrib['IssueInstant']
+            RequestID = auth_req.attrib['RequestID']
+            ticket = auth_req.getchildren()[0].text
+            ticket = models.ServiceTicket.objects.get(value=ticket, service=target, validate=False, creation__gt=(datetime.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
+            ticket.validate = True
+            ticket.save()
+            expireInstant = (ticket.creation + timedelta(seconds=settings.CAS_TICKET_VALIDITY)).isoformat()
+            attributes = []
+            for key, value in ticket.attributs.items():
+                if isinstance(value, list):
+                    for v in value:
+                        attributes.append((key, v))
+                else:
+                    attributes.append((key, value))
+            params = {'IssueInstant':IssueInstant, 'expireInstant':expireInstant,'Recipient':target, 'ResponseID':RequestID, 'username':ticket.user.username, 'attributes':attributes}
+            if ticket.service_pattern.user_field and ticket.user.attributs.get(ticket.service_pattern.user_field):
+                params['username'] = ticket.user.attributs.get(ticket.service_pattern.user_field)
+            return render(request, "cas_server/samlValidate.xml", params, content_type="text/xml; charset=utf-8")
+        except IndexError:
+            return render(request, "cas_server/samlValidateError.xml", {'code':'VersionMismatch'}, content_type="text/xml; charset=utf-8")
+        except KeyError:
+            return render(request, "cas_server/samlValidateError.xml", {'code':'VersionMismatch'}, content_type="text/xml; charset=utf-8")
+        except models.ServiceTicket.DoesNotExist:
+            return render(request, "cas_server/samlValidateError.xml", {'code':'AuthnFailed'}, content_type="text/xml; charset=utf-8")

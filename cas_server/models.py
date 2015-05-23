@@ -41,13 +41,13 @@ class User(models.Model):
     def logout(self, request):
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
-        for ticket in ServiceTicket.objects.filter(user=self):
+        for ticket in ServiceTicket.objects.filter(user=self, validate=True):
             async_list.append(ticket.logout(request, session))
             ticket.delete()
-        for ticket in ProxyTicket.objects.filter(user=self):
+        for ticket in ProxyTicket.objects.filter(user=self, validate=True):
             async_list.append(ticket.logout(request, session))
             ticket.delete()
-        for ticket in ProxyGrantingTicket.objects.filter(user=self):
+        for ticket in ProxyGrantingTicket.objects.filter(user=self, validate=True):
             async_list.append(ticket.logout(request, session))
             ticket.delete()
         for future in async_list:

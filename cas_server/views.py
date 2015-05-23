@@ -7,8 +7,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
+from django.core.urlresolvers import reverse 
 
 import requests
+import urllib
 from datetime import datetime, timedelta
 from lxml import etree
 
@@ -23,6 +25,12 @@ def _logout(request):
     except KeyError: pass
     try: del request.session["warn"]
     except KeyError: pass
+
+
+def redirect_params(url_name, params={}):
+    url = reverse(url_name, args = args)
+    params = urllib.urlencode(params)
+    return HttpResponseRedirect(url + "?%s" % params)
 
 def login(request):
     user = None
@@ -63,7 +71,7 @@ def login(request):
             user = models.User.objects.get(username=request.session["username"])
         except models.User.DoesNotExist:
             _logout(request)
-            return redirect("login")
+            return redirect_params("login", params=dict(request.GET))
 
         # if login agains a service is requestest
         if service:

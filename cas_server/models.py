@@ -132,7 +132,7 @@ class Usernames(models.Model):
 
 class ReplaceAttributName(models.Model):
     class Meta:
-        unique_together = ('name', 'service_pattern')
+        unique_together = ('name', 'replace', 'service_pattern')
     name = models.CharField(max_length=255, help_text=u"nom d'un attributs à transmettre au service")
     replace = models.CharField(max_length=255, blank=True, help_text=u"nom sous lequel l'attribut sera présenté au service. vide = inchangé")
     service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")

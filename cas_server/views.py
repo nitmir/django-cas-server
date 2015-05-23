@@ -58,11 +58,12 @@ def login(request):
             form = forms.UserCredential(initial={'service':service,'method':method,'warn':request.session.get("warn")})
             
     # if authenticated and successfully renewed authentication if needed
-    if request.session.get("authenticated") and (not renew or renewed):
+    if request.session.get("authenticated") request.session.get("username") and (not renew or renewed):
         try:
             user = models.User.objects.get(username=request.session["username"])
         except models.User.DoesNotExist:
             _logout(request)
+            return redirect("login")
 
         # if login agains a service is requestest
         if service:

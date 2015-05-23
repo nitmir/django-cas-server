@@ -72,7 +72,7 @@ def login(request):
                 # is the current user allowed on this service
                 service_pattern.check_user(user)
                 # if the user has asked to be warned before any login to a service (no transparent SSO)
-                if request.session["warn"] and not warned:
+                if request.session.get("warn", True) and not warned:
                     messages.add_message(request, messages.WARNING, _(u"Authentication has been required by service %(name)s (%(url)s)") % {'name':service_pattern.name, 'url':service})
                     return render(request, settings.CAS_WARN_TEMPLATE, {'service_ticket_url':user.get_service_url(service, service_pattern, renew=renew)})
                 else:

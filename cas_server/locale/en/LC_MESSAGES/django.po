@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-22 17:49+0200\n"
-"PO-Revision-Date: 2015-05-22 17:52+0100\n"
+"POT-Creation-Date: 2015-05-23 19:01+0200\n"
+"PO-Revision-Date: 2015-05-23 19:03+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: en\n"
@@ -28,6 +28,10 @@ msgstr "password"
 #: forms.py:14
 msgid "warn"
 msgstr " Warn me before logging me into other sites."
+
+#: forms.py:32
+msgid "Bad user"
+msgstr "The credentials you provided cannot be determined to be authentic."
 
 #: models.py:57
 #, python-format
@@ -67,45 +71,45 @@ msgstr "Login"
 msgid "Connect to the service"
 msgstr "Connect to the service"
 
-#: views.py:74
+#: views.py:76
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr "Authentication has been required by service %(name)s (%(url)s)"
 
-#: views.py:79
+#: views.py:81
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "Service %(url)s non allowed."
 
-#: views.py:81
+#: views.py:83
 msgid "Username non allowed"
 msgstr "Username non allowed"
 
-#: views.py:83
+#: views.py:85
 msgid "User charateristics non allowed"
 msgstr "User charateristics non allowed"
 
-#: views.py:85
+#: views.py:87
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: views.py:101
+#: views.py:103
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Authentication renewal required by service %(name)s (%(url)s)."
 
-#: views.py:103
+#: views.py:105
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentication required by service %(name)s (%(url)s)."
 
-#: views.py:105
+#: views.py:107
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Service %s non allowed"
 
-#: views.py:121
+#: views.py:123
 msgid "Successfully logout"
 msgstr ""
 "<h3>Logout successful</h3>You have successfully logged out of the Central "

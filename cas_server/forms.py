@@ -29,7 +29,7 @@ class UserCredential(forms.Form):
                 user.save()
             self.user = user
         else:
-            raise forms.ValidationError("Bad user")
+            raise forms.ValidationError(_(u"Bad user"))
 
 
 class TicketForm(forms.ModelForm):

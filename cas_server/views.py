@@ -166,7 +166,7 @@ def psValidate(request, typ=['ST']):
             elif ticket.startswith("PT"):
                 ticket = models.ProxyTicket.objects.get(value=ticket, service=service, validate=False, renew=renew, creation__gt=(datetime.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
                 for p in ticket.proxies.all():
-                    proxies.add(p.url)
+                    proxies.append(p.url)
             ticket.validate = True
             ticket.save()
             attributes = []

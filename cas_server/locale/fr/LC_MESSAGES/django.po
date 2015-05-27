@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-05-27 22:56+0200\n"
-"PO-Revision-Date: 2015-05-23 19:02+0100\n"
+"PO-Revision-Date: 2015-05-27 23:05+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -35,110 +35,108 @@ msgid "Bad user"
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
 #: models.py:89
-#, fuzzy, python-format
-#| msgid "Error during service logout %s"
+#, python-format
 msgid "Error during service logout %r"
-msgstr "Une erreur est survenue durant la déconnexion du service %s"
+msgstr "Une erreur est survenue durant la déconnexion du service %r"
 
 #: models.py:147
 msgid "position"
-msgstr ""
+msgstr "position"
 
 #: models.py:154 models.py:239
 msgid "name"
-msgstr ""
+msgstr "nom"
 
 #: models.py:155
-#, fuzzy
-#| msgid "Connect to the service"
 msgid "A name for the service"
-msgstr "Se connecter au service"
+msgstr "Un nom pour le service"
 
 #: models.py:160 models.py:266 models.py:283
 msgid "pattern"
-msgstr ""
+msgstr "motif"
 
 #: models.py:166
 msgid "user field"
-msgstr ""
+msgstr "champ utilisateur"
 
 #: models.py:167
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
+"Nom de l'attribut devant être transmis comme nom d'utilisateur au service. "
+"vide = nom de connection"
 
 #: models.py:171
 msgid "restrict username"
-msgstr ""
+msgstr "limiter les noms d'utilisateurs"
 
 #: models.py:172
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
+"Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
+"ci-dessous"
 
 #: models.py:176
 msgid "proxy"
-msgstr ""
+msgstr "proxy"
 
 #: models.py:177
 msgid ""
 "A ProxyGrantingTicket can be delivered to the service in order to "
 "authenticate for the user on a backend service"
 msgstr ""
+"Un ProxyGrantingTicket peut être délivré au service pour lui permettre de "
+"s'authentifier en temps l'utilisateur à un autre service"
 
 #: models.py:182
 msgid "single sign out"
 msgstr ""
 
 #: models.py:183
-#, fuzzy
-#| msgid "Connect to the service"
 msgid "Enable SSO for the service"
-msgstr "Se connecter au service"
+msgstr "Active le SSO pour le service"
 
 #: models.py:225
 msgid "username"
-msgstr ""
+msgstr "nom d'utilisateur"
 
 #: models.py:226
-#, fuzzy
-#| msgid "Connect to the service"
 msgid "username allowed to connect to the service"
-msgstr "Se connecter au service"
+msgstr "noms d'utilisateurs autorisé à se connecter au service"
 
 #: models.py:240
-#, fuzzy
-#| msgid "The attribut %(field)s is needed to use that service"
 msgid "name of an attribut to send to the service"
-msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
+msgstr "nom d'un attribut a envoyer au service"
 
 #: models.py:245 models.py:289
 msgid "replace"
-msgstr ""
+msgstr "remplacement"
 
 #: models.py:246
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
+"nom sous lequel l'attribut sera rendu visible au service. vide = inchangé"
 
 #: models.py:261 models.py:278
 msgid "attribut"
-msgstr ""
+msgstr "attribut"
 
 #: models.py:262
 msgid "Name of the attribut which must verify pattern"
-msgstr ""
+msgstr "Nom de l'attribut devant vérifier un motif"
 
 #: models.py:267
 msgid "a regular expression"
-msgstr ""
+msgstr "une expression régulière"
 
 #: models.py:279
 msgid "Name of the attribut for which the value must be replace"
-msgstr ""
+msgstr "nom de l'attribue pour lequel la valeur doit être remplacé"
 
 #: models.py:284
 msgid "An regular expression maching whats need to be replaced"
-msgstr ""
+msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
 #: models.py:290
 msgid "replace expression, groups are capture by \\1, \\2 …"

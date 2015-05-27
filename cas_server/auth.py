@@ -80,7 +80,10 @@ class MysqlAuthUser(DummyAuthUser):
                     salt = '$'.join(self.user["password"].split('$', 3)[:-1])
                     return crypt.crypt(password, salt) == self.user["password"]
                 else:
-                    return crypt.crypt(password, self.user["password"][:2]) == self.user["password"]
+                    return crypt.crypt(
+                        password,
+                        self.user["password"][:2]
+                    ) == self.user["password"]
 
     def attributs(self):
         """return a dict of user attributes"""

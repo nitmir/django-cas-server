@@ -10,7 +10,7 @@
 #
 # (c) 2015 Valentin Samir
 """models for the app"""
-import cas_server.default_settings
+from . import default_settings
 
 from django.conf import settings
 from django.db import models

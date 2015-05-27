@@ -9,7 +9,7 @@
 #
 # (c) 2015 Valentin Samir
 """forms for the app"""
-import cas_server.default_settings
+from . import default_settings
 
 from django import forms
 from django.conf import settings

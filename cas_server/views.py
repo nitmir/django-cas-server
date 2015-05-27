@@ -10,7 +10,7 @@
 #
 # (c) 2015 Valentin Samir
 """views for the app"""
-import cas_server.default_settings
+from . import default_settings
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect

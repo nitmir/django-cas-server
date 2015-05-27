@@ -165,6 +165,10 @@ class ServicePattern(models.Model):
         help_text="Un ProxyGrantingTicket peut être délivré au service pour " \
         "s'authentifier en temps que l'utilisateur sur d'autres services"
     )
+    single_sign_out = models.BooleanField(
+        default=False,
+        help_text="Activer le SSO sur le service"
+    )
 
     def __unicode__(self):
         return u"%s: %s" % (self.pos, self.pattern)
@@ -284,7 +288,7 @@ class Ticket(models.Model):
 
     def logout(self, request, session):
         """Send a SSO request to the ticket service"""
-        if self.validate:
+        if self.validate and self.service_pattern.single_sign_out:
             xml = """<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>

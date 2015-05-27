@@ -1,12 +1,14 @@
-import default_settings
+"""forms for the app"""
+import cas_server.default_settings
 
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-import models
+from . import models
 
 class UserCredential(forms.Form):
+    """Form used on the login page to retrive user credentials"""
     username = forms.CharField(label=_('login'))
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
@@ -22,17 +24,20 @@ class UserCredential(forms.Form):
         if auth.test_password(cleaned_data.get("password")):
             try:
                 user = models.User.objects.get(username=auth.username)
-                user.attributs=auth.attributs()
+                user.attributs = auth.attributs()
                 user.save()
             except models.User.DoesNotExist:
-                user = models.User.objects.create(username=auth.username, attributs=auth.attributs())
+                user = models.User.objects.create(
+                    username=auth.username,
+                    attributs=auth.attributs()
+                )
                 user.save()
-            self.user = user
         else:
             raise forms.ValidationError(_(u"Bad user"))
 
 
 class TicketForm(forms.ModelForm):
+    """Form for Tickets in the admin interface"""
     class Meta:
         model = models.Ticket
         exclude = []

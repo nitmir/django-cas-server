@@ -1,4 +1,5 @@
 # ⁻*- coding: utf-8 -*-
+"""Some authentication classes for the CAS"""
 from django.conf import settings
 from django.contrib.auth.models import User
 try:
@@ -7,38 +8,47 @@ try:
     import crypt
 except ImportError:
     MySQLdb = None
+
 class DummyAuthUser(object):
+    """A Dummy authentication class"""
     def __init__(self, username):
         self.username = username
 
     def test_password(self, password):
+        """test `password` agains the user"""
         return False
 
     def attributs(self):
+        """return a dict of user attributes"""
         return {}
 
 
 class TestAuthUser(DummyAuthUser):
+    """A test authentication class with one user test having
+    alose test as password and some attributes"""
     def __init__(self, username):
-        self.username = username
+        super(TestAuthUser, self).__init__(username)
 
     def test_password(self, password):
+        """test `password` agains the user"""
         return self.username == "test" and password == "test"
 
     def attributs(self):
+        """return a dict of user attributes"""
         return {'nom':'Nymous', 'prenom':'Ano', 'email':'anonymous@example.net'}
 
 
 class MysqlAuthUser(DummyAuthUser):
+    """A mysql auth class: authentication user agains a mysql database"""
     user = None
     def __init__(self, username):
         mysql_config = {
-          "user": settings.CAS_SQL_USERNAME,
-          "passwd": settings.CAS_SQL_PASSWORD,
-          "db": settings.CAS_SQL_DBNAME,
-          "host": settings.CAS_SQL_HOST,
-          "charset":settings.CAS_SQL_DBCHARSET,
-          "cursorclass":MySQLdb.cursors.DictCursor
+            "user": settings.CAS_SQL_USERNAME,
+            "passwd": settings.CAS_SQL_PASSWORD,
+            "db": settings.CAS_SQL_DBNAME,
+            "host": settings.CAS_SQL_HOST,
+            "charset":settings.CAS_SQL_DBCHARSET,
+            "cursorclass":MySQLdb.cursors.DictCursor
         }
         if not MySQLdb:
             raise RuntimeError("Please install MySQLdb before using the MysqlAuthUser backend")
@@ -49,6 +59,7 @@ class MysqlAuthUser(DummyAuthUser):
         super(MysqlAuthUser, self).__init__(username)
 
     def test_password(self, password):
+        """test `password` agains the user"""
         if not self.user:
             return False
         else:
@@ -62,13 +73,14 @@ class MysqlAuthUser(DummyAuthUser):
                     return crypt.crypt(password, self.user["password"][:2]) == self.user["password"]
 
     def attributs(self):
+        """return a dict of user attributes"""
         if not self.user:
             return {}
         else:
             return self.user
 
-        
 class DjangoAuthUser(DummyAuthUser):
+    """A django auth class: authenticate user agains django internal users"""
     user = None
     def __init__(self, username):
         try:
@@ -79,16 +91,18 @@ class DjangoAuthUser(DummyAuthUser):
 
 
     def test_password(self, password):
+        """test `password` agains the user"""
         if not self.user:
             return False
         else:
             return self.user.check_password(password)
 
     def attributs(self):
+        """return a dict of user attributes"""
         if not self.user:
             return {}
         else:
             attr = {}
             for field in self.user._meta.fields:
-                attr[field.attname]=getattr(self.user, field.attname)
+                attr[field.attname] = getattr(self.user, field.attname)
             return attr

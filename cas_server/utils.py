@@ -1,7 +1,9 @@
+"""Some util function for the app"""
 import urlparse
 import urllib
 
 def update_url(url, params):
+    """update params in the `url` query string"""
     url_parts = list(urlparse.urlparse(url))
     query = dict(urlparse.parse_qsl(url_parts[4]))
     query.update(params)

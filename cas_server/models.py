@@ -79,14 +79,15 @@ class User(models.Model):
             async_list.append(ticket.logout(request, session))
             ticket.delete()
         for future in async_list:
-            try:
-                future.result()
-            except Exception as error:
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    _(u'Error during service logout %r') % error
-                )
+            if future:
+                try:
+                    future.result()
+                except Exception as error:
+                    messages.add_message(
+                        request,
+                        messages.WARNING,
+                        _(u'Error during service logout %r') % error
+                    )
 
     def get_ticket(self, ticket_class, service, service_pattern, renew):
         """

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-23 19:01+0200\n"
+"POT-Creation-Date: 2015-05-27 22:56+0200\n"
 "PO-Revision-Date: 2015-05-23 19:03+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
@@ -17,28 +17,133 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.6.10\n"
 
-#: forms.py:10
+#: forms.py:22
 msgid "login"
 msgstr "username"
 
-#: forms.py:12
+#: forms.py:24
 msgid "password"
 msgstr "password"
 
-#: forms.py:14
+#: forms.py:26
 msgid "warn"
 msgstr " Warn me before logging me into other sites."
 
-#: forms.py:32
+#: forms.py:46
 msgid "Bad user"
 msgstr "The credentials you provided cannot be determined to be authentic."
 
-#: models.py:57
-#, python-format
-msgid "Error during service logout %s"
+#: models.py:89
+#, fuzzy, python-format
+#| msgid "Error during service logout %s"
+msgid "Error during service logout %r"
 msgstr "Error during service logout %s"
 
-#: models.py:189
+#: models.py:147
+msgid "position"
+msgstr ""
+
+#: models.py:154 models.py:239
+msgid "name"
+msgstr ""
+
+#: models.py:155
+#, fuzzy
+#| msgid "Connect to the service"
+msgid "A name for the service"
+msgstr "Connect to the service"
+
+#: models.py:160 models.py:266 models.py:283
+msgid "pattern"
+msgstr ""
+
+#: models.py:166
+msgid "user field"
+msgstr ""
+
+#: models.py:167
+msgid "Name of the attribut to transmit as username, empty = login"
+msgstr ""
+
+#: models.py:171
+msgid "restrict username"
+msgstr ""
+
+#: models.py:172
+msgid "Limit username allowed to connect to the list provided bellow"
+msgstr ""
+
+#: models.py:176
+msgid "proxy"
+msgstr ""
+
+#: models.py:177
+msgid ""
+"A ProxyGrantingTicket can be delivered to the service in order to "
+"authenticate for the user on a backend service"
+msgstr ""
+
+#: models.py:182
+msgid "single sign out"
+msgstr ""
+
+#: models.py:183
+#, fuzzy
+#| msgid "Connect to the service"
+msgid "Enable SSO for the service"
+msgstr "Connect to the service"
+
+#: models.py:225
+msgid "username"
+msgstr ""
+
+#: models.py:226
+#, fuzzy
+#| msgid "Connect to the service"
+msgid "username allowed to connect to the service"
+msgstr "Connect to the service"
+
+#: models.py:240
+#, fuzzy
+#| msgid "The attribut %(field)s is needed to use that service"
+msgid "name of an attribut to send to the service"
+msgstr "The attribut %(field)s is needed to use that service"
+
+#: models.py:245 models.py:289
+msgid "replace"
+msgstr ""
+
+#: models.py:246
+msgid ""
+"name under which the attribut will be showto the service. empty = default "
+"name of the attribut"
+msgstr ""
+
+#: models.py:261 models.py:278
+msgid "attribut"
+msgstr ""
+
+#: models.py:262
+msgid "Name of the attribut which must verify pattern"
+msgstr ""
+
+#: models.py:267
+msgid "a regular expression"
+msgstr ""
+
+#: models.py:279
+msgid "Name of the attribut for which the value must be replace"
+msgstr ""
+
+#: models.py:284
+msgid "An regular expression maching whats need to be replaced"
+msgstr ""
+
+#: models.py:290
+msgid "replace expression, groups are capture by \\1, \\2 …"
+msgstr ""
+
+#: models.py:337
 #, python-format
 msgid ""
 "Error during service logout %(service)s:\n"
@@ -71,45 +176,45 @@ msgstr "Login"
 msgid "Connect to the service"
 msgstr "Connect to the service"
 
-#: views.py:76
+#: views.py:116
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr "Authentication has been required by service %(name)s (%(url)s)"
 
-#: views.py:81
+#: views.py:135
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "Service %(url)s non allowed."
 
-#: views.py:83
+#: views.py:141
 msgid "Username non allowed"
 msgstr "Username non allowed"
 
-#: views.py:85
+#: views.py:147
 msgid "User charateristics non allowed"
 msgstr "User charateristics non allowed"
 
-#: views.py:87
+#: views.py:153
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: views.py:103
+#: views.py:174
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Authentication renewal required by service %(name)s (%(url)s)."
 
-#: views.py:105
+#: views.py:181
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentication required by service %(name)s (%(url)s)."
 
-#: views.py:107
+#: views.py:188
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Service %s non allowed"
 
-#: views.py:123
+#: views.py:206
 msgid "Successfully logout"
 msgstr ""
 "<h3>Logout successful</h3>You have successfully logged out of the Central "

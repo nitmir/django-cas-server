@@ -16,7 +16,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib import messages
 from picklefield.fields import PickledObjectField
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 import re
 import os
@@ -142,33 +142,45 @@ class ServicePattern(models.Model):
     class Meta:
         ordering = ("pos", )
 
-    pos = models.IntegerField(default=100)
+    pos = models.IntegerField(
+        default=100,
+        verbose_name=_(u"position")
+    )
     name = models.CharField(
         max_length=255,
         unique=True,
         blank=True,
         null=True,
-        help_text="Un nom pour le service"
+        verbose_name=_(u"name"),
+        help_text=_(u"A name for the service")
     )
-    pattern = models.CharField(max_length=255, unique=True)
+    pattern = models.CharField(
+        max_length=255,
+        unique=True,
+        verbose_name=_(u"pattern")
+    )
     user_field = models.CharField(
         max_length=255,
         default="",
         blank=True,
-        help_text="Nom de l'attribut transmit comme username, vide = login"
+        verbose_name=_(u"user field"),
+        help_text=_("Name of the attribut to transmit as username, empty = login")
     )
     restrict_users = models.BooleanField(
         default=False,
-        help_text="Limiter les utilisateur autorisé a se connecté a ce service à celle ci-dessous"
+        verbose_name=_(u"restrict username"),
+        help_text=_("Limit username allowed to connect to the list provided bellow")
     )
     proxy = models.BooleanField(
         default=False,
-        help_text="Un ProxyGrantingTicket peut être délivré au service pour " \
-        "s'authentifier en temps que l'utilisateur sur d'autres services"
+        verbose_name=_(u"proxy"),
+        help_text=_("A ProxyGrantingTicket can be delivered to the service " \
+        "in order to authenticate for the user on a backend service")
     )
     single_sign_out = models.BooleanField(
         default=False,
-        help_text="Activer le SSO sur le service"
+        verbose_name=_(u"single sign out"),
+        help_text=_("Enable SSO for the service")
     )
 
     def __unicode__(self):
@@ -208,7 +220,11 @@ class ServicePattern(models.Model):
 
 class Username(models.Model):
     """A list of allowed usernames on a service pattern"""
-    value = models.CharField(max_length=255)
+    value = models.CharField(
+        max_length=255,
+        verbose_name=_(u"username"),
+        help_text=_(u"username allowed to connect to the service")
+    )
     service_pattern = models.ForeignKey(ServicePattern, related_name="usernames")
 
     def __unicode__(self):
@@ -220,13 +236,15 @@ class ReplaceAttributName(models.Model):
         unique_together = ('name', 'replace', 'service_pattern')
     name = models.CharField(
         max_length=255,
-        help_text=u"nom d'un attributs à transmettre au service"
+        verbose_name=_(u"name"),
+        help_text=_(u"name of an attribut to send to the service")
     )
     replace = models.CharField(
         max_length=255,
         blank=True,
-        help_text=u"nom sous lequel l'attribut sera présenté " \
-        u"au service. vide = inchangé"
+        verbose_name=_(u"replace"),
+        help_text=_(u"name under which the attribut will be show" \
+        u"to the service. empty = default name of the attribut")
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")
 
@@ -240,11 +258,13 @@ class FilterAttributValue(models.Model):
     """A list of filter on attributs for a service pattern"""
     attribut = models.CharField(
         max_length=255,
-        help_text=u"Nom de l'attribut devant vérifier pattern"
+        verbose_name=_(u"attribut"),
+        help_text=_(u"Name of the attribut which must verify pattern")
     )
     pattern = models.CharField(
         max_length=255,
-        help_text=u"Une expression régulière"
+        verbose_name=_(u"pattern"),
+        help_text=_(u"a regular expression")
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="filters")
 
@@ -255,16 +275,19 @@ class ReplaceAttributValue(models.Model):
     """Replacement to apply on attributs values for a service pattern"""
     attribut = models.CharField(
         max_length=255,
-        help_text=u"Nom de l'attribut dont la valeur doit être modifié"
+        verbose_name=_(u"attribut"),
+        help_text=_(u"Name of the attribut for which the value must be replace")
     )
     pattern = models.CharField(
         max_length=255,
-        help_text=u"Une expression régulière de ce qui doit être modifié"
+        verbose_name=_(u"pattern"),
+        help_text=_(u"An regular expression maching whats need to be replaced")
     )
     replace = models.CharField(
         max_length=255,
         blank=True,
-        help_text=u"Par quoi le remplacer, les groupes sont capturé par \\1, \\2 …"
+        verbose_name=_(u"replace"),
+        help_text=_(u"replace expression, groups are capture by \\1, \\2 …")
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="replacements")
 

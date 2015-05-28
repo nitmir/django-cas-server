@@ -68,3 +68,6 @@ def gen_pgtiou():
     """Generate a Proxy Granting Ticket IOU"""
     return _gen_ticket('PGTIOU')
 
+
+def gen_saml_id():
+    return _gen_ticket('_')

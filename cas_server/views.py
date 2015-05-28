@@ -403,7 +403,12 @@ def _saml_validate_error(request, code, msg=""):
     return render(
         request,
         "cas_server/samlValidateError.xml",
-        {'code':code, 'msg':msg},
+        {
+            'code':code,
+            'msg':msg,
+            'IssueInstant':timezone.now().isoformat(),
+            'ResponseID':utils.gen_saml_id()
+        },
         content_type="text/xml; charset=utf-8"
     )
 
@@ -457,7 +462,7 @@ def saml_validate(request):
                 'IssueInstant':issue_instant,
                 'expireInstant':expire_instant,
                 'Recipient':target,
-                'ResponseID':request_id,
+                'ResponseID':utils.gen_saml_id(),
                 'username':ticket.user.username,
                 'attributes':attributes
             }

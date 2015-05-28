@@ -66,7 +66,7 @@ class User(models.Model):
         return self.username
 
     def logout(self, request):
-        """Sending SSO request to all services the user logged in"""
+        """Sending SLO request to all services the user logged in"""
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
         for ticket in ServiceTicket.objects.filter(user=self, validate=True):
@@ -177,10 +177,10 @@ class ServicePattern(models.Model):
         help_text=_("A ProxyGrantingTicket can be delivered to the service " \
         "in order to authenticate for the user on a backend service")
     )
-    single_sign_out = models.BooleanField(
+    single_log_out = models.BooleanField(
         default=False,
-        verbose_name=_(u"single sign out"),
-        help_text=_("Enable SSO for the service")
+        verbose_name=_(u"single log out"),
+        help_text=_("Enable SLO for the service")
     )
 
     def __unicode__(self):
@@ -311,8 +311,8 @@ class Ticket(models.Model):
         return u"Ticket(%s, %s)" % (self.user, self.service)
 
     def logout(self, request, session):
-        """Send a SSO request to the ticket service"""
-        if self.validate and self.service_pattern.single_sign_out:
+        """Send a SLO request to the ticket service"""
+        if self.validate and self.service_pattern.single_log_out:
             xml = """<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>

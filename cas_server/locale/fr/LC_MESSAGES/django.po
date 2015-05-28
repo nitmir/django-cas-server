@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-27 22:56+0200\n"
-"PO-Revision-Date: 2015-05-27 23:05+0100\n"
+"POT-Creation-Date: 2015-05-28 02:10+0200\n"
+"PO-Revision-Date: 2015-05-28 02:15+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -88,12 +88,12 @@ msgstr ""
 "s'authentifier en temps l'utilisateur à un autre service"
 
 #: models.py:182
-msgid "single sign out"
+msgid "single log out"
 msgstr ""
 
 #: models.py:183
-msgid "Enable SSO for the service"
-msgstr "Active le SSO pour le service"
+msgid "Enable SLO for the service"
+msgstr "Active le SLO pour le service"
 
 #: models.py:225
 msgid "username"
@@ -140,7 +140,7 @@ msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
 #: models.py:290
 msgid "replace expression, groups are capture by \\1, \\2 …"
-msgstr ""
+msgstr "expression de remplacement, les groupe sont capturé par \\1, \\2"
 
 #: models.py:337
 #, python-format

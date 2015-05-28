@@ -59,7 +59,7 @@ class ServicePatternAdmin(admin.ModelAdmin):
         ReplaceAttributValueInline,
         FilterAttributValueInline
     )
-    list_display = ('pos', 'name', 'pattern', 'proxy', 'single_sign_out')
+    list_display = ('pos', 'name', 'pattern', 'proxy', 'single_log_out')
 
 
 admin.site.register(User, UserAdmin)

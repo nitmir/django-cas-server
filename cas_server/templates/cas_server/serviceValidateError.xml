@@ -1,5 +1,3 @@
 <cas:serviceResponse xmlns:cas="http://www.yale.edu/tp/cas">
- <cas:authenticationFailure code="{{code}}">
-    {{msg}}
-  </cas:authenticationFailure>
+ <cas:authenticationFailure code="{{code}}">{{msg}}</cas:authenticationFailure>
 </cas:serviceResponse>

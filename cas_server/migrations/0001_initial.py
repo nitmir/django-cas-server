@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),
                 ('renew', models.BooleanField(default=False)),
-                ('value', models.CharField(default=cas_server.models._gen_pgt, unique=True, max_length=255)),
+                ('value', models.CharField(default=cas_server.utils.gen_pgt, unique=True, max_length=255)),
             ],
             options={
                 'abstract': False,
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),
                 ('renew', models.BooleanField(default=False)),
-                ('value', models.CharField(default=cas_server.models._gen_pt, unique=True, max_length=255)),
+                ('value', models.CharField(default=cas_server.utils.gen_pt, unique=True, max_length=255)),
             ],
             options={
                 'abstract': False,
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),
                 ('renew', models.BooleanField(default=False)),
-                ('value', models.CharField(default=cas_server.models._gen_st, unique=True, max_length=255)),
+                ('value', models.CharField(default=cas_server.utils.gen_st, unique=True, max_length=255)),
             ],
             options={
                 'abstract': False,

@@ -10,9 +10,6 @@
 #
 # (c) 2015 Valentin Samir
 """models for the app"""
-from . import default_settings
-
-from django.conf import settings
 from django.db import models
 from django.contrib import messages
 from picklefield.fields import PickledObjectField
@@ -21,40 +18,11 @@ from django.utils import timezone
 
 import re
 import os
-import random
-import string
 
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
 from . import utils
-
-def _gen_ticket(prefix):
-    """Generate a ticket with prefix `prefix`"""
-    return '%s-%s' % (
-        prefix,
-        ''.join(
-            random.choice(
-                string.ascii_letters + string.digits
-            ) for _ in range(settings.CAS_ST_LEN)
-        )
-    )
-
-def _gen_st():
-    """Generate a Service Ticket"""
-    return _gen_ticket('ST')
-
-def _gen_pt():
-    """Generate a Proxy Ticket"""
-    return _gen_ticket('PT')
-
-def _gen_pgt():
-    """Generate a Proxy Granting Ticket"""
-    return _gen_ticket('PGT')
-
-def gen_pgtiou():
-    """Generate a Proxy Granting Ticket IOU"""
-    return _gen_ticket('PGTIOU')
 
 class User(models.Model):
     """A user logged into the CAS"""
@@ -83,10 +51,11 @@ class User(models.Model):
                 try:
                     future.result()
                 except Exception as error:
+                    error = utils.unpack_nested_exception(error)
                     messages.add_message(
                         request,
                         messages.WARNING,
-                        _(u'Error during service logout %r') % error
+                        _(u'Error during service logout %s') % error
                     )
 
     def get_ticket(self, ticket_class, service, service_pattern, renew):
@@ -333,6 +302,7 @@ class Ticket(models.Model):
                     headers=headers
                 )
             except Exception as error:
+                error = utils.unpack_nested_exception(error)
                 messages.add_message(
                     request,
                     messages.WARNING,
@@ -342,17 +312,17 @@ class Ticket(models.Model):
 
 class ServiceTicket(Ticket):
     """A Service Ticket"""
-    value = models.CharField(max_length=255, default=_gen_st, unique=True)
+    value = models.CharField(max_length=255, default=utils.gen_st, unique=True)
     def __unicode__(self):
         return u"ServiceTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 class ProxyTicket(Ticket):
     """A Proxy Ticket"""
-    value = models.CharField(max_length=255, default=_gen_pt, unique=True)
+    value = models.CharField(max_length=255, default=utils.gen_pt, unique=True)
     def __unicode__(self):
         return u"ProxyTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
-    value = models.CharField(max_length=255, default=_gen_pgt, unique=True)
+    value = models.CharField(max_length=255, default=utils.gen_pgt, unique=True)
     def __unicode__(self):
         return u"ProxyGrantingTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 

@@ -229,6 +229,15 @@ def validate(request):
         return HttpResponse("no\n", content_type="text/plain")
 
 
+def _validate_error(request, code, msg=""):
+    """render the serviceValidateError.xml template using `code` and `msg`"""
+    return render(
+        request,
+        "cas_server/serviceValidateError.xml",
+        {'code':code, 'msg':msg},
+        content_type="text/xml; charset=utf-8"
+    )
+
 def ps_validate(request, ticket_type=None):
     """factorization for serviceValidate and proxyValidate"""
     if ticket_type is None:
@@ -238,22 +247,20 @@ def ps_validate(request, ticket_type=None):
     pgt_url = request.GET.get('pgtUrl')
     renew = True if request.GET.get('renew') else False
     if service and ticket:
-        for typ in ticket_type:
-            if ticket.startswith(typ):
+        for elt in ticket_type:
+            if ticket.startswith(elt):
                 break
         else:
-            return render(
+            return _validate_error(
                 request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
+                'INVALID_TICKET',
+                'tickets should begin with %s' % ' or '.join(ticket_type)
             )
         try:
             proxies = []
             if ticket.startswith("ST"):
                 ticket = models.ServiceTicket.objects.get(
                     value=ticket,
-                    service=service,
                     validate=False,
                     renew=renew,
                     creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
@@ -261,7 +268,6 @@ def ps_validate(request, ticket_type=None):
             elif ticket.startswith("PT"):
                 ticket = models.ProxyTicket.objects.get(
                     value=ticket,
-                    service=service,
                     validate=False,
                     renew=renew,
                     creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
@@ -270,6 +276,8 @@ def ps_validate(request, ticket_type=None):
                     proxies.append(prox.url)
             ticket.validate = True
             ticket.save()
+            if ticket.service != service:
+                return _validate_error(request, 'INVALID_SERVICE')
             attributes = []
             for key, value in ticket.attributs.items():
                 if isinstance(value, list):
@@ -284,7 +292,7 @@ def ps_validate(request, ticket_type=None):
             if pgt_url and pgt_url.startswith("https://"):
                 pattern = models.ServicePattern.validate(pgt_url)
                 if pattern.proxy:
-                    proxyid = models.gen_pgtiou()
+                    proxyid = utils.gen_pgtiou()
                     pticket = models.ProxyGrantingTicket.objects.create(
                         user=ticket.user,
                         service=pgt_url,
@@ -304,19 +312,14 @@ def ps_validate(request, ticket_type=None):
                             params,
                             content_type="text/xml; charset=utf-8"
                         )
-                    except requests.exceptions.SSLError:
-                        return render(
-                            request,
-                            "cas_server/serviceValidateError.xml",
-                            {'code':'INVALID_PROXY_CALLBACK'},
-                            content_type="text/xml; charset=utf-8"
-                        )
+                    except requests.exceptions.SSLError as error:
+                        error = utils.unpack_nested_exception(error)
+                        return _validate_error(request, 'INVALID_PROXY_CALLBACK', str(error))
                 else:
-                    return render(
+                    return _validate_error(
                         request,
-                        "cas_server/serviceValidateError.xml",
-                        {'code':'INVALID_PROXY_CALLBACK'},
-                        content_type="text/xml; charset=utf-8"
+                        'INVALID_PROXY_CALLBACK',
+                        "callback url not allowed by configuration"
                     )
             else:
                 return render(
@@ -326,25 +329,18 @@ def ps_validate(request, ticket_type=None):
                     content_type="text/xml; charset=utf-8"
                 )
         except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist):
-            return render(
-                request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
-            )
+            return _validate_error(request, 'INVALID_TICKET', 'ticket not found')
         except models.ServicePattern.DoesNotExist:
-            return render(
+            return _validate_error(
                 request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
+                'INVALID_PROXY_CALLBACK',
+                'callback url not allowed by configuration'
             )
     else:
-        return render(
+        return _validate_error(
             request,
-            "cas_server/serviceValidateError.xml",
-            {'code':'INVALID_REQUEST'},
-            content_type="text/xml; charset=utf-8"
+            'INVALID_REQUEST',
+            "you must specify a service and a ticket"
         )
 
 def service_validate(request):
@@ -378,46 +374,20 @@ def proxy(request):
                 content_type="text/xml; charset=utf-8"
             )
         except models.ProxyGrantingTicket.DoesNotExist:
-            return render(
-                request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
-            )
+            return _validate_error(request, 'INVALID_TICKET', 'PGT not found')
         except models.ServicePattern.DoesNotExist:
-            return render(
+            return _validate_error(request, 'UNAUTHORIZED_SERVICE')
+        except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
+            return _validate_error(
                 request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
-            )
-        except models.BadUsername:
-            return render(
-                request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
-            )
-        except models.BadFilter:
-            return render(
-                request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
-            )
-        except models.UserFieldNotDefined:
-            return render(
-                request,
-                "cas_server/serviceValidateError.xml",
-                {'code':'INVALID_TICKET'},
-                content_type="text/xml; charset=utf-8"
+                'UNAUTHORIZED_USER',
+                '%s not allowed on %s' % (ticket.user, target_service)
             )
     else:
-        return render(
+        return _validate_error(
             request,
-            "cas_server/serviceValidateError.xml",
-            {'code':'INVALID_REQUEST'},
-            content_type="text/xml; charset=utf-8"
+            'INVALID_REQUEST',
+            "you must specify and pgt and targetService"
         )
 
 def p3_service_validate(request):
@@ -427,6 +397,15 @@ def p3_service_validate(request):
 def p3_proxy_validate(request):
     """service/proxy ticket validation CAS 3.0"""
     return proxy_validate(request)
+
+def _saml_validate_error(request, code, msg=""):
+    """render the samlValidateError.xml templace using `code` and `msg`"""
+    return render(
+        request,
+        "cas_server/samlValidateError.xml",
+        {'code':code, 'msg':msg},
+        content_type="text/xml; charset=utf-8"
+    )
 
 @csrf_exempt
 def saml_validate(request):
@@ -439,14 +418,32 @@ def saml_validate(request):
             issue_instant = auth_req.attrib['IssueInstant']
             request_id = auth_req.attrib['RequestID']
             ticket = auth_req.getchildren()[0].text
-            ticket = models.ServiceTicket.objects.get(
-                value=ticket,
-                service=target,
-                validate=False,
-                creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
-            )
+            if ticket.startswith("ST"):
+                ticket = models.ServiceTicket.objects.get(
+                    value=ticket,
+                    validate=False,
+                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                )
+            elif ticket.startswith("PT"):
+                ticket = models.ProxyTicket.objects.get(
+                    value=ticket,
+                    validate=False,
+                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                )
+            else:
+                return _saml_validate_error(
+                    request,
+                    'AuthnFailed',
+                    'ticket should begin with PT- or ST-'
+                )
             ticket.validate = True
             ticket.save()
+            if ticket.service != target:
+                return _saml_validate_error(
+                    request,
+                    'AuthnFailed',
+                    'TARGET do not match ticket service'
+                )
             expire_instant = (ticket.creation + \
             timedelta(seconds=settings.CAS_TICKET_VALIDITY)).isoformat()
             attributes = []
@@ -473,26 +470,13 @@ def saml_validate(request):
                 params,
                 content_type="text/xml; charset=utf-8"
             )
-        except IndexError:
-            return render(
-                request,
-                "cas_server/samlValidateError.xml",
-                {'code':'VersionMismatch'},
-                content_type="text/xml; charset=utf-8"
-            )
-        except KeyError:
-            return render(
-                request,
-                "cas_server/samlValidateError.xml",
-                {'code':'VersionMismatch'},
-                content_type="text/xml; charset=utf-8"
-            )
-        except models.ServiceTicket.DoesNotExist:
-            return render(
-                request,
-                "cas_server/samlValidateError.xml",
-                {'code':'AuthnFailed'},
-                content_type="text/xml; charset=utf-8"
-            )
+        except (IndexError, KeyError):
+            return _saml_validate_error(request, 'VersionMismatch')
+        except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist):
+            return _saml_validate_error(request, 'AuthnFailed', 'ticket not found')
     else:
-        return redirect("login")
+        return _saml_validate_error(
+            request,
+            'VersionMismatch',
+            'request should be send using POST'
+        )

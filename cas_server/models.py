@@ -10,7 +10,11 @@
 #
 # (c) 2015 Valentin Samir
 """models for the app"""
+from . import default_settings
+
+from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.contrib import messages
 from picklefield.fields import PickledObjectField
 from django.utils.translation import ugettext_lazy as _
@@ -18,7 +22,8 @@ from django.utils import timezone
 
 import re
 import os
-
+import sys
+from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
@@ -285,6 +290,39 @@ class Ticket(models.Model):
     def __unicode__(self):
         return u"Ticket(%s, %s)" % (self.user, self.service)
 
+    @classmethod
+    def clean(cls):
+        """Remove old ticket and send SLO to timed-out services"""
+        # removing old validated ticket and non validated expired tickets
+        cls.objects.filter(
+            (
+                Q(single_log_out=False)&Q(validate=True)
+            )|(
+                Q(validate=False)&\
+                Q(creation__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
+            )
+        ).delete()
+
+        # sending SLO to timed-out validated tickets
+        if settings.CAS_TICKET_TIMEOUT and \
+        settings.CAS_TICKET_TIMEOUT >= settings.CAS_TICKET_VALIDITY:
+            async_list = []
+            session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
+            queryset = cls.objects.filter(
+                single_log_out=True,
+                validate=True,
+                creation__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT))
+            )
+            for ticket in queryset:
+                async_list.append(ticket.logout(None, session))
+            queryset.delete()
+            for future in async_list:
+                if future:
+                    try:
+                        future.result()
+                    except Exception as error:
+                        sys.stderr.write("%r\n" % error)
+
     def logout(self, request, session):
         """Send a SLO request to the ticket service"""
         if self.validate and self.single_log_out:
@@ -306,13 +344,16 @@ class Ticket(models.Model):
                     headers=headers
                 )
             except Exception as error:
-                error = utils.unpack_nested_exception(error)
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    _(u'Error during service logout %(service)s:\n%(error)s') %
-                    {'service': self.service, 'error':error}
-                )
+                if request is not None:
+                    error = utils.unpack_nested_exception(error)
+                    messages.add_message(
+                        request,
+                        messages.WARNING,
+                        _(u'Error during service logout %(service)s:\n%(error)s') %
+                        {'service': self.service, 'error':error}
+                    )
+                else:
+                    sys.stderr.write("%r\n" % error)
 
 class ServiceTicket(Ticket):
     """A Service Ticket"""

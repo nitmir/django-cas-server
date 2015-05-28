@@ -24,6 +24,7 @@ setting_default('CAS_LOGGED_TEMPLATE', 'cas_server/logged.html')
 setting_default('CAS_AUTH_CLASS', auth.DjangoAuthUser)
 setting_default('CAS_ST_LEN', 30)
 setting_default('CAS_TICKET_VALIDITY', 300)
+setting_default('CAS_TICKET_TIMEOUT', 24*3600)
 setting_default('CAS_PROXY_CA_CERTIFICATE_PATH', True)
 
 setting_default('CAS_SQL_HOST', 'localhost')

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-28 02:10+0200\n"
+"POT-Creation-Date: 2015-05-28 15:24+0200\n"
 "PO-Revision-Date: 2015-05-23 19:03+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
@@ -33,117 +33,123 @@ msgstr " Warn me before logging me into other sites."
 msgid "Bad user"
 msgstr "The credentials you provided cannot be determined to be authentic."
 
-#: models.py:89
+#: models.py:58
 #, fuzzy, python-format
 #| msgid "Error during service logout %s"
-msgid "Error during service logout %r"
+msgid "Error during service logout %s"
 msgstr "Error during service logout %s"
 
-#: models.py:147
+#: models.py:117
 msgid "position"
 msgstr ""
 
-#: models.py:154 models.py:239
+#: models.py:124 models.py:213
 msgid "name"
 msgstr ""
 
-#: models.py:155
+#: models.py:125
 #, fuzzy
 #| msgid "Connect to the service"
 msgid "A name for the service"
 msgstr "Connect to the service"
 
-#: models.py:160 models.py:266 models.py:283
+#: models.py:130 models.py:240 models.py:257
 msgid "pattern"
 msgstr ""
 
-#: models.py:166
+#: models.py:136
 msgid "user field"
 msgstr ""
 
-#: models.py:167
+#: models.py:137
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
 
-#: models.py:171
+#: models.py:141
 msgid "restrict username"
 msgstr ""
 
-#: models.py:172
+#: models.py:142
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
 
-#: models.py:176
+#: models.py:146
 msgid "proxy"
 msgstr ""
 
-#: models.py:177
-msgid ""
-"A ProxyGrantingTicket can be delivered to the service in order to "
-"authenticate for the user on a backend service"
+#: models.py:147
+msgid "Proxy tickets can be delivered to the service"
 msgstr ""
 
-#: models.py:182
+#: models.py:151
+msgid "proxy callback"
+msgstr ""
+
+#: models.py:152
+msgid "can be used as a proxy callback to deliver PGT"
+msgstr ""
+
+#: models.py:156
 msgid "single log out"
 msgstr ""
 
-#: models.py:183
+#: models.py:157
 #, fuzzy
 #| msgid "Connect to the service"
 msgid "Enable SLO for the service"
 msgstr "Connect to the service"
 
-#: models.py:225
+#: models.py:199
 msgid "username"
 msgstr ""
 
-#: models.py:226
+#: models.py:200
 #, fuzzy
 #| msgid "Connect to the service"
 msgid "username allowed to connect to the service"
 msgstr "Connect to the service"
 
-#: models.py:240
+#: models.py:214
 #, fuzzy
 #| msgid "The attribut %(field)s is needed to use that service"
 msgid "name of an attribut to send to the service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: models.py:245 models.py:289
+#: models.py:219 models.py:263
 msgid "replace"
 msgstr ""
 
-#: models.py:246
+#: models.py:220
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
 
-#: models.py:261 models.py:278
+#: models.py:235 models.py:252
 msgid "attribut"
 msgstr ""
 
-#: models.py:262
+#: models.py:236
 msgid "Name of the attribut which must verify pattern"
 msgstr ""
 
-#: models.py:267
+#: models.py:241
 msgid "a regular expression"
 msgstr ""
 
-#: models.py:279
+#: models.py:253
 msgid "Name of the attribut for which the value must be replace"
 msgstr ""
 
-#: models.py:284
+#: models.py:258
 msgid "An regular expression maching whats need to be replaced"
 msgstr ""
 
-#: models.py:290
+#: models.py:264
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr ""
 
-#: models.py:337
+#: models.py:313
 #, python-format
 msgid ""
 "Error during service logout %(service)s:\n"

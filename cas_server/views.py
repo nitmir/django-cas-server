@@ -291,7 +291,7 @@ def ps_validate(request, ticket_type=None):
                 params['username'] = ticket.user.attributs.get(ticket.service_pattern.user_field)
             if pgt_url and pgt_url.startswith("https://"):
                 pattern = models.ServicePattern.validate(pgt_url)
-                if pattern.proxy:
+                if pattern.proxy_callback:
                     proxyid = utils.gen_pgtiou()
                     pticket = models.ProxyGrantingTicket.objects.create(
                         user=ticket.user,
@@ -358,6 +358,12 @@ def proxy(request):
         try:
             # is the target service allowed
             pattern = models.ServicePattern.validate(target_service)
+            if not pattern.proxy:
+                return _validate_error(
+                    request,
+                    'UNAUTHORIZED_SERVICE',
+                    'the service do not allow proxy ticket'
+                )
             # is the proxy granting ticket valid
             ticket = models.ProxyGrantingTicket.objects.get(
                 value=pgt,

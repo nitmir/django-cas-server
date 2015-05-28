@@ -144,8 +144,12 @@ class ServicePattern(models.Model):
     proxy = models.BooleanField(
         default=False,
         verbose_name=_(u"proxy"),
-        help_text=_("A ProxyGrantingTicket can be delivered to the service " \
-        "in order to authenticate for the user on a backend service")
+        help_text=_("Proxy tickets can be delivered to the service")
+    )
+    proxy_callback = models.BooleanField(
+        default=False,
+        verbose_name=_(u"proxy callback"),
+        help_text=_("can be used as a proxy callback to deliver PGT")
     )
     single_log_out = models.BooleanField(
         default=False,

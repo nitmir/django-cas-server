@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-28 02:10+0200\n"
-"PO-Revision-Date: 2015-05-28 02:15+0100\n"
+"POT-Creation-Date: 2015-05-28 15:24+0200\n"
+"PO-Revision-Date: 2015-05-28 15:25+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -34,115 +34,119 @@ msgstr "Prévenez-moi avant d'accéder à d'autres services."
 msgid "Bad user"
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
-#: models.py:89
+#: models.py:58
 #, python-format
-msgid "Error during service logout %r"
-msgstr "Une erreur est survenue durant la déconnexion du service %r"
+msgid "Error during service logout %s"
+msgstr "Une erreur est survenue durant la déconnexion du service %s"
 
-#: models.py:147
+#: models.py:117
 msgid "position"
 msgstr "position"
 
-#: models.py:154 models.py:239
+#: models.py:124 models.py:213
 msgid "name"
 msgstr "nom"
 
-#: models.py:155
+#: models.py:125
 msgid "A name for the service"
 msgstr "Un nom pour le service"
 
-#: models.py:160 models.py:266 models.py:283
+#: models.py:130 models.py:240 models.py:257
 msgid "pattern"
 msgstr "motif"
 
-#: models.py:166
+#: models.py:136
 msgid "user field"
 msgstr "champ utilisateur"
 
-#: models.py:167
+#: models.py:137
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
 "Nom de l'attribut devant être transmis comme nom d'utilisateur au service. "
 "vide = nom de connection"
 
-#: models.py:171
+#: models.py:141
 msgid "restrict username"
 msgstr "limiter les noms d'utilisateurs"
 
-#: models.py:172
+#: models.py:142
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
 "Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
 "ci-dessous"
 
-#: models.py:176
+#: models.py:146
 msgid "proxy"
 msgstr "proxy"
 
-#: models.py:177
-msgid ""
-"A ProxyGrantingTicket can be delivered to the service in order to "
-"authenticate for the user on a backend service"
-msgstr ""
-"Un ProxyGrantingTicket peut être délivré au service pour lui permettre de "
-"s'authentifier en temps l'utilisateur à un autre service"
+#: models.py:147
+msgid "Proxy tickets can be delivered to the service"
+msgstr "des proxy tickets peuvent être délivrés au service"
 
-#: models.py:182
+#: models.py:151
+msgid "proxy callback"
+msgstr ""
+
+#: models.py:152
+msgid "can be used as a proxy callback to deliver PGT"
+msgstr "peut être utilisé comme un callback pour recevoir un PGT"
+
+#: models.py:156
 msgid "single log out"
 msgstr ""
 
-#: models.py:183
+#: models.py:157
 msgid "Enable SLO for the service"
 msgstr "Active le SLO pour le service"
 
-#: models.py:225
+#: models.py:199
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: models.py:226
+#: models.py:200
 msgid "username allowed to connect to the service"
 msgstr "noms d'utilisateurs autorisé à se connecter au service"
 
-#: models.py:240
+#: models.py:214
 msgid "name of an attribut to send to the service"
 msgstr "nom d'un attribut a envoyer au service"
 
-#: models.py:245 models.py:289
+#: models.py:219 models.py:263
 msgid "replace"
 msgstr "remplacement"
 
-#: models.py:246
+#: models.py:220
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
 "nom sous lequel l'attribut sera rendu visible au service. vide = inchangé"
 
-#: models.py:261 models.py:278
+#: models.py:235 models.py:252
 msgid "attribut"
 msgstr "attribut"
 
-#: models.py:262
+#: models.py:236
 msgid "Name of the attribut which must verify pattern"
 msgstr "Nom de l'attribut devant vérifier un motif"
 
-#: models.py:267
+#: models.py:241
 msgid "a regular expression"
 msgstr "une expression régulière"
 
-#: models.py:279
+#: models.py:253
 msgid "Name of the attribut for which the value must be replace"
 msgstr "nom de l'attribue pour lequel la valeur doit être remplacé"
 
-#: models.py:284
+#: models.py:258
 msgid "An regular expression maching whats need to be replaced"
 msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
-#: models.py:290
+#: models.py:264
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr "expression de remplacement, les groupe sont capturé par \\1, \\2"
 
-#: models.py:337
+#: models.py:313
 #, python-format
 msgid ""
 "Error during service logout %(service)s:\n"
@@ -221,6 +225,13 @@ msgstr ""
 "<h3>Déconnexion réussie</h3>\n"
 "Vous vous êtes déconnecté(e) du Service Central d'Authentification.<br/>Pour "
 "des raisons de sécurité, veuillez fermer votre navigateur."
+
+#~ msgid ""
+#~ "A ProxyGrantingTicket can be delivered to the service in order to "
+#~ "authenticate for the user on a backend service"
+#~ msgstr ""
+#~ "Un ProxyGrantingTicket peut être délivré au service pour lui permettre de "
+#~ "s'authentifier en temps l'utilisateur à un autre service"
 
 #~ msgid ""
 #~ "Une demande d'authentification a été émise pour le service %(name)s "

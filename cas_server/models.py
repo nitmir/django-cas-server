@@ -17,10 +17,10 @@ from django.db import models
 from django.contrib import messages
 from picklefield.fields import PickledObjectField
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
 import re
 import os
-import time
 import random
 import string
 
@@ -69,15 +69,15 @@ class User(models.Model):
         """Sending SLO request to all services the user logged in"""
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
-        for ticket in ServiceTicket.objects.filter(user=self, validate=True):
-            async_list.append(ticket.logout(request, session))
-            ticket.delete()
-        for ticket in ProxyTicket.objects.filter(user=self, validate=True):
-            async_list.append(ticket.logout(request, session))
-            ticket.delete()
-        for ticket in ProxyGrantingTicket.objects.filter(user=self, validate=True):
-            async_list.append(ticket.logout(request, session))
-            ticket.delete()
+        ticket_classes = [ServiceTicket, ProxyTicket, ProxyGrantingTicket]
+        for ticket_class in ticket_classes:
+            for ticket in ticket_class.objects.filter(
+                    user=self,
+                    validate=True,
+                    single_log_out=True
+            ):
+                async_list.append(ticket.logout(request, session))
+                ticket.delete()
         for future in async_list:
             if future:
                 try:
@@ -112,7 +112,8 @@ class User(models.Model):
             attributs=service_attributs,
             service=service,
             renew=renew,
-            service_pattern=service_pattern
+            service_pattern=service_pattern,
+            single_log_out=service_pattern.single_log_out
         )
         ticket.save()
         return ticket
@@ -306,13 +307,14 @@ class Ticket(models.Model):
     service_pattern = models.ForeignKey(ServicePattern, related_name="%(class)s")
     creation = models.DateTimeField(auto_now_add=True)
     renew = models.BooleanField(default=False)
+    single_log_out = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"Ticket(%s, %s)" % (self.user, self.service)
 
     def logout(self, request, session):
         """Send a SLO request to the ticket service"""
-        if self.validate and self.service_pattern.single_log_out:
+        if self.validate and self.single_log_out:
             xml = """<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
@@ -320,7 +322,7 @@ class Ticket(models.Model):
   </samlp:LogoutRequest>""" % \
             {
                 'id' : os.urandom(20).encode("hex"),
-                'datetime' : int(time.time()),
+                'datetime' : timezone.now().isoformat(),
                 'ticket': self.value
             }
             headers = {'Content-Type': 'text/xml'}

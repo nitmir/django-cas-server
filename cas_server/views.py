@@ -288,7 +288,8 @@ def ps_validate(request, ticket_type=None):
                     pticket = models.ProxyGrantingTicket.objects.create(
                         user=ticket.user,
                         service=pgt_url,
-                        service_pattern=pattern
+                        service_pattern=pattern,
+                        single_log_out=pattern.single_log_out
                     )
                     url = utils.update_url(pgt_url, {'pgtIou':proxyid, 'pgtId':pticket.value})
                     try:

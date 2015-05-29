@@ -357,16 +357,19 @@ class Ticket(models.Model):
 
 class ServiceTicket(Ticket):
     """A Service Ticket"""
+    PREFIX = settings.CAS_SERVICE_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_st, unique=True)
     def __unicode__(self):
         return u"ServiceTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 class ProxyTicket(Ticket):
     """A Proxy Ticket"""
+    PREFIX = settings.CAS_PROXY_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_pt, unique=True)
     def __unicode__(self):
         return u"ProxyTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
+    PREFIX = settings.CAS_PROXY_GRANTING_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_pgt, unique=True)
     def __unicode__(self):
         return u"ProxyGrantingTicket(%s, %s, %s)" % (self.user, self.value, self.service)

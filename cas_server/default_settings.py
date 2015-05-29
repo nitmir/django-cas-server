@@ -27,6 +27,11 @@ setting_default('CAS_TICKET_VALIDITY', 300)
 setting_default('CAS_TICKET_TIMEOUT', 24*3600)
 setting_default('CAS_PROXY_CA_CERTIFICATE_PATH', True)
 
+setting_default('CAS_SERVICE_TICKET_PREFIX', 'ST')
+setting_default('CAS_PROXY_TICKET_PREFIX', 'PT')
+setting_default('CAS_PROXY_GRANTING_TICKET_PREFIX', 'PGT')
+setting_default('CAS_PROXY_GRANTING_TICKET_IOU_PREFIX', 'PGTIOU')
+
 setting_default('CAS_SQL_HOST', 'localhost')
 setting_default('CAS_SQL_USERNAME', '')
 setting_default('CAS_SQL_PASSWORD', '')
@@ -36,3 +41,6 @@ setting_default('CAS_SQL_USER_QUERY', 'SELECT user AS usersame, pass AS ' \
     'password, users.* FROM users WHERE user = %s')
 setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt') # crypt or plain
 
+def noop():
+    """do nothing"""
+    pass

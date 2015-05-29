@@ -62,20 +62,21 @@ def _gen_ticket(prefix):
 
 def gen_st():
     """Generate a Service Ticket"""
-    return _gen_ticket('ST')
+    return _gen_ticket(settings.CAS_SERVICE_TICKET_PREFIX)
 
 def gen_pt():
     """Generate a Proxy Ticket"""
-    return _gen_ticket('PT')
+    return _gen_ticket(settings.CAS_PROXY_TICKET_PREFIX)
 
 def gen_pgt():
     """Generate a Proxy Granting Ticket"""
-    return _gen_ticket('PGT')
+    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_PREFIX)
 
 def gen_pgtiou():
     """Generate a Proxy Granting Ticket IOU"""
-    return _gen_ticket('PGTIOU')
+    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_IOU_PREFIX)
 
 
 def gen_saml_id():
+    """Generate an saml id"""
     return _gen_ticket('_')

@@ -31,10 +31,8 @@ from . import utils
 from . import forms
 from . import models
 
-class LogoutView(View):
-    """destroy CAS session (logout) view"""
-    request = None
-    service = None
+class LogoutMixin(object):
+    """destroy CAS session utims"""
     def clean_session_variables(self):
         """Clean sessions variables"""
         try:
@@ -61,6 +59,12 @@ class LogoutView(View):
         finally:
             self.clean_session_variables()
 
+class LogoutView(View, LogoutMixin):
+    """destroy CAS session (logout) view"""
+
+    request = None
+    service = None
+
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
         self.request = request
@@ -75,7 +79,7 @@ class LogoutView(View):
             messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
             return redirect("cas_server:login")
 
-class LoginView(View, LogoutView):
+class LoginView(View, LogoutMixin):
     """credential requestor / acceptor"""
 
     # pylint: disable=too-many-instance-attributes
@@ -123,6 +127,7 @@ class LoginView(View, LogoutView):
         return self.common()
 
     def get(self, request, *args, **kwargs):
+        """methode called on GET request on this view"""
         self.request = request
         self.service = request.GET.get('service')
         self.renew = True if request.GET.get('renew') else False

@@ -558,7 +558,7 @@ class SamlValidate(View, AttributesMixin):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         """dispatch requests based on method GET, POST, ..."""
-        return super(SamlValidation, self).dispatch(request, *args, **kwargs)
+        return super(SamlValidate, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
         """methode called on POST request on this view"""

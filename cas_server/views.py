@@ -334,12 +334,11 @@ class ValidateService(View, AttributesMixin):
     ticket = None
     pgt_url = None
     renew = None
-    allow_proxy_ticket = None
+    allow_proxy_ticket = False
 
-    def get(self, request, allow_proxy_ticket=False):
+    def get(self, request):
         """methode called on GET request on this view"""
         self.request = request
-        self.allow_proxy_ticket = allow_proxy_ticket
         self.service = request.GET.get('service')
         self.ticket = request.GET.get('ticket')
         self.pgt_url = request.GET.get('pgtUrl')

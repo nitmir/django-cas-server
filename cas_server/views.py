@@ -312,7 +312,7 @@ class ValidateError(Exception):
     def __init__(self, code, msg=""):
         self.code = code
         self.msg = msg
-        super(ValidateError).__init__(code)
+        super(ValidateError, self).__init__(code)
 
     def __unicode__(self):
         return u"%s" % self.msg
@@ -516,7 +516,7 @@ class SamlValidateError(Exception):
     def __init__(self, code, msg=""):
         self.code = code
         self.msg = msg
-        super(SamlValidateError).__init__(code)
+        super(SamlValidateError, self).__init__(code)
 
     def __unicode__(self):
         return u"%s" % self.msg

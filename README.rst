@@ -26,7 +26,7 @@ Quick start
 
 2. Include the polls URLconf in your project urls.py like this::
 
-    url(r'^cas/', include('cas_server.urls')),
+    url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
 
 3. Run `python manage.py migrate` to create the cas_server models.
 

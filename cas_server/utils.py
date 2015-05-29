@@ -12,11 +12,19 @@
 from . import default_settings
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
 import urlparse
 import urllib
 import random
 import string
+
+def redirect_params(url_name, params=None):
+    """Redirect to `url_name` with `params` as querystring"""
+    url = reverse(url_name)
+    params = urllib.urlencode(params if params else {})
+    return HttpResponseRedirect(url + "?%s" % params)
 
 def update_url(url, params):
     """update params in the `url` query string"""

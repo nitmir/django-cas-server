@@ -18,8 +18,8 @@ from . import views
 urlpatterns = patterns(
     '',
     url(r'^$', RedirectView.as_view(pattern_name="login")),
-    url('^login$', views.login, name='login'),
-    url('^logout$', views.logout, name='logout'),
+    url('^login$', views.LoginView.as_view(), name='login'),
+    url('^logout$', views.LogoutView.as_view(), name='logout'),
     url('^validate$', views.validate, name='validate'),
     url('^serviceValidate$', views.service_validate, name='serviceValidate'),
     url('^proxyValidate$', views.proxy_validate, name='proxyValidate'),

@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.views.generic import View
 
 import requests
 import urllib
@@ -30,181 +31,232 @@ from . import utils
 from . import forms
 from . import models
 
-def _logout(request):
-    """Clean sessions variables"""
-    try:
-        del request.session["authenticated"]
-    except KeyError:
-        pass
-    try:
-        del request.session["username"]
-    except KeyError:
-        pass
-    try:
-        del request.session["warn"]
-    except KeyError:
-        pass
+class LogoutView(View):
+    """destroy CAS session (logout) view"""
+    request = None
+    service = None
+    def clean_session_variables(self):
+        """Clean sessions variables"""
+        try:
+            del self.request.session["authenticated"]
+        except KeyError:
+            pass
+        try:
+            del self.request.session["username"]
+        except KeyError:
+            pass
+        try:
+            del self.request.session["warn"]
+        except KeyError:
+            pass
 
+    def logout(self):
+        """effectively destroy CAS session"""
+        try:
+            user = models.User.objects.get(username=self.request.session.get("username"))
+            user.logout(self.request)
+            user.delete()
+        except models.User.DoesNotExist:
+            pass
+        finally:
+            self.clean_session_variables()
 
-def redirect_params(url_name, params=None):
-    """Redirect to `url_name` with `params` as querystring"""
-    url = reverse(url_name)
-    params = urllib.urlencode(params if params else {})
-    return HttpResponseRedirect(url + "?%s" % params)
+    def get(self, request, *args, **kwargs):
+        """methode called on GET request on this view"""
+        self.request = request
+        self.service = request.GET.get('service')
+        self.logout()
+        # if service is set, redirect to service after logout
+        if self.service:
+            list(messages.get_messages(request)) # clean messages before leaving the django app
+            return HttpResponseRedirect(self.service)
+        # else redirect to login page
+        else:
+            messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
+            return redirect("cas_server:login")
 
-
-def login(request):
+class LoginView(View, LogoutView):
     """credential requestor / acceptor"""
+
+    # pylint: disable=too-many-instance-attributes
+    # Nine is reasonable in this case.
+
     user = None
     form = None
-    service_pattern = None
+
+    request = None
+    service = None
+    renew = None
+    gateway = None
+    method = None
+
     renewed = False
     warned = False
-    if request.method == 'POST':
-        service = request.POST.get('service')
-        renew = True if request.POST.get('renew') else False
-        gateway = request.POST.get('gateway')
-        method = request.POST.get('method')
 
-        if not request.session.get("authenticated") or renew:
-            form = forms.UserCredential(
+    def post(self, request, *args, **kwargs):
+        """methode called on POST request on this view"""
+        self.request = request
+        self.service = request.POST.get('service')
+        self.renew = True if request.POST.get('renew') else False
+        self.gateway = request.POST.get('gateway')
+        self.method = request.POST.get('method')
+
+        if not request.session.get("authenticated") or self.renew:
+            self.form = forms.UserCredential(
                 request.POST,
-                initial={'service':service, 'method':method, 'warn':request.session.get("warn")}
+                initial={
+                    'service':self.service,
+                    'method':self.method,
+                    'warn':request.session.get("warn")
+                }
             )
-            if form.is_valid():
-                user = models.User.objects.get(username=form.cleaned_data['username'])
+            if self.form.is_valid():
+                self.user = models.User.objects.get(username=self.form.cleaned_data['username'])
                 request.session.set_expiry(0)
-                request.session["username"] = form.cleaned_data['username']
-                request.session["warn"] = True if form.cleaned_data.get("warn") else False
+                request.session["username"] = self.form.cleaned_data['username']
+                request.session["warn"] = True if self.form.cleaned_data.get("warn") else False
                 request.session["authenticated"] = True
-                renewed = True
-                warned = True
+                self.renewed = True
+                self.warned = True
             else:
-                _logout(request)
-    else:
-        service = request.GET.get('service')
-        renew = True if request.GET.get('renew') else False
-        gateway = request.GET.get('gateway')
-        method = request.GET.get('method')
+                self.logout()
+        return self.common()
 
-        if not request.session.get("authenticated") or renew:
-            form = forms.UserCredential(
-                initial={'service':service, 'method':method, 'warn':request.session.get("warn")}
+    def get(self, request, *args, **kwargs):
+        self.request = request
+        self.service = request.GET.get('service')
+        self.renew = True if request.GET.get('renew') else False
+        self.gateway = request.GET.get('gateway')
+        self.method = request.GET.get('method')
+
+        if not request.session.get("authenticated") or self.renew:
+            self.form = forms.UserCredential(
+                initial={
+                    'service':self.service,
+                    'method':self.method,
+                    'warn':request.session.get("warn")
+                }
             )
 
-    # if authenticated and successfully renewed authentication if needed
-    if request.session.get("authenticated") and \
-    request.session.get("username") and (not renew or renewed):
+        return self.common()
+
+    def service_login(self):
+        """Perform login agains a service"""
         try:
-            user = models.User.objects.get(username=request.session["username"])
+            # is the service allowed
+            service_pattern = models.ServicePattern.validate(self.service)
+            # is the current user allowed on this service
+            service_pattern.check_user(self.user)
+            # if the user has asked to be warned before any login to a service
+            if self.request.session.get("warn", True) and not self.warned:
+                messages.add_message(
+                    self.request,
+                    messages.WARNING,
+                    _(u"Authentication has been required by service %(name)s (%(url)s)") % \
+                    {'name':service_pattern.name, 'url':self.service}
+                )
+                return render(
+                    self.request,
+                    settings.CAS_WARN_TEMPLATE,
+                    {'service_ticket_url':self.user.get_service_url(
+                        self.service,
+                        service_pattern,
+                        renew=self.renew
+                    )}
+                )
+            else:
+                # redirect, using method ?
+                return HttpResponseRedirect(
+                    self.user.get_service_url(self.service, service_pattern, renew=self.renew)
+                )
+        except models.ServicePattern.DoesNotExist:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _(u'Service %(url)s non allowed.') % {'url' : self.service}
+            )
+        except models.BadUsername:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _(u"Username non allowed")
+            )
+        except models.BadFilter:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _(u"User charateristics non allowed")
+            )
+        except models.UserFieldNotDefined:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _(u"The attribut %(field)s is needed to use" \
+                   " that service") % {'field':service_pattern.user_field}
+            )
+
+        # if gateway is set and auth failed redirect to the service without authentication
+        if self.gateway:
+            list(messages.get_messages(self.request)) # clean messages before leaving django
+            return HttpResponseRedirect(self.service)
+
+        return render(self.request, settings.CAS_LOGGED_TEMPLATE, {'session':self.request.session})
+
+    def authenticated(self):
+        """Processing authenticated users"""
+        try:
+            self.user = models.User.objects.get(username=self.request.session.get("username"))
         except models.User.DoesNotExist:
-            _logout(request)
-            return redirect_params("login", params=dict(request.GET))
+            self.logout()
+            return utils.redirect_params("cas_server:login", params=dict(self.request.GET))
 
-        # if login agains a service is requestest
-        if service:
+        # if login agains a service is self.requestest
+        if self.service:
+            return self.service_login()
+        else:
+            return render(
+                self.request,
+                settings.CAS_LOGGED_TEMPLATE,
+                {'session':self.request.session}
+            )
+
+    def not_authenticated(self):
+        """Processing non authenticated users"""
+        if self.service:
             try:
-                # is the service allowed
-                service_pattern = models.ServicePattern.validate(service)
-                # is the current user allowed on this service
-                service_pattern.check_user(user)
-                # if the user has asked to be warned before any login to a service
-                if request.session.get("warn", True) and not warned:
+                service_pattern = models.ServicePattern.validate(self.service)
+                if self.gateway:
+                    list(messages.get_messages(self.request))# clean messages before leaving django
+                    return HttpResponseRedirect(self.service)
+                if self.request.session.get("authenticated") and self.renew:
                     messages.add_message(
-                        request,
+                        self.request,
                         messages.WARNING,
-                        _(u"Authentication has been required by service %(name)s (%(url)s)") % \
-                        {'name':service_pattern.name, 'url':service}
-                    )
-                    return render(
-                        request,
-                        settings.CAS_WARN_TEMPLATE,
-                        {'service_ticket_url':user.get_service_url(
-                            service,
-                            service_pattern,
-                            renew=renew
-                        )}
-                    )
-                else:
-                    # redirect, using method ?
-                    return redirect(user.get_service_url(service, service_pattern, renew=renew))
-            except models.ServicePattern.DoesNotExist:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    _(u'Service %(url)s non allowed.') % {'url' : service}
-                )
-            except models.BadUsername:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    _(u"Username non allowed")
-                )
-            except models.BadFilter:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    _(u"User charateristics non allowed")
-                )
-            except models.UserFieldNotDefined:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    _(u"The attribut %(field)s is needed to use" \
-                       " that service") % {'field':service_pattern.user_field}
-                )
-
-            # if gateway is set and auth failed redirect to the service without authentication
-            if gateway:
-                list(messages.get_messages(request)) # clean messages before leaving the django app
-                return redirect(service)
-
-        return render(request, settings.CAS_LOGGED_TEMPLATE, {'session':request.session})
-    else:
-        if service:
-            try:
-                service_pattern = models.ServicePattern.validate(service)
-                if gateway:
-                    list(messages.get_messages(request)) # clean messages before leaving django
-                    return redirect(service)
-                if request.session.get("authenticated") and renew:
-                    messages.add_message(
-                        request,
-                        messages.WARNING,
-                        _(u"Authentication renewal required by service" \
-                           " %(name)s (%(url)s).") % {'name':service_pattern.name, 'url':service}
+                        _(u"Authentication renewal required by service %(name)s (%(url)s).") %
+                        {'name':service_pattern.name, 'url':self.service}
                     )
                 else:
                     messages.add_message(
-                        request,
+                        self.request,
                         messages.WARNING,
-                        _(u"Authentication required by service" \
-                           " %(name)s (%(url)s).") % {'name':service_pattern.name, 'url':service}
+                        _(u"Authentication required by service %(name)s (%(url)s).") %
+                        {'name':service_pattern.name, 'url':self.service}
                     )
             except models.ServicePattern.DoesNotExist:
                 messages.add_message(
-                    request,
+                    self.request,
                     messages.ERROR,
-                    _(u'Service %s non allowed') % service
+                    _(u'Service %s non allowed') % self.service
                 )
-        return render(request, settings.CAS_LOGIN_TEMPLATE, {'form':form})
+        return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form':self.form})
 
-def logout(request):
-    """destroy CAS session (logout)"""
-    service = request.GET.get('service')
-    if request.session.get("authenticated"):
-        user = models.User.objects.get(username=request.session["username"])
-        user.logout(request)
-        user.delete()
-        _logout(request)
-    # if service is set, redirect to service after logout
-    if service:
-        list(messages.get_messages(request)) # clean messages before leaving the django app
-        return redirect(service)
-    # else redirect to login page
-    else:
-        messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
-        return redirect("login")
+    def common(self):
+        """Part execute uppon GET and POST request"""
+        # if authenticated and successfully renewed authentication if needed
+        if self.request.session.get("authenticated") and (not self.renew or self.renewed):
+            return self.authenticated()
+        else:
+            return self.not_authenticated()
 
 def validate(request):
     """service ticket validation"""

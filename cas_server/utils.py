@@ -9,9 +9,9 @@
 #
 # (c) 2015 Valentin Samir
 """Some util function for the app"""
-from . import default_settings
+from .default_settings import settings
 
-from django.conf import settings
+from django.utils.importlib import import_module
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
@@ -19,6 +19,13 @@ import urlparse
 import urllib
 import random
 import string
+
+def import_attr(path):
+    """transform a python module.attr path to the attr"""
+    if not isinstance(path, str):
+        return string
+    module, attr = path.rsplit('.', 1)
+    return getattr(import_module(module), attr)
 
 def redirect_params(url_name, params=None):
     """Redirect to `url_name` with `params` as querystring"""

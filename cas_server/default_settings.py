@@ -10,8 +10,6 @@
 # (c) 2015 Valentin Samir
 """Default values for the app's settings"""
 from django.conf import settings
-from . import auth
-
 
 def setting_default(name, default_value):
     """if the config `name` is not set, set it the `default_value`"""
@@ -21,7 +19,7 @@ def setting_default(name, default_value):
 setting_default('CAS_LOGIN_TEMPLATE', 'cas_server/login.html')
 setting_default('CAS_WARN_TEMPLATE', 'cas_server/warn.html')
 setting_default('CAS_LOGGED_TEMPLATE', 'cas_server/logged.html')
-setting_default('CAS_AUTH_CLASS', auth.DjangoAuthUser)
+setting_default('CAS_AUTH_CLASS', 'cas_server.auth.DjangoAuthUser')
 setting_default('CAS_ST_LEN', 30)
 setting_default('CAS_TICKET_VALIDITY', 300)
 setting_default('CAS_TICKET_TIMEOUT', 24*3600)
@@ -41,6 +39,3 @@ setting_default('CAS_SQL_USER_QUERY', 'SELECT user AS usersame, pass AS ' \
     'password, users.* FROM users WHERE user = %s')
 setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt') # crypt or plain
 
-def noop():
-    """do nothing"""
-    pass

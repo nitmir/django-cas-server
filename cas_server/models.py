@@ -10,15 +10,14 @@
 #
 # (c) 2015 Valentin Samir
 """models for the app"""
-from . import default_settings
+from .default_settings import settings
 
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.contrib import messages
-from picklefield.fields import PickledObjectField
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from picklefield.fields import PickledObjectField
 
 import re
 import os
@@ -27,13 +26,17 @@ from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
-from . import utils
+import utils
 
 class User(models.Model):
     """A user logged into the CAS"""
     username = models.CharField(max_length=30, unique=True)
-    attributs = PickledObjectField()
     date = models.DateTimeField(auto_now_add=True, auto_now=True)
+
+    @property
+    def attributs(self):
+        """return a fresh dict for the user attributs"""
+        return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
 
     def __unicode__(self):
         return self.username

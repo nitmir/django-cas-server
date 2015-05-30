@@ -10,13 +10,10 @@
 #
 # (c) 2015 Valentin Samir
 """views for the app"""
-from . import default_settings
-
-default_settings.noop()
+from .default_settings import settings
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
@@ -29,9 +26,9 @@ import requests
 from lxml import etree
 from datetime import timedelta
 
-from . import utils
-from . import forms
-from . import models
+import utils
+import forms
+import models
 
 class AttributesMixin(object):
     """mixin for the attributs methode"""

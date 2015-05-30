@@ -9,13 +9,13 @@
 #
 # (c) 2015 Valentin Samir
 """forms for the app"""
-from . import default_settings
+from .default_settings import settings
 
 from django import forms
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from . import models
+import utils
+import models
 
 class UserCredential(forms.Form):
     """Form used on the login page to retrive user credentials"""
@@ -30,17 +30,13 @@ class UserCredential(forms.Form):
 
     def clean(self):
         cleaned_data = super(UserCredential, self).clean()
-        auth = settings.CAS_AUTH_CLASS(cleaned_data.get("username"))
+        auth = utils.import_attr(settings.CAS_AUTH_CLASS)(cleaned_data.get("username"))
         if auth.test_password(cleaned_data.get("password")):
             try:
                 user = models.User.objects.get(username=auth.username)
-                user.attributs = auth.attributs()
                 user.save()
             except models.User.DoesNotExist:
-                user = models.User.objects.create(
-                    username=auth.username,
-                    attributs=auth.attributs()
-                )
+                user = models.User.objects.create(username=auth.username)
                 user.save()
         else:
             raise forms.ValidationError(_(u"Bad user"))

@@ -17,7 +17,7 @@ from . import views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', RedirectView.as_view(pattern_name="login")),
+    url(r'^$', RedirectView.as_view(pattern_name="cas_server:login")),
     url('^login$', views.LoginView.as_view(), name='login'),
     url('^logout$', views.LogoutView.as_view(), name='logout'),
     url('^validate$', views.Validate.as_view(), name='validate'),

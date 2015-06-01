@@ -3,20 +3,12 @@
     <cas:user>{{username}}</cas:user>
     <cas:attributes>
 {% for key, value in attributes %}      <cas:{{key}}>{{value}}</cas:{{key}}>
-{% endfor %}
-    </cas:attributes>
-{% for key, value in attributes %}
-<cas:attribute name="{{key}}" value="{{value}}"/>
-{% endfor %}
-{% if proxyGrantingTicket %}
-    <cas:proxyGrantingTicket>{{proxyGrantingTicket}}</cas:proxyGrantingTicket>
-{% endif %}
-{% if  proxies %}
-    <cas:proxies>
-    {% for proxy in proxies %}
-      <cas:proxy>{{proxy}}</cas:proxy>
-    {% endfor %}
-    </cas:proxies>
-{% endif %}
+{% endfor %}    </cas:attributes>
+{% for key, value in attributes %}    <cas:attribute name="{{key}}" value="{{value}}"/>
+{% endfor %}{% if proxyGrantingTicket %}
+    <cas:proxyGrantingTicket>{{proxyGrantingTicket}}</cas:proxyGrantingTicket>{% endif %}
+{% if  proxies %}    <cas:proxies>{% for proxy in proxies %}
+      <cas:proxy>{{proxy}}</cas:proxy>{% endfor %}
+    </cas:proxies>{% endif %}
   </cas:authenticationSuccess>
 </cas:serviceResponse>

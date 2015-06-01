@@ -16,7 +16,7 @@
         <Conditions NotBefore="{{IssueInstant}}" NotOnOrAfter="{{expireInstant}}">
           <AudienceRestrictionCondition>
             <Audience>
-              https://some-service.example.com/app/
+              {{Recipient}}
             </Audience>
           </AudienceRestrictionCondition>
         </Conditions>
@@ -29,12 +29,10 @@
               </ConfirmationMethod>
             </SubjectConfirmation>
           </Subject>
-{% for name, value in attributes %}
-          <Attribute AttributeName="name" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+{% for name, value in attributes %}          <Attribute AttributeName="name" AttributeNamespace="http://www.ja-sig.org/products/cas/">
             <AttributeValue>value</AttributeValue>
           </Attribute>
-{% endfor %}
-        </AttributeStatement>
+{% endfor %}        </AttributeStatement>
         <AuthenticationStatement AuthenticationInstant="{{IssueInstant}}"
         AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password">
           <Subject>

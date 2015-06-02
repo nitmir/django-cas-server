@@ -13,7 +13,7 @@ are listed in default_settings.py
 
 The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_
 but you can use your own templates using the CAS_LOGIN_TEMPLATE,
-CAS_LOGGED_TEMPLATE and CAS_WARN_TEMPLATE setting variables.
+CAS_LOGGED_TEMPLATE, CAS_WARN_TEMPLATE and CAS_LOGOUT_TEMPLATEsetting variables.
 
 Quick start
 -----------

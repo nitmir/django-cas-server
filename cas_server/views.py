@@ -91,8 +91,11 @@ class LogoutView(View, LogoutMixin):
             return HttpResponseRedirect(self.service)
         # else redirect to login page
         else:
-            messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
-            return redirect("cas_server:login")
+            if settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT:
+                messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
+                return redirect("cas_server:login")
+            else:
+                return render(request, settings.CAS_LOGOUT_TEMPLATE)
 
 class LoginView(View, LogoutMixin):
     """credential requestor / acceptor"""

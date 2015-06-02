@@ -1,0 +1,20 @@
+{% extends "cas_server/base.html" %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+{% load i18n %}
+{% block bootstrap3_extra_head %}
+<link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+{% endblock %}
+{% block bootstrap3_content %}
+<div class="container">
+<div class="row">
+<div class="col-md-3"></div>
+<div class="col-md-6">
+{% bootstrap_messages %}
+<div class="alert alert-success" role="alert">{% trans "Successfully logout" %}</div>
+</div>
+<div class="col-md-3"></div>
+</div>
+    </div> <!-- /container -->
+{% endblock %}
+

@@ -19,11 +19,13 @@ def setting_default(name, default_value):
 setting_default('CAS_LOGIN_TEMPLATE', 'cas_server/login.html')
 setting_default('CAS_WARN_TEMPLATE', 'cas_server/warn.html')
 setting_default('CAS_LOGGED_TEMPLATE', 'cas_server/logged.html')
+setting_default('CAS_LOGOUT_TEMPLATE', 'cas_server/logout.html')
 setting_default('CAS_AUTH_CLASS', 'cas_server.auth.DjangoAuthUser')
 setting_default('CAS_ST_LEN', 30)
 setting_default('CAS_TICKET_VALIDITY', 300)
 setting_default('CAS_TICKET_TIMEOUT', 24*3600)
 setting_default('CAS_PROXY_CA_CERTIFICATE_PATH', True)
+setting_default('CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT', False)
 
 setting_default('CAS_SERVICE_TICKET_PREFIX', 'ST')
 setting_default('CAS_PROXY_TICKET_PREFIX', 'PT')

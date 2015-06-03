@@ -1,3 +1,4 @@
+# ⁻*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -35,11 +36,20 @@ def redirect_params(url_name, params=None):
 
 def update_url(url, params):
     """update params in the `url` query string"""
+    if isinstance(url, unicode):
+       url = url.encode('utf-8')
+    for key, value in params.items():
+        if isinstance(key, unicode):
+            del params[key]
+            key = key.encode('utf-8')
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        params[key] = value
     url_parts = list(urlparse.urlparse(url))
     query = dict(urlparse.parse_qsl(url_parts[4]))
     query.update(params)
     url_parts[4] = urllib.urlencode(query)
-    return urlparse.urlunparse(url_parts)
+    return urlparse.urlunparse(url_parts).decode('utf-8')
 
 def unpack_nested_exception(error):
     """If exception are stacked, return the first one"""

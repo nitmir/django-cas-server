@@ -27,6 +27,8 @@ setting_default('CAS_TICKET_TIMEOUT', 24*3600)
 setting_default('CAS_PROXY_CA_CERTIFICATE_PATH', True)
 setting_default('CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT', False)
 
+setting_default('CAS_AUTH_SHARED_SECRET', '')
+
 setting_default('CAS_SERVICE_TICKET_PREFIX', 'ST')
 setting_default('CAS_PROXY_TICKET_PREFIX', 'PT')
 setting_default('CAS_PROXY_GRANTING_TICKET_PREFIX', 'PGT')

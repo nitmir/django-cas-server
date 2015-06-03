@@ -294,9 +294,13 @@ class Auth(View):
         username = request.POST.get('username')
         password = request.POST.get('password')
         service = request.POST.get('service')
+        secret = request.POST.get('secret')
 
+        if not settings.CAS_AUTH_SHARED_SECRET:
+            return HttpResponse("no\nplease set CAS_AUTH_SHARED_SECRET", content_type="text/plain")
+        if secret != settings.CAS_AUTH_SHARED_SECRET:
+            return HttpResponse("no\n", content_type="text/plain")
         if not username or not password or not service:
-            print "not username or service or password"
             return HttpResponse("no\n", content_type="text/plain")
         form = forms.UserCredential(
             request.POST,

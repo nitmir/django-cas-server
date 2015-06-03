@@ -27,5 +27,6 @@ urlpatterns = patterns(
     url('^p3/serviceValidate$', views.ValidateService.as_view(allow_proxy_ticket=False), name='p3_serviceValidate'),
     url('^p3/proxyValidate$', views.ValidateService.as_view(allow_proxy_ticket=True), name='p3_proxyValidate'),
     url('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
+    url('^auth$', views.Auth.as_view(), name='auth'),
 )
 

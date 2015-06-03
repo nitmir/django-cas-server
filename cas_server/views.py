@@ -281,6 +281,47 @@ class LoginView(View, LogoutMixin):
         else:
             return self.not_authenticated()
 
+class Auth(View):
+    """A simple view to validate username/password/service tuple"""
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """dispatch requests based on method GET, POST, ..."""
+        return super(Auth, self).dispatch(request, *args, **kwargs)
+
+    @staticmethod
+    def post(request):
+        """methode called on GET request on this view"""
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        service = request.POST.get('service')
+
+        if not username or not password or not service:
+            print "not username or service or password"
+            return HttpResponse("no\n", content_type="text/plain")
+        form = forms.UserCredential(
+            request.POST,
+            initial={
+                'service':service,
+                'method':'POST',
+                'warn':False
+            }
+        )
+        if form.is_valid():
+            try:
+                user = models.User.objects.get(username=form.cleaned_data['username'])
+                # is the service allowed
+                service_pattern = models.ServicePattern.validate(service)
+                # is the current user allowed on this service
+                service_pattern.check_user(user)
+                # if the user has asked to be warned before any login to a service
+                return HttpResponse("yes\n", content_type="text/plain")
+            except (models.ServicePattern.DoesNotExist, models.ServicePatternException) as error:
+                print "error: %r" % error
+                return HttpResponse("no\n", content_type="text/plain")
+        else:
+            print "bad password"
+            return HttpResponse("no\n", content_type="text/plain")
+
 class Validate(View):
     """service ticket validation"""
     @staticmethod

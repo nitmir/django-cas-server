@@ -102,16 +102,18 @@ class User(models.Model):
         url = utils.update_url(service, {'ticket':ticket.value})
         return url
 
-class BadUsername(Exception):
+class ServicePatternException(Exception):
+    pass
+class BadUsername(ServicePatternException):
     """Exception raised then an non allowed username
     try to get a ticket for a service"""
     pass
-class BadFilter(Exception):
+class BadFilter(ServicePatternException):
     """"Exception raised then a user try
     to get a ticket for a service and do not reach a condition"""
     pass
 
-class UserFieldNotDefined(Exception):
+class UserFieldNotDefined(ServicePatternException):
     """Exception raised then a user try to get a ticket for a service
     using as username an attribut not present on this user"""
     pass

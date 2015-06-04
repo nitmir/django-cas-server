@@ -175,8 +175,8 @@ class ServicePattern(models.Model):
         if self.restrict_users and not self.usernames.filter(value=user.username):
             raise BadUsername()
         for filtre in self.filters.all():
-            if isinstance(user.attributs[filtre.attribut], list):
-                attrs = user.attributs[filtre.attribut]
+            if isinstance(user.attributs.get(filtre.attribut, []), list):
+                attrs = user.attributs.get(filtre.attribut, [])
             else:
                 attrs = [user.attributs[filtre.attribut]]
             for value in attrs:

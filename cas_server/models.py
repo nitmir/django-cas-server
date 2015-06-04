@@ -49,7 +49,7 @@ class User(models.Model):
         for ticket_class in ticket_classes:
             for ticket in ticket_class.objects.filter(
                     user=self,
-                    validate=True,
+                    validate=True if ticket_class != ProxyGrantingTicket else False,
                     single_log_out=True
             ):
                 async_list.append(ticket.logout(request, session))

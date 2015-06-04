@@ -345,7 +345,7 @@ class Ticket(models.Model):
             try:
                 return session.post(
                     self.service.encode('utf-8'),
-                    data=xml.encode('utf-8'),
+                    data={'logoutRequest':xml.encode('utf-8')},
                     headers=headers
                 )
             except Exception as error:

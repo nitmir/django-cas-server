@@ -330,7 +330,7 @@ class Ticket(models.Model):
 
     def logout(self, request, session):
         """Send a SLO request to the ticket service"""
-        if self.validate and self.single_log_out:
+        if (self.validate or isinstance(self, ProxyGrantingTicket)) and self.single_log_out:
             xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>

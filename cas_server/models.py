@@ -331,7 +331,7 @@ class Ticket(models.Model):
     def logout(self, request, session):
         """Send a SLO request to the ticket service"""
         if self.validate and self.single_log_out:
-            xml = """<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+            xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
     <samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
@@ -341,12 +341,10 @@ class Ticket(models.Model):
                 'datetime' : timezone.now().isoformat(),
                 'ticket': self.value
             }
-            headers = {'Content-Type': 'text/xml'}
             try:
                 return session.post(
                     self.service.encode('utf-8'),
                     data={'logoutRequest':xml.encode('utf-8')},
-                    headers=headers
                 )
             except Exception as error:
                 if request is not None:

@@ -123,15 +123,26 @@ class LoginView(View, LogoutMixin):
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
 
-        if not request.session.get("authenticated") or self.renew:
-            self.form = forms.UserCredential(
-                request.POST,
-                initial={
-                    'service':self.service,
-                    'method':self.method,
-                    'warn':request.session.get("warn")
-                }
+        # save LT for later check
+        lt_valid = request.session.get('lt')
+        lt_send = request.POST.get('lt')
+        # generate a new LT
+        request.session['lt'] = utils.gen_lt()
+
+        # check if send LT is valid
+        if lt_valid is None or lt_valid != lt_send:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                _(u"Invalid login ticket")
             )
+            values = request.POST.copy()
+            # if not set a new LT and fail
+            values['lt'] = request.session['lt']
+            self.init_form(values)
+
+        elif not request.session.get("authenticated") or self.renew:
+            self.init_form(request.POST)
             if self.form.is_valid():
                 self.user = models.User.objects.get(username=self.form.cleaned_data['username'])
                 request.session.set_expiry(0)
@@ -152,16 +163,23 @@ class LoginView(View, LogoutMixin):
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
 
-        if not request.session.get("authenticated") or self.renew:
-            self.form = forms.UserCredential(
-                initial={
-                    'service':self.service,
-                    'method':self.method,
-                    'warn':request.session.get("warn")
-                }
-            )
+        # generate a new LT
+        request.session['lt'] = utils.gen_lt()
 
+        if not request.session.get("authenticated") or self.renew:
+            self.init_form()
         return self.common()
+
+    def init_form(self, values=None):
+        self.form = forms.UserCredential(
+            values,
+            initial={
+                'service':self.service,
+                'method':self.method,
+                'warn':self.request.session.get("warn"),
+                'lt':self.request.session['lt']
+            }
+        )
 
     def service_login(self):
         """Perform login agains a service"""
@@ -231,7 +249,7 @@ class LoginView(View, LogoutMixin):
             self.user = models.User.objects.get(username=self.request.session.get("username"))
         except models.User.DoesNotExist:
             self.logout()
-            return utils.redirect_params("cas_server:login", params=dict(self.request.GET))
+            return utils.redirect_params("cas_server:login", params=self.request.GET)
 
         # if login agains a service is self.requestest
         if self.service:

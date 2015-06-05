@@ -66,32 +66,36 @@ def unpack_nested_exception(error):
     return error
 
 
-def _gen_ticket(prefix):
+def _gen_ticket(prefix, lg=settings.CAS_TICKET_LEN):
     """Generate a ticket with prefix `prefix`"""
     return '%s-%s' % (
         prefix,
         ''.join(
             random.choice(
                 string.ascii_letters + string.digits
-            ) for _ in range(settings.CAS_ST_LEN)
+            ) for _ in range(lg - len(prefix) - 1)
         )
     )
 
+def gen_lt():
+    """Generate a Service Ticket"""
+    return _gen_ticket(settings.CAS_LOGIN_TICKET_PREFIX, settings.CAS_LT_LEN)
+
 def gen_st():
     """Generate a Service Ticket"""
-    return _gen_ticket(settings.CAS_SERVICE_TICKET_PREFIX)
+    return _gen_ticket(settings.CAS_SERVICE_TICKET_PREFIX, settings.CAS_ST_LEN)
 
 def gen_pt():
     """Generate a Proxy Ticket"""
-    return _gen_ticket(settings.CAS_PROXY_TICKET_PREFIX)
+    return _gen_ticket(settings.CAS_PROXY_TICKET_PREFIX, settings.CAS_PT_LEN)
 
 def gen_pgt():
     """Generate a Proxy Granting Ticket"""
-    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_PREFIX)
+    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_PREFIX, settings.CAS_PGT_LEN)
 
 def gen_pgtiou():
     """Generate a Proxy Granting Ticket IOU"""
-    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_IOU_PREFIX)
+    return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_IOU_PREFIX, settings.CAS_PGTIOU_LEN)
 
 
 def gen_saml_id():

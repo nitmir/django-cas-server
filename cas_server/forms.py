@@ -22,6 +22,7 @@ class UserCredential(forms.Form):
     username = forms.CharField(label=_('login'))
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
+    lt = forms.CharField(widget=forms.HiddenInput())
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
 

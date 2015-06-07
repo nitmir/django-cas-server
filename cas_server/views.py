@@ -84,11 +84,15 @@ class LogoutView(View, LogoutMixin):
         """methode called on GET request on this view"""
         self.request = request
         self.service = request.GET.get('service')
+        self.url = request.GET.get('url')
         self.logout()
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request)) # clean messages before leaving the django app
             return HttpResponseRedirect(self.service)
+        elif self.url:
+            list(messages.get_messages(request)) # clean messages before leaving the django app
+            return HttpResponseRedirect(self.url)
         # else redirect to login page
         else:
             if settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT:

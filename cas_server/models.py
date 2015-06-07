@@ -186,7 +186,7 @@ class ServicePattern(models.Model):
                 raise BadFilter('%s do not match %s %s' % (
                     filtre.pattern,
                     filtre.attribut,
-                    user.attributs[filtre.attribut]
+                    user.attributs.get(filtre.attribut)
                 ))
         if self.user_field and not user.attributs.get(self.user_field):
             raise UserFieldNotDefined()

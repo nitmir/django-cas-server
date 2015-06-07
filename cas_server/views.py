@@ -211,6 +211,7 @@ class LoginView(View, LogoutMixin):
                 )
             else:
                 # redirect, using method ?
+                list(messages.get_messages(self.request)) # clean messages before leaving django
                 return HttpResponseRedirect(
                     self.user.get_service_url(self.service, service_pattern, renew=self.renew)
                 )

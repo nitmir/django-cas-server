@@ -80,10 +80,10 @@ class User(models.Model):
         )
         service_attributs = {}
         for (key, value) in self.attributs.items():
-            if key in attributs:
+            if key in attributs or '*' in attributs:
                 if key in replacements:
                     value = re.sub(replacements[key][0], replacements[key][1], value)
-                service_attributs[attributs[key]] = value
+                service_attributs[attributs.get(key, key)] = value
         ticket = ticket_class.objects.create(
             user=self,
             attributs=service_attributs,
@@ -221,7 +221,7 @@ class ReplaceAttributName(models.Model):
     name = models.CharField(
         max_length=255,
         verbose_name=_(u"name"),
-        help_text=_(u"name of an attribut to send to the service")
+        help_text=_(u"name of an attribut to send to the service, use * for all attributes")
     )
     replace = models.CharField(
         max_length=255,

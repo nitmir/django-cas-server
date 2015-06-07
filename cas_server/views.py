@@ -130,7 +130,7 @@ class LoginView(View, LogoutMixin):
         # save LT for later check
         lt_valid = request.session.get('lt')
         lt_send = request.POST.get('lt')
-        # generate a new LT
+        # generate a new LT (by posting the LT has been consumed)
         request.session['lt'] = utils.gen_lt()
 
         # check if send LT is valid
@@ -167,8 +167,8 @@ class LoginView(View, LogoutMixin):
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
 
-        # generate a new LT
-        request.session['lt'] = utils.gen_lt()
+        # generate a new LT if none is present
+        request.session['lt'] = request.session.get('lt', utils.gen_lt())
 
         if not request.session.get("authenticated") or self.renew:
             self.init_form()

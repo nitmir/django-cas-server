@@ -30,6 +30,9 @@ import utils
 import forms
 import models
 
+from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
+from .models import ServicePattern
+
 class AttributesMixin(object):
     """mixin for the attributs methode"""
 
@@ -189,7 +192,7 @@ class LoginView(View, LogoutMixin):
         """Perform login agains a service"""
         try:
             # is the service allowed
-            service_pattern = models.ServicePattern.validate(self.service)
+            service_pattern = ServicePattern.validate(self.service)
             # is the current user allowed on this service
             service_pattern.check_user(self.user)
             # if the user has asked to be warned before any login to a service
@@ -215,7 +218,7 @@ class LoginView(View, LogoutMixin):
                 return HttpResponseRedirect(
                     self.user.get_service_url(self.service, service_pattern, renew=self.renew)
                 )
-        except models.ServicePattern.DoesNotExist:
+        except ServicePattern.DoesNotExist:
             messages.add_message(
                 self.request,
                 messages.ERROR,
@@ -270,7 +273,7 @@ class LoginView(View, LogoutMixin):
         """Processing non authenticated users"""
         if self.service:
             try:
-                service_pattern = models.ServicePattern.validate(self.service)
+                service_pattern = ServicePattern.validate(self.service)
                 if self.gateway:
                     list(messages.get_messages(self.request))# clean messages before leaving django
                     return HttpResponseRedirect(self.service)
@@ -288,7 +291,7 @@ class LoginView(View, LogoutMixin):
                         _(u"Authentication required by service %(name)s (%(url)s).") %
                         {'name':service_pattern.name, 'url':self.service}
                     )
-            except models.ServicePattern.DoesNotExist:
+            except ServicePattern.DoesNotExist:
                 messages.add_message(
                     self.request,
                     messages.ERROR,
@@ -337,12 +340,12 @@ class Auth(View):
             try:
                 user = models.User.objects.get(username=form.cleaned_data['username'])
                 # is the service allowed
-                service_pattern = models.ServicePattern.validate(service)
+                service_pattern = ServicePattern.validate(service)
                 # is the current user allowed on this service
                 service_pattern.check_user(user)
                 # if the user has asked to be warned before any login to a service
                 return HttpResponse("yes\n", content_type="text/plain")
-            except (models.ServicePattern.DoesNotExist, models.ServicePatternException) as error:
+            except (ServicePattern.DoesNotExist, ServicePatternException) as error:
                 print "error: %r" % error
                 return HttpResponse("no\n", content_type="text/plain")
         else:
@@ -359,17 +362,17 @@ class Validate(View):
         renew = True if request.GET.get('renew') else False
         if service and ticket:
             try:
-                ticket = models.ServiceTicket.objects.get(
+                ticket = ServiceTicket.objects.get(
                     value=ticket,
                     service=service,
                     validate=False,
                     renew=renew,
-                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                    creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
                 )
                 ticket.validate = True
                 ticket.save()
                 return HttpResponse("yes\n", content_type="text/plain")
-            except models.ServiceTicket.DoesNotExist:
+            except ServiceTicket.DoesNotExist:
                 return HttpResponse("no\n", content_type="text/plain")
         else:
             return HttpResponse("no\n", content_type="text/plain")
@@ -447,19 +450,19 @@ class ValidateService(View, AttributesMixin):
         """fetch the ticket angains the database and check its validity"""
         try:
             proxies = []
-            if self.ticket.startswith(models.ServiceTicket.PREFIX):
-                ticket = models.ServiceTicket.objects.get(
+            if self.ticket.startswith(ServiceTicket.PREFIX):
+                ticket = ServiceTicket.objects.get(
                     value=self.ticket,
                     validate=False,
                     renew=self.renew,
-                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                    creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
                 )
-            elif self.allow_proxy_ticket and self.ticket.startswith(models.ProxyTicket.PREFIX):
-                ticket = models.ProxyTicket.objects.get(
+            elif self.allow_proxy_ticket and self.ticket.startswith(ProxyTicket.PREFIX):
+                ticket = ProxyTicket.objects.get(
                     value=self.ticket,
                     validate=False,
                     renew=self.renew,
-                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                    creation__gt=(timezone.now() - timedelta(seconds=ProxyTicket.VALIDITY))
                 )
                 for prox in ticket.proxies.all():
                     proxies.append(prox.url)
@@ -470,17 +473,17 @@ class ValidateService(View, AttributesMixin):
             if ticket.service != self.service:
                 raise ValidateError('INVALID_SERVICE')
             return ticket, proxies
-        except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist):
+        except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
             raise ValidateError('INVALID_TICKET', 'ticket not found')
 
 
     def process_pgturl(self, params):
         """Handle PGT request"""
         try:
-            pattern = models.ServicePattern.validate(self.pgt_url)
+            pattern = ServicePattern.validate(self.pgt_url)
             if pattern.proxy_callback:
                 proxyid = utils.gen_pgtiou()
-                pticket = models.ProxyGrantingTicket.objects.create(
+                pticket = ProxyGrantingTicket.objects.create(
                     user=self.ticket.user,
                     service=self.pgt_url,
                     service_pattern=pattern,
@@ -507,7 +510,7 @@ class ValidateService(View, AttributesMixin):
                     'INVALID_PROXY_CALLBACK',
                     "callback url not allowed by configuration"
                 )
-        except models.ServicePattern.DoesNotExist:
+        except ServicePattern.DoesNotExist:
             raise ValidateError(
                 'INVALID_PROXY_CALLBACK',
                 'callback url not allowed by configuration'
@@ -541,21 +544,21 @@ class Proxy(View):
         """handle PT request"""
         try:
             # is the target service allowed
-            pattern = models.ServicePattern.validate(self.target_service)
+            pattern = ServicePattern.validate(self.target_service)
             if not pattern.proxy:
                 raise ValidateError(
                     'UNAUTHORIZED_SERVICE',
                     'the service do not allow proxy ticket'
                 )
             # is the proxy granting ticket valid
-            ticket = models.ProxyGrantingTicket.objects.get(
+            ticket = ProxyGrantingTicket.objects.get(
                 value=self.pgt,
-                creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                creation__gt=(timezone.now() - timedelta(seconds=ProxyGrantingTicket.VALIDITY))
             )
             # is the pgt user allowed on the target service
             pattern.check_user(ticket.user)
             pticket = ticket.user.get_ticket(
-                models.ProxyTicket,
+                ProxyTicket,
                 self.target_service,
                 pattern,
                 renew=False)
@@ -566,9 +569,9 @@ class Proxy(View):
                 {'ticket':pticket.value},
                 content_type="text/xml; charset=utf-8"
             )
-        except models.ProxyGrantingTicket.DoesNotExist:
+        except ProxyGrantingTicket.DoesNotExist:
             raise ValidateError('INVALID_TICKET', 'PGT not found')
-        except models.ServicePattern.DoesNotExist:
+        except ServicePattern.DoesNotExist:
             raise ValidateError('UNAUTHORIZED_SERVICE')
         except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
             raise ValidateError(
@@ -636,7 +639,7 @@ class SamlValidate(View, AttributesMixin):
         try:
             self.ticket = self.process_ticket()
             expire_instant = (self.ticket.creation + \
-            timedelta(seconds=settings.CAS_TICKET_VALIDITY)).isoformat()
+            timedelta(seconds=self.ticket.VALIDITY)).isoformat()
             attributes = self.attributes()
             params = {
                 'IssueInstant':timezone.now().isoformat(),
@@ -665,17 +668,17 @@ class SamlValidate(View, AttributesMixin):
         try:
             auth_req = self.root.getchildren()[1].getchildren()[0]
             ticket = auth_req.getchildren()[0].text
-            if ticket.startswith(models.ServiceTicket.PREFIX):
-                ticket = models.ServiceTicket.objects.get(
+            if ticket.startswith(ServiceTicket.PREFIX):
+                ticket = ServiceTicket.objects.get(
                     value=ticket,
                     validate=False,
-                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                    creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
                 )
-            elif ticket.startswith(models.ProxyTicket.PREFIX):
-                ticket = models.ProxyTicket.objects.get(
+            elif ticket.startswith(ProxyTicket.PREFIX):
+                ticket = ProxyTicket.objects.get(
                     value=ticket,
                     validate=False,
-                    creation__gt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+                    creation__gt=(timezone.now() - timedelta(seconds=ProxyTicket.VALIDITY))
                 )
             else:
                 raise SamlValidateError(
@@ -692,5 +695,5 @@ class SamlValidate(View, AttributesMixin):
             return ticket
         except (IndexError, KeyError):
             raise SamlValidateError('VersionMismatch')
-        except (models.ServiceTicket.DoesNotExist, models.ProxyTicket.DoesNotExist):
+        except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
             raise SamlValidateError('AuthnFailed', 'ticket not found')

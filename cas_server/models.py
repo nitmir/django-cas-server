@@ -292,6 +292,9 @@ class Ticket(models.Model):
     renew = models.BooleanField(default=False)
     single_log_out = models.BooleanField(default=False)
 
+    VALIDITY = settings.CAS_TICKET_VALIDITY
+    TIMEOUT = settings.CAS_TICKET_TIMEOUT
+
     def __unicode__(self):
         return u"Ticket(%s, %s)" % (self.user, self.service)
 
@@ -304,19 +307,18 @@ class Ticket(models.Model):
                 Q(single_log_out=False)&Q(validate=True)
             )|(
                 Q(validate=False)&\
-                Q(creation__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY)))
+                Q(creation__lt=(timezone.now() - timedelta(seconds=cls.VALIDITY)))
             )
         ).delete()
 
         # sending SLO to timed-out validated tickets
-        if settings.CAS_TICKET_TIMEOUT and \
-        settings.CAS_TICKET_TIMEOUT >= settings.CAS_TICKET_VALIDITY:
+        if cls.TIMEOUT and cls.TIMEOUT > 0:
             async_list = []
             session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
             queryset = cls.objects.filter(
                 single_log_out=True,
                 validate=True,
-                creation__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT))
+                creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
             )
             for ticket in queryset:
                 async_list.append(ticket.logout(None, session))
@@ -373,7 +375,10 @@ class ProxyTicket(Ticket):
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
     PREFIX = settings.CAS_PROXY_GRANTING_TICKET_PREFIX
+    VALIDITY = settings.CAS_PGT_VALIDITY
     value = models.CharField(max_length=255, default=utils.gen_pgt, unique=True)
+
+
     def __unicode__(self):
         return u"ProxyGrantingTicket(%s, %s, %s)" % (self.user, self.value, self.service)
 

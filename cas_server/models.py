@@ -167,6 +167,16 @@ class ServicePattern(models.Model):
         help_text=_("Enable SLO for the service")
     )
 
+    single_log_out_callback = models.CharField(
+        max_length=255,
+        default="",
+        blank=True,
+        verbose_name=_(u"single log out callback"),
+        help_text=_(u"URL where the SLO request will be POST. empty = service url\n" \
+                    u"This is usefull for non HTTP proxied services.")
+    )
+
+
     def __unicode__(self):
         return u"%s: %s" % (self.pos, self.pattern)
 
@@ -344,8 +354,12 @@ class Ticket(models.Model):
                 'ticket': self.value
             }
             try:
+                if self.service_pattern.single_log_out_callback:
+                    url = self.service_pattern.single_log_out_callback
+                else:
+                   url = self.service
                 return session.post(
-                    self.service.encode('utf-8'),
+                    url.encode('utf-8'),
                     data={'logoutRequest':xml.encode('utf-8')},
                 )
             except Exception as error:

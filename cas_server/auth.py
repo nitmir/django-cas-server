@@ -66,7 +66,7 @@ class MysqlAuthUser(DummyAuthUser):
         curs = conn.cursor()
         if curs.execute(settings.CAS_SQL_USER_QUERY, (username,)) == 1:
             self.user = curs.fetchone()
-        super(MysqlAuthUser, self).__init__(username)
+        super(MysqlAuthUser, self).__init__(self.user['username'])
 
     def test_password(self, password):
         """test `password` agains the user"""

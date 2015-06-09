@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.contrib.sessions.models import Session
 from picklefield.fields import PickledObjectField
 
 import re
@@ -30,8 +31,18 @@ import utils
 
 class User(models.Model):
     """A user logged into the CAS"""
-    username = models.CharField(max_length=30, unique=True)
+    class Meta:
+        unique_together = ("username", "session")
+    session = models.OneToOneField(Session, related_name="cas_server_user", blank=True, null=True, on_delete=models.SET_NULL)
+    username = models.CharField(max_length=30)
     date = models.DateTimeField(auto_now_add=True, auto_now=True)
+
+    @classmethod
+    def clean_old_entries(cls):
+        users = cls.objects.filter(session=None)
+        for user in users:
+            user.logout()
+        users.delete()
 
     @property
     def attributs(self):
@@ -39,9 +50,12 @@ class User(models.Model):
         return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
 
     def __unicode__(self):
-        return self.username
+        if self.session:
+            return u"%s - %s" % (self.username, self.session.session_key)
+        else:
+            return self.username
 
-    def logout(self, request):
+    def logout(self, request=None):
         """Sending SLO request to all services the user logged in"""
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
@@ -59,12 +73,13 @@ class User(models.Model):
                 try:
                     future.result()
                 except Exception as error:
-                    error = utils.unpack_nested_exception(error)
-                    messages.add_message(
-                        request,
-                        messages.WARNING,
-                        _(u'Error during service logout %s') % error
-                    )
+                    if request is not None:
+                        error = utils.unpack_nested_exception(error)
+                        messages.add_message(
+                            request,
+                            messages.WARNING,
+                            _(u'Error during service logout %s') % error
+                        )
 
     def get_ticket(self, ticket_class, service, service_pattern, renew):
         """
@@ -309,7 +324,7 @@ class Ticket(models.Model):
         return u"Ticket(%s, %s)" % (self.user, self.service)
 
     @classmethod
-    def clean(cls):
+    def clean_old_entries(cls):
         """Remove old ticket and send SLO to timed-out services"""
         # removing old validated ticket and non validated expired tickets
         cls.objects.filter(

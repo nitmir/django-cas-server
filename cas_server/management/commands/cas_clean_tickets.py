@@ -8,5 +8,6 @@ class Command(BaseCommand):
     help = _(u"Clean old trickets")
 
     def handle(self, *args, **options):
+        models.User.clean_old_entries()
         for ticket_class in [models.ServiceTicket, models.ProxyTicket, models.ProxyGrantingTicket]:
-            ticket_class.clean()
+            ticket_class.clean_old_entries()

@@ -69,7 +69,10 @@ class LogoutMixin(object):
     def logout(self):
         """effectively destroy CAS session"""
         try:
-            user = models.User.objects.get(username=self.request.session.get("username"))
+            user = models.User.objects.get(
+                username=self.request.session.get("username"),
+                session=utils.get_session(self.request)
+            )
             user.logout(self.request)
             user.delete()
         except models.User.DoesNotExist:
@@ -151,7 +154,10 @@ class LoginView(View, LogoutMixin):
         elif not request.session.get("authenticated") or self.renew:
             self.init_form(request.POST)
             if self.form.is_valid():
-                self.user = models.User.objects.get(username=self.form.cleaned_data['username'])
+                self.user = models.User.objects.get(
+                    username=self.form.cleaned_data['username'],
+                    session=utils.get_session(self.request)
+                )
                 request.session.set_expiry(0)
                 request.session["username"] = self.form.cleaned_data['username']
                 request.session["warn"] = True if self.form.cleaned_data.get("warn") else False
@@ -179,6 +185,7 @@ class LoginView(View, LogoutMixin):
 
     def init_form(self, values=None):
         self.form = forms.UserCredential(
+            self.request,
             values,
             initial={
                 'service':self.service,
@@ -254,7 +261,10 @@ class LoginView(View, LogoutMixin):
     def authenticated(self):
         """Processing authenticated users"""
         try:
-            self.user = models.User.objects.get(username=self.request.session.get("username"))
+            self.user = models.User.objects.get(
+                username=self.request.session.get("username"),
+                session=utils.get_session(self.request)
+            )
         except models.User.DoesNotExist:
             self.logout()
             return utils.redirect_params("cas_server:login", params=self.request.GET)
@@ -329,6 +339,7 @@ class Auth(View):
         if not username or not password or not service:
             return HttpResponse("no\n", content_type="text/plain")
         form = forms.UserCredential(
+            request,
             request.POST,
             initial={
                 'service':service,
@@ -338,18 +349,20 @@ class Auth(View):
         )
         if form.is_valid():
             try:
-                user = models.User.objects.get(username=form.cleaned_data['username'])
+                user = models.User.objects.get(
+                    username=form.cleaned_data['username'],
+                    session=utils.get_session(request)
+                )
                 # is the service allowed
                 service_pattern = ServicePattern.validate(service)
                 # is the current user allowed on this service
                 service_pattern.check_user(user)
-                # if the user has asked to be warned before any login to a service
+                if not request.session.get("authenticated"):
+                    user.delete()
                 return HttpResponse("yes\n", content_type="text/plain")
             except (ServicePattern.DoesNotExist, ServicePatternException) as error:
-                print "error: %r" % error
                 return HttpResponse("no\n", content_type="text/plain")
         else:
-            print "bad password"
             return HttpResponse("no\n", content_type="text/plain")
 
 class Validate(View):

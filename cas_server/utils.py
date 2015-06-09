@@ -15,6 +15,7 @@ from .default_settings import settings
 from django.utils.importlib import import_module
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.contrib.sessions.models import Session
 
 import urlparse
 import urllib
@@ -101,3 +102,8 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+def get_session(request):
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
+    return Session.objects.get(session_key=request.session.session_key)

@@ -22,22 +22,24 @@ class UserCredential(forms.Form):
     username = forms.CharField(label=_('login'))
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
-    lt = forms.CharField(widget=forms.HiddenInput())
+    lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, request, *args, **kwargs):
+        self.request = request
         super(UserCredential, self).__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super(UserCredential, self).clean()
         auth = utils.import_attr(settings.CAS_AUTH_CLASS)(cleaned_data.get("username"))
         if auth.test_password(cleaned_data.get("password")):
+            session = utils.get_session(self.request)
             try:
-                user = models.User.objects.get(username=auth.username)
+                user = models.User.objects.get(username=auth.username, session=session)
                 user.save()
             except models.User.DoesNotExist:
-                user = models.User.objects.create(username=auth.username)
+                user = models.User.objects.create(username=auth.username, session=session)
                 user.save()
         else:
             raise forms.ValidationError(_(u"Bad user"))

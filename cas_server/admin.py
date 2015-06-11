@@ -14,25 +14,35 @@ from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket, User, Servi
 from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterAttributValue
 from .forms import TicketForm
 
+tickets_readonly_fields=('validate', 'service', 'service_pattern', 'creation', 'renew', 'single_log_out', 'value')
+tickets_fields = ('validate', 'service', 'service_pattern', 'creation', 'renew', 'single_log_out')
 class ServiceTicketInline(admin.TabularInline):
     """`ServiceTicket` in admin interface"""
     model = ServiceTicket
     extra = 0
     form = TicketForm
+    readonly_fields = tickets_readonly_fields
+    fields = tickets_fields
 class ProxyTicketInline(admin.TabularInline):
     """`ProxyTicket` in admin interface"""
     model = ProxyTicket
     extra = 0
     form = TicketForm
+    readonly_fields = tickets_readonly_fields
+    fields = tickets_fields
 class ProxyGrantingInline(admin.TabularInline):
     """`ProxyGrantingTicket` in admin interface"""
     model = ProxyGrantingTicket
     extra = 0
     form = TicketForm
+    readonly_fields = tickets_readonly_fields
+    fields = tickets_fields[1:]
 
 class UserAdmin(admin.ModelAdmin):
     """`User` in admin interface"""
     inlines = (ServiceTicketInline, ProxyTicketInline, ProxyGrantingInline)
+    readonly_fields=('username', 'date', "session_key")
+    fields = ('username', 'date', "session_key")
 
 class UsernamesInline(admin.TabularInline):
     """`Username` in admin interface"""

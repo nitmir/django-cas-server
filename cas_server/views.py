@@ -71,7 +71,7 @@ class LogoutMixin(object):
         try:
             user = models.User.objects.get(
                 username=self.request.session.get("username"),
-                session=utils.get_session(self.request)
+                session_key=self.request.session_key
             )
             user.logout(self.request)
             user.delete()
@@ -156,7 +156,7 @@ class LoginView(View, LogoutMixin):
             if self.form.is_valid():
                 self.user = models.User.objects.get(
                     username=self.form.cleaned_data['username'],
-                    session=utils.get_session(self.request)
+                    session_key=self.request.session_key
                 )
                 request.session.set_expiry(0)
                 request.session["username"] = self.form.cleaned_data['username']
@@ -263,7 +263,7 @@ class LoginView(View, LogoutMixin):
         try:
             self.user = models.User.objects.get(
                 username=self.request.session.get("username"),
-                session=utils.get_session(self.request)
+                session_key=self.request.session_key
             )
         except models.User.DoesNotExist:
             self.logout()
@@ -351,7 +351,7 @@ class Auth(View):
             try:
                 user = models.User.objects.get(
                     username=form.cleaned_data['username'],
-                    session=utils.get_session(request)
+                    session_key=self.request.session_key
                 )
                 # is the service allowed
                 service_pattern = ServicePattern.validate(service)

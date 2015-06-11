@@ -17,32 +17,43 @@ from django.db.models import Q
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-from django.contrib.sessions.models import Session
 from picklefield.fields import PickledObjectField
 
 import re
 import os
 import sys
+from importlib import import_module
 from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
 import utils
 
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
 class User(models.Model):
     """A user logged into the CAS"""
     class Meta:
-        unique_together = ("username", "session")
-    session = models.OneToOneField(Session, related_name="cas_server_user", blank=True, null=True, on_delete=models.SET_NULL)
+        unique_together = ("username", "session_key")
+    session_key = models.CharField(max_length=40, blank=True, null=True)
     username = models.CharField(max_length=30)
     date = models.DateTimeField(auto_now_add=True, auto_now=True)
 
     @classmethod
     def clean_old_entries(cls):
-        users = cls.objects.filter(session=None)
+        users = cls.objects.filter(
+            date__lt=(timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE))
+        )
         for user in users:
             user.logout()
         users.delete()
+
+    @classmethod
+    def clean_deleted_sessions(cls):
+        for user in cls.objects.all():
+            if not SessionStore(session_key=user.session_key).get('authenticated'):
+                user.logout()
+                user.delete()
 
     @property
     def attributs(self):
@@ -108,6 +119,7 @@ class User(models.Model):
             single_log_out=service_pattern.single_log_out
         )
         ticket.save()
+        self.save()
         return ticket
 
     def get_service_url(self, service, service_pattern, renew):
@@ -321,7 +333,7 @@ class Ticket(models.Model):
     TIMEOUT = settings.CAS_TICKET_TIMEOUT
 
     def __unicode__(self):
-        return u"Ticket(%s, %s)" % (self.user, self.service)
+        return u"Ticket-%s" % self.pk
 
     @classmethod
     def clean_old_entries(cls):
@@ -394,13 +406,13 @@ class ServiceTicket(Ticket):
     PREFIX = settings.CAS_SERVICE_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_st, unique=True)
     def __unicode__(self):
-        return u"ServiceTicket(%s, %s, %s)" % (self.user, self.value, self.service)
+        return u"ServiceTicket-%s" % self.pk
 class ProxyTicket(Ticket):
     """A Proxy Ticket"""
     PREFIX = settings.CAS_PROXY_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_pt, unique=True)
     def __unicode__(self):
-        return u"ProxyTicket(%s, %s, %s)" % (self.user, self.value, self.service)
+        return u"ProxyTicket-%s" % self.pk
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
     PREFIX = settings.CAS_PROXY_GRANTING_TICKET_PREFIX
@@ -409,7 +421,7 @@ class ProxyGrantingTicket(Ticket):
 
 
     def __unicode__(self):
-        return u"ProxyGrantingTicket(%s, %s, %s)" % (self.user, self.value, self.service)
+        return u"ProxyGrantingTicket-%s" % self.pk
 
 class Proxy(models.Model):
     """A list of proxies on `ProxyTicket`"""

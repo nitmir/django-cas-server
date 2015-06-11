@@ -37,13 +37,13 @@ class UserCredential(forms.Form):
             try:
                 user = models.User.objects.get(
                     username=auth.username,
-                    session_key=self.request.session_key
+                    session_key=self.request.session.session_key
                 )
                 user.save()
             except models.User.DoesNotExist:
                 user = models.User.objects.create(
                     username=auth.username,
-                    session_key=self.request.session_key
+                    session_key=self.request.session.session_key
                 )
                 user.save()
         else:

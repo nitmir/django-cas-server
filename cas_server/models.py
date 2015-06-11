@@ -61,10 +61,7 @@ class User(models.Model):
         return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
 
     def __unicode__(self):
-        if self.session:
-            return u"%s - %s" % (self.username, self.session.session_key)
-        else:
-            return self.username
+        return u"%s - %s" % (self.username, self.session_key)
 
     def logout(self, request=None):
         """Sending SLO request to all services the user logged in"""

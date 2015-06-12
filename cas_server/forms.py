@@ -27,26 +27,14 @@ class UserCredential(forms.Form):
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
 
-    def __init__(self, request, *args, **kwargs):
-        self.request = request
+    def __init__(self, *args, **kwargs):
         super(UserCredential, self).__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super(UserCredential, self).clean()
         auth = utils.import_attr(settings.CAS_AUTH_CLASS)(cleaned_data.get("username"))
         if auth.test_password(cleaned_data.get("password")):
-            try:
-                user = models.User.objects.get(
-                    username=auth.username,
-                    session_key=self.request.session.session_key
-                )
-                user.save()
-            except models.User.DoesNotExist:
-                user = models.User.objects.create(
-                    username=auth.username,
-                    session_key=self.request.session.session_key
-                )
-                user.save()
+            cleaned_data["username"] = auth.username
         else:
             raise forms.ValidationError(_(u"Bad user"))
 

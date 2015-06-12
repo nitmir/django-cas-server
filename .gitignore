@@ -1,6 +1,9 @@
 *.pyc
+*.egg-info
 
 bootstrap3
 cas/
 db.sqlite3
 manage.py
+
+.tox

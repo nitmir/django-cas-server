@@ -1,0 +1,9 @@
+tox==1.8.1
+pytest==2.6.4
+pytest-django==2.7.0
+pytest-pythonpath==0.3
+requests>=2.4
+django-picklefield>=0.3.1
+requests_futures>=0.9.5
+django-bootstrap3>=5.4
+lxml>=3.4

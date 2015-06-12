@@ -43,6 +43,7 @@ class UserAdmin(admin.ModelAdmin):
     inlines = (ServiceTicketInline, ProxyTicketInline, ProxyGrantingInline)
     readonly_fields=('username', 'date', "session_key")
     fields = ('username', 'date', "session_key")
+    list_display = ('username', 'date', "session_key")
 
 class UsernamesInline(admin.TabularInline):
     """`Username` in admin interface"""

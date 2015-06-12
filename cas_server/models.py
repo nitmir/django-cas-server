@@ -367,7 +367,8 @@ class Ticket(models.Model):
     def logout(self, request, session):
         """Send a SLO request to the ticket service"""
         if (self.validate or isinstance(self, ProxyGrantingTicket)) and self.single_log_out:
-            xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+            try:
+                xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
     <samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
@@ -377,7 +378,6 @@ class Ticket(models.Model):
                 'datetime' : timezone.now().isoformat(),
                 'ticket': self.value
             }
-            try:
                 if self.service_pattern.single_log_out_callback:
                     url = self.service_pattern.single_log_out_callback
                 else:

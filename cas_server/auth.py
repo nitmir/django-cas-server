@@ -19,8 +19,10 @@ try:
 except ImportError:
     MySQLdb = None
 
+
 class DummyAuthUser(object):
     """A Dummy authentication class"""
+
     def __init__(self, username):
         self.username = username
 
@@ -36,6 +38,7 @@ class DummyAuthUser(object):
 class TestAuthUser(DummyAuthUser):
     """A test authentication class with one user test having
     alose test as password and some attributes"""
+
     def __init__(self, username):
         super(TestAuthUser, self).__init__(username)
 
@@ -45,20 +48,21 @@ class TestAuthUser(DummyAuthUser):
 
     def attributs(self):
         """return a dict of user attributes"""
-        return {'nom':'Nymous', 'prenom':'Ano', 'email':'anonymous@example.net'}
+        return {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
 
 
 class MysqlAuthUser(DummyAuthUser):
     """A mysql auth class: authentication user agains a mysql database"""
     user = None
+
     def __init__(self, username):
         mysql_config = {
             "user": settings.CAS_SQL_USERNAME,
             "passwd": settings.CAS_SQL_PASSWORD,
             "db": settings.CAS_SQL_DBNAME,
             "host": settings.CAS_SQL_HOST,
-            "charset":settings.CAS_SQL_DBCHARSET,
-            "cursorclass":MySQLdb.cursors.DictCursor
+            "charset": settings.CAS_SQL_DBCHARSET,
+            "cursorclass": MySQLdb.cursors.DictCursor
         }
         if not MySQLdb:
             raise RuntimeError("Please install MySQLdb before using the MysqlAuthUser backend")
@@ -92,16 +96,17 @@ class MysqlAuthUser(DummyAuthUser):
         else:
             return self.user
 
+
 class DjangoAuthUser(DummyAuthUser):
     """A django auth class: authenticate user agains django internal users"""
     user = None
+
     def __init__(self, username):
         try:
             self.user = User.objects.get(username=username)
         except User.DoesNotExist:
             pass
         super(DjangoAuthUser, self).__init__(username)
-
 
     def test_password(self, password):
         """test `password` agains the user"""

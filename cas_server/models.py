@@ -31,6 +31,7 @@ import utils
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
+
 class User(models.Model):
     """A user logged into the CAS"""
     class Meta:
@@ -123,24 +124,32 @@ class User(models.Model):
         """Return the url to which the user must be redirected to
         after a Service Ticket has been generated"""
         ticket = self.get_ticket(ServiceTicket, service, service_pattern, renew)
-        url = utils.update_url(service, {'ticket':ticket.value})
+        url = utils.update_url(service, {'ticket': ticket.value})
         return url
+
 
 class ServicePatternException(Exception):
     pass
+
+
 class BadUsername(ServicePatternException):
     """Exception raised then an non allowed username
     try to get a ticket for a service"""
     pass
+
+
 class BadFilter(ServicePatternException):
     """"Exception raised then a user try
     to get a ticket for a service and do not reach a condition"""
     pass
 
+
 class UserFieldNotDefined(ServicePatternException):
     """Exception raised then a user try to get a ticket for a service
     using as username an attribut not present on this user"""
     pass
+
+
 class ServicePattern(models.Model):
     """Allowed services pattern agains services are tested to"""
     class Meta:
@@ -196,10 +205,9 @@ class ServicePattern(models.Model):
         default="",
         blank=True,
         verbose_name=_(u"single log out callback"),
-        help_text=_(u"URL where the SLO request will be POST. empty = service url\n" \
+        help_text=_(u"URL where the SLO request will be POST. empty = service url\n"
                     u"This is usefull for non HTTP proxied services.")
     )
-
 
     def __unicode__(self):
         return u"%s: %s" % (self.pos, self.pattern)
@@ -226,7 +234,6 @@ class ServicePattern(models.Model):
             raise UserFieldNotDefined()
         return True
 
-
     @classmethod
     def validate(cls, service):
         """Check if a Service Patern match `service` and
@@ -235,6 +242,7 @@ class ServicePattern(models.Model):
             if re.match(service_pattern.pattern, service):
                 return service_pattern
         raise cls.DoesNotExist()
+
 
 class Username(models.Model):
     """A list of allowed usernames on a service pattern"""
@@ -247,6 +255,7 @@ class Username(models.Model):
 
     def __unicode__(self):
         return self.value
+
 
 class ReplaceAttributName(models.Model):
     """A list of replacement of attributs name for a service pattern"""
@@ -261,8 +270,8 @@ class ReplaceAttributName(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_(u"replace"),
-        help_text=_(u"name under which the attribut will be show" \
-        u"to the service. empty = default name of the attribut")
+        help_text=_(u"name under which the attribut will be show"
+                    u"to the service. empty = default name of the attribut")
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")
 
@@ -271,6 +280,7 @@ class ReplaceAttributName(models.Model):
             return self.name
         else:
             return u"%s → %s" % (self.name, self.replace)
+
 
 class FilterAttributValue(models.Model):
     """A list of filter on attributs for a service pattern"""
@@ -288,6 +298,7 @@ class FilterAttributValue(models.Model):
 
     def __unicode__(self):
         return u"%s %s" % (self.attribut, self.pattern)
+
 
 class ReplaceAttributValue(models.Model):
     """Replacement to apply on attributs values for a service pattern"""
@@ -338,10 +349,10 @@ class Ticket(models.Model):
         # removing old validated ticket and non validated expired tickets
         cls.objects.filter(
             (
-                Q(single_log_out=False)&Q(validate=True)
-            )|(
-                Q(validate=False)&\
-                Q(creation__lt=(timezone.now() - timedelta(seconds=cls.VALIDITY)))
+                Q(single_log_out=False) & Q(validate=True)
+            ) | (
+                Q(validate=False)
+                & Q(creation__lt=(timezone.now() - timedelta(seconds=cls.VALIDITY)))
             )
         ).delete()
 
@@ -373,18 +384,18 @@ class Ticket(models.Model):
     <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
     <samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
   </samlp:LogoutRequest>""" % \
-            {
-                'id' : os.urandom(20).encode("hex"),
-                'datetime' : timezone.now().isoformat(),
-                'ticket': self.value
-            }
+                    {
+                        'id': os.urandom(20).encode("hex"),
+                        'datetime': timezone.now().isoformat(),
+                        'ticket':  self.value
+                    }
                 if self.service_pattern.single_log_out_callback:
                     url = self.service_pattern.single_log_out_callback
                 else:
-                   url = self.service
+                    url = self.service
                 return session.post(
                     url.encode('utf-8'),
-                    data={'logoutRequest':xml.encode('utf-8')},
+                    data={'logoutRequest': xml.encode('utf-8')},
                 )
             except Exception as error:
                 if request is not None:
@@ -393,32 +404,39 @@ class Ticket(models.Model):
                         request,
                         messages.WARNING,
                         _(u'Error during service logout %(service)s:\n%(error)s') %
-                        {'service': self.service, 'error':error}
+                        {'service':  self.service, 'error': error}
                     )
                 else:
                     sys.stderr.write("%r\n" % error)
+
 
 class ServiceTicket(Ticket):
     """A Service Ticket"""
     PREFIX = settings.CAS_SERVICE_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_st, unique=True)
+
     def __unicode__(self):
         return u"ServiceTicket-%s" % self.pk
+
+
 class ProxyTicket(Ticket):
     """A Proxy Ticket"""
     PREFIX = settings.CAS_PROXY_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_pt, unique=True)
+
     def __unicode__(self):
         return u"ProxyTicket-%s" % self.pk
+
+
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
     PREFIX = settings.CAS_PROXY_GRANTING_TICKET_PREFIX
     VALIDITY = settings.CAS_PGT_VALIDITY
     value = models.CharField(max_length=255, default=utils.gen_pgt, unique=True)
 
-
     def __unicode__(self):
         return u"ProxyGrantingTicket-%s" % self.pk
+
 
 class Proxy(models.Model):
     """A list of proxies on `ProxyTicket`"""
@@ -429,4 +447,3 @@ class Proxy(models.Model):
 
     def __unicode__(self):
         return self.url
-

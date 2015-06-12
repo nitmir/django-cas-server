@@ -21,12 +21,27 @@ urlpatterns = patterns(
     url('^login$', views.LoginView.as_view(), name='login'),
     url('^logout$', views.LogoutView.as_view(), name='logout'),
     url('^validate$', views.Validate.as_view(), name='validate'),
-    url('^serviceValidate$', views.ValidateService.as_view(allow_proxy_ticket=False), name='serviceValidate'),
-    url('^proxyValidate$', views.ValidateService.as_view(allow_proxy_ticket=True), name='proxyValidate'),
+    url(
+        '^serviceValidate$',
+        views.ValidateService.as_view(allow_proxy_ticket=False),
+        name='serviceValidate'
+    ),
+    url(
+        '^proxyValidate$',
+        views.ValidateService.as_view(allow_proxy_ticket=True),
+        name='proxyValidate'
+    ),
     url('^proxy$', views.Proxy.as_view(), name='proxy'),
-    url('^p3/serviceValidate$', views.ValidateService.as_view(allow_proxy_ticket=False), name='p3_serviceValidate'),
-    url('^p3/proxyValidate$', views.ValidateService.as_view(allow_proxy_ticket=True), name='p3_proxyValidate'),
+    url(
+        '^p3/serviceValidate$',
+        views.ValidateService.as_view(allow_proxy_ticket=False),
+        name='p3_serviceValidate'
+    ),
+    url(
+        '^p3/proxyValidate$',
+        views.ValidateService.as_view(allow_proxy_ticket=True),
+        name='p3_proxyValidate'
+    ),
     url('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
     url('^auth$', views.Auth.as_view(), name='auth'),
 )
-

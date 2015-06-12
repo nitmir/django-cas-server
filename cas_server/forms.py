@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import utils
 import models
 
+
 class UserCredential(forms.Form):
     """Form used on the login page to retrive user credentials"""
     username = forms.CharField(label=_('login'))

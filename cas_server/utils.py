@@ -21,6 +21,7 @@ import urllib
 import random
 import string
 
+
 def import_attr(path):
     """transform a python module.attr path to the attr"""
     if not isinstance(path, str):
@@ -28,16 +29,18 @@ def import_attr(path):
     module, attr = path.rsplit('.', 1)
     return getattr(import_module(module), attr)
 
+
 def redirect_params(url_name, params=None):
     """Redirect to `url_name` with `params` as querystring"""
     url = reverse(url_name)
     params = urllib.urlencode(params if params else {})
     return HttpResponseRedirect(url + "?%s" % params)
 
+
 def update_url(url, params):
     """update params in the `url` query string"""
     if isinstance(url, unicode):
-       url = url.encode('utf-8')
+        url = url.encode('utf-8')
     for key, value in params.items():
         if isinstance(key, unicode):
             del params[key]
@@ -50,6 +53,7 @@ def update_url(url, params):
     query.update(params)
     url_parts[4] = urllib.urlencode(query)
     return urlparse.urlunparse(url_parts).decode('utf-8')
+
 
 def unpack_nested_exception(error):
     """If exception are stacked, return the first one"""
@@ -77,21 +81,26 @@ def _gen_ticket(prefix, lg=settings.CAS_TICKET_LEN):
         )
     )
 
+
 def gen_lt():
     """Generate a Service Ticket"""
     return _gen_ticket(settings.CAS_LOGIN_TICKET_PREFIX, settings.CAS_LT_LEN)
+
 
 def gen_st():
     """Generate a Service Ticket"""
     return _gen_ticket(settings.CAS_SERVICE_TICKET_PREFIX, settings.CAS_ST_LEN)
 
+
 def gen_pt():
     """Generate a Proxy Ticket"""
     return _gen_ticket(settings.CAS_PROXY_TICKET_PREFIX, settings.CAS_PT_LEN)
 
+
 def gen_pgt():
     """Generate a Proxy Granting Ticket"""
     return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_PREFIX, settings.CAS_PGT_LEN)
+
 
 def gen_pgtiou():
     """Generate a Proxy Granting Ticket IOU"""

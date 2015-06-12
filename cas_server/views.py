@@ -33,6 +33,7 @@ import models
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 
+
 class AttributesMixin(object):
     """mixin for the attributs methode"""
 
@@ -48,6 +49,7 @@ class AttributesMixin(object):
             else:
                 attributes.append((key, value))
         return attributes
+
 
 class LogoutMixin(object):
     """destroy CAS session utils"""
@@ -80,6 +82,7 @@ class LogoutMixin(object):
         finally:
             self.clean_session_variables()
 
+
 class LogoutView(View, LogoutMixin):
     """destroy CAS session (logout) view"""
 
@@ -94,10 +97,10 @@ class LogoutView(View, LogoutMixin):
         self.logout()
         # if service is set, redirect to service after logout
         if self.service:
-            list(messages.get_messages(request)) # clean messages before leaving the django app
+            list(messages.get_messages(request))  # clean messages before leaving the django app
             return HttpResponseRedirect(self.service)
         elif self.url:
-            list(messages.get_messages(request)) # clean messages before leaving the django app
+            list(messages.get_messages(request))  # clean messages before leaving the django app
             return HttpResponseRedirect(self.url)
         # else redirect to login page
         else:
@@ -106,6 +109,7 @@ class LogoutView(View, LogoutMixin):
                 return redirect("cas_server:login")
             else:
                 return render(request, settings.CAS_LOGOUT_TEMPLATE)
+
 
 class LoginView(View, LogoutMixin):
     """credential requestor / acceptor"""
@@ -188,10 +192,10 @@ class LoginView(View, LogoutMixin):
             self.request,
             values,
             initial={
-                'service':self.service,
-                'method':self.method,
-                'warn':self.request.session.get("warn"),
-                'lt':self.request.session['lt']
+                'service': self.service,
+                'method': self.method,
+                'warn': self.request.session.get("warn"),
+                'lt': self.request.session['lt']
             }
         )
 
@@ -207,13 +211,13 @@ class LoginView(View, LogoutMixin):
                 messages.add_message(
                     self.request,
                     messages.WARNING,
-                    _(u"Authentication has been required by service %(name)s (%(url)s)") % \
-                    {'name':service_pattern.name, 'url':self.service}
+                    _(u"Authentication has been required by service %(name)s (%(url)s)") %
+                    {'name': service_pattern.name, 'url': self.service}
                 )
                 return render(
                     self.request,
                     settings.CAS_WARN_TEMPLATE,
-                    {'service_ticket_url':self.user.get_service_url(
+                    {'service_ticket_url': self.user.get_service_url(
                         self.service,
                         service_pattern,
                         renew=self.renew
@@ -221,7 +225,7 @@ class LoginView(View, LogoutMixin):
                 )
             else:
                 # redirect, using method ?
-                list(messages.get_messages(self.request)) # clean messages before leaving django
+                list(messages.get_messages(self.request))  # clean messages before leaving django
                 return HttpResponseRedirect(
                     self.user.get_service_url(self.service, service_pattern, renew=self.renew)
                 )
@@ -229,7 +233,7 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u'Service %(url)s non allowed.') % {'url' : self.service}
+                _(u'Service %(url)s non allowed.') % {'url': self.service}
             )
         except models.BadUsername:
             messages.add_message(
@@ -247,16 +251,16 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"The attribut %(field)s is needed to use" \
-                   " that service") % {'field':service_pattern.user_field}
+                _(u"The attribut %(field)s is needed to use"
+                  u" that service") % {'field': service_pattern.user_field}
             )
 
         # if gateway is set and auth failed redirect to the service without authentication
         if self.gateway:
-            list(messages.get_messages(self.request)) # clean messages before leaving django
+            list(messages.get_messages(self.request))  # clean messages before leaving django
             return HttpResponseRedirect(self.service)
 
-        return render(self.request, settings.CAS_LOGGED_TEMPLATE, {'session':self.request.session})
+        return render(self.request, settings.CAS_LOGGED_TEMPLATE, {'session': self.request.session})
 
     def authenticated(self):
         """Processing authenticated users"""
@@ -276,7 +280,7 @@ class LoginView(View, LogoutMixin):
             return render(
                 self.request,
                 settings.CAS_LOGGED_TEMPLATE,
-                {'session':self.request.session}
+                {'session': self.request.session}
             )
 
     def not_authenticated(self):
@@ -285,21 +289,22 @@ class LoginView(View, LogoutMixin):
             try:
                 service_pattern = ServicePattern.validate(self.service)
                 if self.gateway:
-                    list(messages.get_messages(self.request))# clean messages before leaving django
+                    # clean messages before leaving django
+                    list(messages.get_messages(self.request))
                     return HttpResponseRedirect(self.service)
                 if self.request.session.get("authenticated") and self.renew:
                     messages.add_message(
                         self.request,
                         messages.WARNING,
                         _(u"Authentication renewal required by service %(name)s (%(url)s).") %
-                        {'name':service_pattern.name, 'url':self.service}
+                        {'name': service_pattern.name, 'url': self.service}
                     )
                 else:
                     messages.add_message(
                         self.request,
                         messages.WARNING,
                         _(u"Authentication required by service %(name)s (%(url)s).") %
-                        {'name':service_pattern.name, 'url':self.service}
+                        {'name': service_pattern.name, 'url': self.service}
                     )
             except ServicePattern.DoesNotExist:
                 messages.add_message(
@@ -307,7 +312,7 @@ class LoginView(View, LogoutMixin):
                     messages.ERROR,
                     _(u'Service %s non allowed') % self.service
                 )
-        return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form':self.form})
+        return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
 
     def common(self):
         """Part execute uppon GET and POST request"""
@@ -316,6 +321,7 @@ class LoginView(View, LogoutMixin):
             return self.authenticated()
         else:
             return self.not_authenticated()
+
 
 class Auth(View):
     """A simple view to validate username/password/service tuple"""
@@ -342,16 +348,16 @@ class Auth(View):
             request,
             request.POST,
             initial={
-                'service':service,
-                'method':'POST',
-                'warn':False
+                'service': service,
+                'method': 'POST',
+                'warn': False
             }
         )
         if form.is_valid():
             try:
                 user = models.User.objects.get(
                     username=form.cleaned_data['username'],
-                    session_key=self.request.session.session_key
+                    session_key=request.session.session_key
                 )
                 # is the service allowed
                 service_pattern = ServicePattern.validate(service)
@@ -360,10 +366,11 @@ class Auth(View):
                 if not request.session.get("authenticated"):
                     user.delete()
                 return HttpResponse("yes\n", content_type="text/plain")
-            except (ServicePattern.DoesNotExist, ServicePatternException) as error:
+            except (ServicePattern.DoesNotExist, models.ServicePatternException):
                 return HttpResponse("no\n", content_type="text/plain")
         else:
             return HttpResponse("no\n", content_type="text/plain")
+
 
 class Validate(View):
     """service ticket validation"""
@@ -406,7 +413,7 @@ class ValidateError(Exception):
         return render(
             request,
             "cas_server/serviceValidateError.xml",
-            {'code':self.code, 'msg':self.msg},
+            {'code': self.code, 'msg': self.msg},
             content_type="text/xml; charset=utf-8"
         )
 
@@ -437,12 +444,12 @@ class ValidateService(View, AttributesMixin):
             try:
                 self.ticket, proxies = self.process_ticket()
                 params = {
-                    'username':self.ticket.user.username,
-                    'attributes':self.attributes(),
-                    'proxies':proxies
+                    'username': self.ticket.user.username,
+                    'attributes': self.attributes(),
+                    'proxies': proxies
                 }
-                if self.ticket.service_pattern.user_field and \
-                self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
+                if (self.ticket.service_pattern.user_field and
+                        self.ticket.user.attributs.get(self.ticket.service_pattern.user_field)):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
@@ -457,7 +464,6 @@ class ValidateService(View, AttributesMixin):
                     )
             except ValidateError as error:
                 return error.render(request)
-
 
     def process_ticket(self):
         """fetch the ticket angains the database and check its validity"""
@@ -489,7 +495,6 @@ class ValidateService(View, AttributesMixin):
         except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
             raise ValidateError('INVALID_TICKET', 'ticket not found')
 
-
     def process_pgturl(self, params):
         """Handle PGT request"""
         try:
@@ -502,7 +507,7 @@ class ValidateService(View, AttributesMixin):
                     service_pattern=pattern,
                     single_log_out=pattern.single_log_out
                 )
-                url = utils.update_url(self.pgt_url, {'pgtIou':proxyid, 'pgtId':pticket.value})
+                url = utils.update_url(self.pgt_url, {'pgtIou': proxyid, 'pgtId': pticket.value})
                 try:
                     ret = requests.get(url, verify=settings.CAS_PROXY_CA_CERTIFICATE_PATH)
                     if ret.status_code == 200:
@@ -529,6 +534,7 @@ class ValidateService(View, AttributesMixin):
                 'callback url not allowed by configuration'
             )
 
+
 class Proxy(View):
     """proxy ticket service"""
 
@@ -551,7 +557,6 @@ class Proxy(View):
                 )
         except ValidateError as error:
             return error.render(request)
-
 
     def process_proxy(self):
         """handle PT request"""
@@ -579,7 +584,7 @@ class Proxy(View):
             return render(
                 self.request,
                 "cas_server/proxy.xml",
-                {'ticket':pticket.value},
+                {'ticket': pticket.value},
                 content_type="text/xml; charset=utf-8"
             )
         except ProxyGrantingTicket.DoesNotExist:
@@ -591,7 +596,6 @@ class Proxy(View):
                 'UNAUTHORIZED_USER',
                 '%s not allowed on %s' % (ticket.user, self.target_service)
             )
-
 
 
 class SamlValidateError(Exception):
@@ -610,27 +614,14 @@ class SamlValidateError(Exception):
             request,
             "cas_server/samlValidateError.xml",
             {
-                'code':self.code,
-                'msg':self.msg,
-                'IssueInstant':timezone.now().isoformat(),
-                'ResponseID':utils.gen_saml_id()
+                'code': self.code,
+                'msg': self.msg,
+                'IssueInstant': timezone.now().isoformat(),
+                'ResponseID': utils.gen_saml_id()
             },
             content_type="text/xml; charset=utf-8"
         )
 
-def _saml_validate_error(request, code, msg=""):
-    """render the samlValidateError.xml templace using `code` and `msg`"""
-    return render(
-        request,
-        "cas_server/samlValidateError.xml",
-        {
-            'code':code,
-            'msg':msg,
-            'IssueInstant':timezone.now().isoformat(),
-            'ResponseID':utils.gen_saml_id()
-        },
-        content_type="text/xml; charset=utf-8"
-    )
 
 class SamlValidate(View, AttributesMixin):
     """SAML ticket validation"""
@@ -651,19 +642,19 @@ class SamlValidate(View, AttributesMixin):
         self.root = etree.fromstring(request.body)
         try:
             self.ticket = self.process_ticket()
-            expire_instant = (self.ticket.creation + \
-            timedelta(seconds=self.ticket.VALIDITY)).isoformat()
+            expire_instant = (self.ticket.creation +
+                              timedelta(seconds=self.ticket.VALIDITY)).isoformat()
             attributes = self.attributes()
             params = {
-                'IssueInstant':timezone.now().isoformat(),
-                'expireInstant':expire_instant,
-                'Recipient':self.target,
-                'ResponseID':utils.gen_saml_id(),
-                'username':self.ticket.user.username,
-                'attributes':attributes
+                'IssueInstant': timezone.now().isoformat(),
+                'expireInstant': expire_instant,
+                'Recipient': self.target,
+                'ResponseID': utils.gen_saml_id(),
+                'username': self.ticket.user.username,
+                'attributes': attributes
             }
             if self.ticket.service_pattern.user_field and \
-            self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
+                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
                 params['username'] = self.ticket.user.attributs.get(
                     self.ticket.service_pattern.user_field
                 )

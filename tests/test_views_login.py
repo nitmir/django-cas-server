@@ -92,6 +92,7 @@ def test_view_login_get_unauth():
     assert response.status_code == 200
 
 @pytest.mark.django_db
+@dummy_user(username="test", session_key="test_session")
 def test_view_login_get_auth():
     factory = RequestFactory()
     request = factory.post('/login')
@@ -107,14 +108,15 @@ def test_view_login_get_auth():
 
     assert ret == LoginView.USER_AUTHENTICATED
 
-    models.User.objects = DummyUserManager(username="test", session_key=request.session.session_key)
-
     login = LoginView()
     response = login.get(request)
 
     assert response.status_code == 200
 
 @pytest.mark.django_db
+@dummy_service_pattern()
+@dummy_user(username="test", session_key="test_session")
+@dummy_ticket(models.ServiceTicket, 'https://www.example.com', "ST-random")
 def test_view_login_get_auth_service():
     factory = RequestFactory()
     request = factory.post('/login?service=https://www.example.com')
@@ -130,12 +132,6 @@ def test_view_login_get_auth_service():
 
     assert ret == LoginView.USER_AUTHENTICATED
 
-    models.User.objects = DummyUserManager(username="test", session_key=request.session.session_key)
-    models.User.save = lambda x:None
-    models.ServiceTicket.objects = DummyTicketManager(models.ServiceTicket, 'https://www.example.com', "ST-random")
-    models.ServicePattern.validate = classmethod(lambda x,y: models.ServicePattern())
-    models.ServiceTicket.save = lambda x:None
-
     login = LoginView()
     response = login.get(request)
 
@@ -143,6 +139,9 @@ def test_view_login_get_auth_service():
     assert response['Location'].startswith('https://www.example.com?ticket=ST-')
 
 @pytest.mark.django_db
+@dummy_service_pattern()
+@dummy_user(username="test", session_key="test_session")
+@dummy_ticket(models.ServiceTicket, 'https://www.example.com', "ST-random")
 def test_view_login_get_auth_service_warn():
     factory = RequestFactory()
     request = factory.post('/login?service=https://www.example.com')
@@ -157,12 +156,6 @@ def test_view_login_get_auth_service_warn():
     ret = login.process_get()
 
     assert ret == LoginView.USER_AUTHENTICATED
-
-    models.User.objects = DummyUserManager(username="test", session_key=request.session.session_key)
-    models.User.save = lambda x:None
-    models.ServiceTicket.objects = DummyTicketManager(models.ServiceTicket, 'https://www.example.com', "ST-random")
-    models.ServicePattern.validate = classmethod(lambda x,y: models.ServicePattern())
-    models.ServiceTicket.save = lambda x:None
 
     login = LoginView()
     response = login.get(request)

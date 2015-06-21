@@ -27,7 +27,7 @@ from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
-import utils
+import cas_server.utils as utils
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 

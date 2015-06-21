@@ -26,9 +26,9 @@ import requests
 from lxml import etree
 from datetime import timedelta
 
-import utils
-import forms
-import models
+import cas_server.utils as utils
+import cas_server.forms as forms
+import cas_server.models as models
 
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
@@ -633,7 +633,7 @@ class Proxy(View):
                 self.target_service,
                 pattern,
                 renew=False)
-            pticket.proxies.create(url=ticket.service)
+            models.Proxy.objects.create(proxy_ticket=pticket, url=ticket.service)
             return render(
                 self.request,
                 "cas_server/proxy.xml",

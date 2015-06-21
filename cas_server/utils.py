@@ -16,10 +16,15 @@ from django.utils.importlib import import_module
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
-import urlparse
-import urllib
 import random
 import string
+
+
+try:
+    from urlparse import urlparse, urlunparse, parse_qsl
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def import_attr(path):
@@ -33,26 +38,29 @@ def import_attr(path):
 def redirect_params(url_name, params=None):
     """Redirect to `url_name` with `params` as querystring"""
     url = reverse(url_name)
-    params = urllib.urlencode(params if params else {})
+    params = urlencode(params if params else {})
     return HttpResponseRedirect(url + "?%s" % params)
 
 
 def update_url(url, params):
     """update params in the `url` query string"""
-    if isinstance(url, unicode):
+    if not isinstance(url, bytes):
         url = url.encode('utf-8')
-    for key, value in params.items():
-        if isinstance(key, unicode):
+    for key, value in list(params.items()):
+        if not isinstance(key, bytes):
             del params[key]
             key = key.encode('utf-8')
-        if isinstance(value, unicode):
+        if not isinstance(value, bytes):
             value = value.encode('utf-8')
         params[key] = value
-    url_parts = list(urlparse.urlparse(url))
-    query = dict(urlparse.parse_qsl(url_parts[4]))
+    url_parts = list(urlparse(url))
+    query = dict(parse_qsl(url_parts[4]))
     query.update(params)
-    url_parts[4] = urllib.urlencode(query)
-    return urlparse.urlunparse(url_parts).decode('utf-8')
+    url_parts[4] = urlencode(query)
+    for i in range(len(url_parts)):
+        if not isinstance(url_parts[i], bytes):
+            url_parts[i] = url_parts[i].encode('utf-8')
+    return urlunparse(url_parts).decode('utf-8')
 
 
 def unpack_nested_exception(error):

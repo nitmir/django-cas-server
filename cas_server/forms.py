@@ -14,8 +14,8 @@ from .default_settings import settings
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-import utils
-import models
+import cas_server.utils as utils
+import cas_server.models as models
 
 
 class UserCredential(forms.Form):

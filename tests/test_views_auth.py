@@ -14,36 +14,33 @@ from .dummy import *
 settings.CAS_AUTH_SHARED_SECRET = "test"
 
 @pytest.mark.django_db
+@dummy_ticket(models.ServiceTicket, 'https://www.example.com', "ST-random")
+@dummy_user(username="test", session_key="test_session")
+@dummy_service_pattern()
 def test_auth_view_goodpass():
     factory = RequestFactory()
     request = factory.post('/auth', {'username':'test', 'password':'test', 'service':'https://www.example.com', 'secret':'test'})
 
     request.session = DummySession()
 
-    models.User.objects = DummyUserManager(username="test", session_key=request.session.session_key)
-    models.ServiceTicket.objects = DummyTicketManager(models.ServiceTicket, 'https://www.example.com', "ST-random")
-    models.ServicePattern.validate = classmethod(lambda x,y: models.ServicePattern())
-
     auth = Auth()
     response = auth.post(request)
 
     assert response.status_code == 200
-    assert response.content == "yes\n"
+    assert response.content == b"yes\n"
 
-
+@dummy_service_pattern()
+@dummy_ticket(models.ServiceTicket, 'https://www.example.com', "ST-random")
+@dummy_user(username="test", session_key="test_session")
 def test_auth_view_badpass():
     factory = RequestFactory()
     request = factory.post('/auth', {'username':'test', 'password':'badpass', 'service':'https://www.example.com', 'secret':'test'})
 
     request.session = DummySession()
 
-    models.User.objects = DummyUserManager(username="test", session_key=request.session.session_key)
-    models.ServiceTicket.objects = DummyTicketManager(models.ServiceTicket, 'https://www.example.com', "ST-random")
-    models.ServicePattern.validate = classmethod(lambda x,y: models.ServicePattern())
-
     auth = Auth()
     response = auth.post(request)
 
     assert response.status_code == 200
-    assert response.content == "no\n"
+    assert response.content == b"no\n"
 

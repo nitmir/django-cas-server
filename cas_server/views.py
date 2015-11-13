@@ -623,7 +623,8 @@ class Proxy(View):
             # is the proxy granting ticket valid
             ticket = ProxyGrantingTicket.objects.get(
                 value=self.pgt,
-                creation__gt=(timezone.now() - timedelta(seconds=ProxyGrantingTicket.VALIDITY))
+                creation__gt=(timezone.now() - timedelta(seconds=ProxyGrantingTicket.VALIDITY)),
+                validate=False
             )
             # is the pgt user allowed on the target service
             pattern.check_user(ticket.user)

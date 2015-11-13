@@ -68,14 +68,14 @@ class User(models.Model):
         """Sending SLO request to all services the user logged in"""
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
-        ticket_classes = [ServiceTicket, ProxyTicket, ProxyGrantingTicket]
+        # first invalidate all PGTs
+        ticket_classes = [ProxyGrantingTicket, ProxyTicket, ServiceTicket]
         for ticket_class in ticket_classes:
             for ticket in ticket_class.objects.filter(
                     user=self,
                     validate=True if ticket_class != ProxyGrantingTicket else False,
-                    single_log_out=True
             ):
-                async_list.append(ticket.logout(request, session))
+                ticket.logout(request, session, async_list)
                 ticket.delete()
         for future in async_list:
             if future:
@@ -361,12 +361,11 @@ class Ticket(models.Model):
             async_list = []
             session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
             queryset = cls.objects.filter(
-                single_log_out=True,
-                validate=True,
+                validate=True if cls != ProxyGrantingTicket else False,
                 creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
             )
             for ticket in queryset:
-                async_list.append(ticket.logout(None, session))
+                ticket.logout(None, session, async_list)
             queryset.delete()
             for future in async_list:
                 if future:
@@ -375,9 +374,13 @@ class Ticket(models.Model):
                     except Exception as error:
                         sys.stderr.write("%r\n" % error)
 
-    def logout(self, request, session):
+    def logout(self, request, session, async_list=None):
         """Send a SLO request to the ticket service"""
-        if (self.validate or isinstance(self, ProxyGrantingTicket)) and self.single_log_out:
+        if isinstance(self, ProxyGrantingTicket):
+            # On logout invalidate the PGT
+            self.validate = True
+            self.save()
+        if self.validate and self.single_log_out:
             try:
                 xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
@@ -393,9 +396,11 @@ class Ticket(models.Model):
                     url = self.service_pattern.single_log_out_callback
                 else:
                     url = self.service
-                return session.post(
-                    url.encode('utf-8'),
-                    data={'logoutRequest': xml.encode('utf-8')},
+                async_list.append(
+                    session.post(
+                        url.encode('utf-8'),
+                        data={'logoutRequest': xml.encode('utf-8')},
+                    )
                 )
             except Exception as error:
                 if request is not None:

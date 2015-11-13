@@ -75,11 +75,10 @@ class LogoutMixin(object):
                 username=self.request.session.get("username"),
                 session_key=self.request.session.session_key
             )
+            self.clean_session_variables()
             user.logout(self.request)
             user.delete()
         except models.User.DoesNotExist:
-            pass
-        finally:
             self.clean_session_variables()
 
 

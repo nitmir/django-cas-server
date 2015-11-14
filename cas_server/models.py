@@ -68,15 +68,13 @@ class User(models.Model):
         """Sending SLO request to all services the user logged in"""
         async_list = []
         session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
-        # first invalidate all PGTs
-        ticket_classes = [ProxyGrantingTicket, ProxyTicket, ServiceTicket]
+        # first invalidate all Tickets
+        ticket_classes = [ProxyGrantingTicket, ServiceTicket, ProxyTicket]
         for ticket_class in ticket_classes:
-            for ticket in ticket_class.objects.filter(
-                    user=self,
-                    validate=True if ticket_class != ProxyGrantingTicket else False,
-            ):
+            queryset = ticket_class.objects.filter(user=self)
+            for ticket in queryset:
                 ticket.logout(request, session, async_list)
-                ticket.delete()
+            queryset.delete()
         for future in async_list:
             if future:
                 try:
@@ -361,7 +359,6 @@ class Ticket(models.Model):
             async_list = []
             session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
             queryset = cls.objects.filter(
-                validate=True if cls != ProxyGrantingTicket else False,
                 creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
             )
             for ticket in queryset:
@@ -376,10 +373,9 @@ class Ticket(models.Model):
 
     def logout(self, request, session, async_list=None):
         """Send a SLO request to the ticket service"""
-        if isinstance(self, ProxyGrantingTicket):
-            # On logout invalidate the PGT
-            self.validate = True
-            self.save()
+        # On logout invalidate the Ticket
+        self.validate = True
+        self.save()
         if self.validate and self.single_log_out:
             try:
                 xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"

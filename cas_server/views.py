@@ -76,10 +76,11 @@ class LogoutMixin(object):
                 session_key=self.request.session.session_key
             )
             self.clean_session_variables()
+            self.request.session.flush()
             user.logout(self.request)
             user.delete()
         except models.User.DoesNotExist:
-            self.clean_session_variables()
+            pass
 
 
 class LogoutView(View, LogoutMixin):
@@ -148,15 +149,19 @@ class LoginView(View, LogoutMixin):
 
     def check_lt(self):
         # save LT for later check
-        lt_valid = self.request.session.get('lt')
+        lt_valid = self.request.session.get('lt', [])
         lt_send = self.request.POST.get('lt')
         # generate a new LT (by posting the LT has been consumed)
-        self.request.session['lt'] = utils.gen_lt()
+        self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
+        if len(self.request.session['lt']) > 100:
+            self.request.session['lt'] = self.request.session['lt'][-100:]
 
         # check if send LT is valid
-        if lt_valid is None or lt_valid != lt_send:
+        if lt_valid is None or lt_send not in lt_valid:
             return False
         else:
+            self.request.session['lt'].remove(lt_send)
+            self.request.session['lt'] = self.request.session['lt']
             return True
 
     def post(self, request, *args, **kwargs):
@@ -194,7 +199,7 @@ class LoginView(View, LogoutMixin):
         if not self.check_lt():
             values = self.request.POST.copy()
             # if not set a new LT and fail
-            values['lt'] = self.request.session['lt']
+            values['lt'] = self.request.session['lt'][-1]
             self.init_form(values)
             return self.INVALID_LOGIN_TICKET
         elif not self.request.session.get("authenticated") or self.renew:
@@ -227,7 +232,7 @@ class LoginView(View, LogoutMixin):
 
     def process_get(self):
         # generate a new LT if none is present
-        self.request.session['lt'] = self.request.session.get('lt', utils.gen_lt())
+        self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
 
         if not self.request.session.get("authenticated") or self.renew:
             self.init_form()
@@ -241,7 +246,7 @@ class LoginView(View, LogoutMixin):
                 'service': self.service,
                 'method': self.method,
                 'warn': self.request.session.get("warn"),
-                'lt': self.request.session['lt']
+                'lt': self.request.session['lt'][-1]
             }
         )
 

@@ -14,17 +14,25 @@ from .default_settings import settings
 
 from django.utils.importlib import import_module
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib import messages
 
 import random
 import string
-
+import json
 
 try:
     from urlparse import urlparse, urlunparse, parse_qsl
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+
+
+def JsonResponse(request, data):
+    data["messages"] = []
+    for msg in messages.get_messages(request):
+        data["messages"].append({'message': msg.message, 'level': msg.level_tag})
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 def import_attr(path):
@@ -40,6 +48,12 @@ def redirect_params(url_name, params=None):
     url = reverse(url_name)
     params = urlencode(params if params else {})
     return HttpResponseRedirect(url + "?%s" % params)
+
+
+def reverse_params(url_name, params=None, **kwargs):
+    url = reverse(url_name, **kwargs)
+    params = urlencode(params if params else {})
+    return url + "?%s" % params
 
 
 def update_url(url, params):

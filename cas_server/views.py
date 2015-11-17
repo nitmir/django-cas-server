@@ -13,6 +13,7 @@
 from .default_settings import settings
 
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
@@ -30,6 +31,7 @@ import cas_server.utils as utils
 import cas_server.forms as forms
 import cas_server.models as models
 
+from utils import JsonResponse
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 
@@ -93,6 +95,7 @@ class LogoutView(View, LogoutMixin):
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
+        self.ajax = 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -108,11 +111,19 @@ class LogoutView(View, LogoutMixin):
         # else redirect to login page
         else:
             if settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT:
-
                 messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
-                return redirect("cas_server:login")
+                if self.ajax:
+                    url = reverse("cas_server:login")
+                    data = {'status': 'success', 'detail': 'logout', 'url': url}
+                    return JsonResponse(request, data)
+                else:
+                    return redirect("cas_server:login")
             else:
-                return render(request, settings.CAS_LOGOUT_TEMPLATE)
+                if self.ajax:
+                    data = {'status': 'success', 'detail': 'logout'}
+                    return JsonResponse(request, data)
+                else:
+                    return render(request, settings.CAS_LOGOUT_TEMPLATE)
 
 
 class LoginView(View, LogoutMixin):
@@ -129,6 +140,7 @@ class LoginView(View, LogoutMixin):
     renew = None
     gateway = None
     method = None
+    ajax = None
 
     renewed = False
     warned = False
@@ -146,6 +158,7 @@ class LoginView(View, LogoutMixin):
         self.renew = True if request.POST.get('renew') else False
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
+        self.ajax = 'HTTP_X_AJAX' in request.META
 
     def check_lt(self):
         # save LT for later check
@@ -223,6 +236,7 @@ class LoginView(View, LogoutMixin):
         self.renew = True if request.GET.get('renew') else False
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
+        self.ajax = 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -265,40 +279,55 @@ class LoginView(View, LogoutMixin):
                     _(u"Authentication has been required by service %(name)s (%(url)s)") %
                     {'name': service_pattern.name, 'url': self.service}
                 )
-                return render(
-                    self.request,
-                    settings.CAS_WARN_TEMPLATE,
-                    {'service_ticket_url': self.user.get_service_url(
-                        self.service,
-                        service_pattern,
-                        renew=self.renew
-                    )}
+                if self.ajax:
+                    data = {"status": "error", "detail": "confirmation needed"}
+                    return JsonResponse(request, data)
+                else:
+                    return render(
+                        self.request,
+                        settings.CAS_WARN_TEMPLATE,
+                        {'service_ticket_url': self.user.get_service_url(
+                            self.service,
+                            service_pattern,
+                            renew=self.renew
+                        )}
                 )
             else:
                 # redirect, using method ?
                 list(messages.get_messages(self.request))  # clean messages before leaving django
-                return HttpResponseRedirect(
-                    self.user.get_service_url(self.service, service_pattern, renew=self.renew)
+                redirect_url = self.user.get_service_url(
+                    self.service,
+                    service_pattern,
+                    renew=self.renew
                 )
+                if not self.ajax:
+                    return HttpResponseRedirect(redirect_url)
+                else:
+                    data = {"status": "success", "detail": "auth", "url": redirect_url}
+                    return JsonResponse(self.request, data)
         except ServicePattern.DoesNotExist:
+            error = 1
             messages.add_message(
                 self.request,
                 messages.ERROR,
                 _(u'Service %(url)s non allowed.') % {'url': self.service}
             )
         except models.BadUsername:
+            error = 2
             messages.add_message(
                 self.request,
                 messages.ERROR,
                 _(u"Username non allowed")
             )
         except models.BadFilter:
+            error = 3
             messages.add_message(
                 self.request,
                 messages.ERROR,
                 _(u"User charateristics non allowed")
             )
         except models.UserFieldNotDefined:
+            error = 4
             messages.add_message(
                 self.request,
                 messages.ERROR,
@@ -307,11 +336,19 @@ class LoginView(View, LogoutMixin):
             )
 
         # if gateway is set and auth failed redirect to the service without authentication
-        if self.gateway:
+        if self.gateway and not self.ajax:
             list(messages.get_messages(self.request))  # clean messages before leaving django
             return HttpResponseRedirect(self.service)
 
-        return render(self.request, settings.CAS_LOGGED_TEMPLATE, {'session': self.request.session})
+        if not self.ajax:
+            return render(
+                self.request,
+                settings.CAS_LOGGED_TEMPLATE,
+                {'session': self.request.session}
+            )
+        else:
+            data = {"status": "error", "detail": "auth", "code": error}
+            return JsonResponse(self.request, data)
 
     def authenticated(self):
         """Processing authenticated users"""
@@ -322,24 +359,36 @@ class LoginView(View, LogoutMixin):
             )
         except models.User.DoesNotExist:
             self.logout()
-            return utils.redirect_params("cas_server:login", params=self.request.GET)
+            if self.ajax:
+                data = {
+                    "status": "error",
+                    "detail": "login required",
+                    "url": utils.reverse_params("cas_server:login", params=self.request.GET)
+                }
+                return JsonResponse(self.request, data)
+            else:
+                return utils.redirect_params("cas_server:login", params=self.request.GET)
 
         # if login agains a service is self.requestest
         if self.service:
             return self.service_login()
         else:
-            return render(
-                self.request,
-                settings.CAS_LOGGED_TEMPLATE,
-                {'session': self.request.session}
-            )
+            if self.ajax:
+                data = {"status": "success", "detail": "logged"}
+                return JsonResponse(self.request, data)
+            else:
+                return render(
+                    self.request,
+                    settings.CAS_LOGGED_TEMPLATE,
+                    {'session': self.request.session}
+                )
 
     def not_authenticated(self):
         """Processing non authenticated users"""
         if self.service:
             try:
                 service_pattern = ServicePattern.validate(self.service)
-                if self.gateway:
+                if self.gateway and not self.ajax:
                     # clean messages before leaving django
                     list(messages.get_messages(self.request))
                     return HttpResponseRedirect(self.service)
@@ -363,7 +412,15 @@ class LoginView(View, LogoutMixin):
                     messages.ERROR,
                     _(u'Service %s non allowed') % self.service
                 )
-        return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
+        if self.ajax:
+            data = {
+                "status": "error",
+                "detail": "login required",
+                "url": utils.reverse_params("cas_server:login",  params=self.request.GET)
+            }
+            return JsonResponse(self.request, data)
+        else:
+            return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
 
     def common(self):
         """Part execute uppon GET and POST request"""

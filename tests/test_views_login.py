@@ -18,7 +18,7 @@ def test_login_view_post_goodpass_goodlt():
     request = factory.post('/login', {'username':'test', 'password':'test', 'lt':'LT-random'})
     request.session = DummySession()
 
-    request.session['lt'] = 'LT-random'
+    request.session['lt'] = ['LT-random']
 
     request.session["username"] = os.urandom(20)
     request.session["warn"] = os.urandom(20)
@@ -38,7 +38,7 @@ def test_login_view_post_badlt():
     request = factory.post('/login', {'username':'test', 'password':'test', 'lt':'LT-random1'})
     request.session = DummySession()
 
-    request.session['lt'] = 'LT-random2'
+    request.session['lt'] = ['LT-random2']
 
     authenticated = os.urandom(20)
     username = os.urandom(20)
@@ -63,7 +63,7 @@ def test_login_view_post_badpass_good_lt():
     request = factory.post('/login', {'username':'test', 'password':'badpassword', 'lt':'LT-random'})
     request.session = DummySession()
 
-    request.session['lt'] = 'LT-random'
+    request.session['lt'] = ['LT-random']
 
     login = LoginView()
     login.init_post(request)

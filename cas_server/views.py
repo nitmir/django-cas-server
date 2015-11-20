@@ -281,7 +281,7 @@ class LoginView(View, LogoutMixin):
                 )
                 if self.ajax:
                     data = {"status": "error", "detail": "confirmation needed"}
-                    return JsonResponse(request, data)
+                    return JsonResponse(self.request, data)
                 else:
                     return render(
                         self.request,
@@ -291,7 +291,7 @@ class LoginView(View, LogoutMixin):
                             service_pattern,
                             renew=self.renew
                         )}
-                )
+                    )
             else:
                 # redirect, using method ?
                 list(messages.get_messages(self.request))  # clean messages before leaving django

@@ -128,6 +128,9 @@ class DummySession(dict):
     def set_expiry(self, int):
         pass
 
+    def flush(self):
+        self.clear()
+
 
 class DummyQuerySet(set):
     pass

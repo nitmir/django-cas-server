@@ -31,7 +31,7 @@ import cas_server.utils as utils
 import cas_server.forms as forms
 import cas_server.models as models
 
-from utils import JsonResponse
+from .utils import JsonResponse
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 

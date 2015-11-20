@@ -1,6 +1,24 @@
 {% extends 'bootstrap3/bootstrap3.html' %}
 {% block bootstrap3_title %}{% block title %}{% endblock %}{% endblock %}
 
-{% load url from future %}
-
+{% load staticfiles %}
 {% load bootstrap3 %}
+
+{% block bootstrap3_extra_head %}
+<link rel="shortcut icon" href="/static/cas_server/favicon.ico?v=1" />
+<link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block bootstrap3_content %}
+<div class="container">
+<div class="row">
+<div class="col-md-3"></div>
+<div class="col-md-6">
+{% bootstrap_messages %}
+{% block content %}
+{% endblock %}
+</div>
+<div class="col-md-3"></div>
+</div>
+    </div> <!-- /container -->
+{% endblock %}

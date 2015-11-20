@@ -2,24 +2,12 @@
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load i18n %}
-{% block bootstrap3_extra_head %}
-<link href="{% static "cas_server/login.css" %}" rel="stylesheet">
-{% endblock %}
-{% block bootstrap3_content %}
-<div class="container">
-<div class="row">
-<div class="col-md-3"></div>
-<div class="col-md-6">
-{% bootstrap_messages %}
+{% block content %}
       <form class="form-signin" method="post">
         <h2 class="form-signin-heading">{% trans "Please loggin" %}</h2>
 {% csrf_token %}
 {% bootstrap_form form %}
 {% bootstrap_button _('Login') size='lg' button_type="submit" button_class="btn-primary btn-block"%}
       </form>
-</div>
-<div class="col-md-3"></div>
-</div>
-    </div> <!-- /container -->
 {% endblock %}
 

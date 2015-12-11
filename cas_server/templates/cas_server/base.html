@@ -1,5 +1,6 @@
 {% extends 'bootstrap3/bootstrap3.html' %}
-{% block bootstrap3_title %}{% block title %}{% endblock %}{% endblock %}
+{% load i18n %}
+{% block bootstrap3_title %}{% block title %}{% trans "Central Authentication Service"  %}{% endblock %}{% endblock %}
 
 {% load staticfiles %}
 {% load bootstrap3 %}

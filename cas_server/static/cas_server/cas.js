@@ -1,4 +1,4 @@
-function cas_login(cas_server_login, service, login_service){
+function cas_login(cas_server_login, service, login_service, callback){
   url = cas_server_login + '?service=' + encodeURIComponent(service);
   $.ajax({
     type: 'GET',
@@ -17,6 +17,8 @@ function cas_login(cas_server_login, service, login_service){
           xhrFields: {
             withCredentials: true
           },
+          success: callback,
+          error: function (request, textStatus, errorThrown) {},
         });
       } else {
         if(data.detail == "login required"){

@@ -82,7 +82,8 @@ class LogoutMixin(object):
             user.logout(self.request)
             user.delete()
         except models.User.DoesNotExist:
-            pass
+            self.clean_session_variables()
+            self.request.session.flush()
 
 
 class LogoutView(View, LogoutMixin):

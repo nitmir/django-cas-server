@@ -22,6 +22,7 @@ Quick start
 
     INSTALLED_APPS = (
         ...
+        'bootstrap3',
         'cas_server',
     )
 

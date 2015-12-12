@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-cas-server',
-    version='0.2.1',
+    version='0.3',
     packages=['cas_server'],
     include_package_data=True,
     license='GPLv3',
@@ -37,7 +37,7 @@ setup(
         ]
     },
     keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
-    install_requires=['Django >= 1.7', 'requests >= 2.4', 'requests_futures >= 0.9.5',
+    install_requires=['Django >= 1.7,<1.10', 'requests >= 2.4', 'requests_futures >= 0.9.5',
         'django-picklefield >= 0.3.1', 'django-bootstrap3 >= 5.4', 'lxml >= 3.4'],
     url="https://github.com/nitmir/django-cas-server",
     download_url="https://github.com/nitmir/django-cas-server/releases",

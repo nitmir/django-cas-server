@@ -12,7 +12,6 @@
 """Some util function for the app"""
 from .default_settings import settings
 
-from django.utils.importlib import import_module
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
@@ -20,6 +19,7 @@ from django.contrib import messages
 import random
 import string
 import json
+from importlib import import_module
 
 try:
     from urlparse import urlparse, urlunparse, parse_qsl

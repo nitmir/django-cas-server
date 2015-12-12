@@ -38,7 +38,7 @@ class User(models.Model):
         unique_together = ("username", "session_key")
     session_key = models.CharField(max_length=40, blank=True, null=True)
     username = models.CharField(max_length=30)
-    date = models.DateTimeField(auto_now_add=True, auto_now=True)
+    date = models.DateTimeField(auto_now=True)
 
     @classmethod
     def clean_old_entries(cls):

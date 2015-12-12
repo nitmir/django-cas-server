@@ -11,7 +11,7 @@
 # (c) 2015 Valentin Samir
 """Some authentication classes for the CAS"""
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 try:
     import MySQLdb
     import MySQLdb.cursors
@@ -20,11 +20,24 @@ except ImportError:
     MySQLdb = None
 
 
-class DummyAuthUser(object):
+class AuthUser(object):
+    def __init__(self, username):
+        self.username = username
+
+    def test_password(self, password):
+        """test `password` agains the user"""
+        raise NotImplemented()
+
+    def attributs(self):
+        """return a dict of user attributes"""
+        raise NotImplemented()
+
+
+class DummyAuthUser(AuthUser):
     """A Dummy authentication class"""
 
     def __init__(self, username):
-        self.username = username
+        super(DummyAuthUser, self).__init__(username)
 
     def test_password(self, password):
         """test `password` agains the user"""
@@ -35,7 +48,7 @@ class DummyAuthUser(object):
         return {}
 
 
-class TestAuthUser(DummyAuthUser):
+class TestAuthUser(AuthUser):
     """A test authentication class with one user test having
     alose test as password and some attributes"""
 
@@ -51,7 +64,7 @@ class TestAuthUser(DummyAuthUser):
         return {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
 
 
-class MysqlAuthUser(DummyAuthUser):
+class MysqlAuthUser(AuthUser):
     """A mysql auth class: authentication user agains a mysql database"""
     user = None
 
@@ -97,11 +110,12 @@ class MysqlAuthUser(DummyAuthUser):
             return self.user
 
 
-class DjangoAuthUser(DummyAuthUser):
+class DjangoAuthUser(AuthUser):
     """A django auth class: authenticate user agains django internal users"""
     user = None
 
     def __init__(self, username):
+        User = get_user_model()
         try:
             self.user = User.objects.get(username=username)
         except User.DoesNotExist:

@@ -1,5 +1,2 @@
 include LICENSE
 include README.rst
-recursive-include cas_server/templates/*
-recursive-include cas_server/locale/*
-recursive-include cas_server/static/*

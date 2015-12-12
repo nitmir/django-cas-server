@@ -10,10 +10,16 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='django-cas-server',
     version='0.3.4',
-    packages=['cas_server', 'cas_server.migrations', 'cas_server.management', 'cas_server.management.commands'],
+    packages=[
+        'cas_server', 'cas_server.migrations',
+        'cas_server.management', 'cas_server.management.commands'
+    ],
     include_package_data=True,
     license='GPLv3',
-    description='A Django app implementing the CAS Protocol 3.0 Specification',
+    description=(
+        'A Django Central Authentication Service server '
+       'implementing the CAS Protocol 3.0 Specification'
+    ),
     long_description=README,
     author='Valentin Samir',
     author_email='valentin.samir@crans.org',
@@ -37,8 +43,10 @@ setup(
         ]
     },
     keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
-    install_requires=['Django >= 1.7,<1.10', 'requests >= 2.4', 'requests_futures >= 0.9.5',
-        'django-picklefield >= 0.3.1', 'django-bootstrap3 >= 5.4', 'lxml >= 3.4'],
+    install_requires=[
+        'Django >= 1.7,<1.10', 'requests >= 2.4', 'requests_futures >= 0.9.5',
+        'django-picklefield >= 0.3.1', 'django-bootstrap3 >= 5.4', 'lxml >= 3.4'
+    ],
     url="https://github.com/nitmir/django-cas-server",
     download_url="https://github.com/nitmir/django-cas-server/releases",
     zip_safe=False

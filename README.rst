@@ -7,18 +7,26 @@ CAS Server
 .. image:: https://travis-ci.org/nitmir/django-cas-server.svg?branch=master
     :target: https://travis-ci.org/nitmir/django-cas-server
 
-CAS Server is a Django app implementing the `CAS Protocol 3.0 Specification
+CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://jasig.github.io/cas/development/protocol/CAS-Protocol-Specification.html>`_.
 
 By defaut, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
 
-The differents parametters you can use in settings.py to tweak the application
-are listed in default_settings.py
-
 The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_
-but you can use your own templates using the CAS_LOGIN_TEMPLATE,
-CAS_LOGGED_TEMPLATE, CAS_WARN_TEMPLATE and CAS_LOGOUT_TEMPLATE setting variables.
+but you can use your own templates using settings variables.
+
+Features
+--------
+
+* Support CAS version 1.0, 2.0, 3.0
+* Support Single Sign Out
+* Configuration of services via the django Admin application
+* Fine control on which user's attributes are passed to which service
+* Possibility to rename/rewrite attributes per service
+* Possibility to require some attribute values per service
+* Supports Django 1.7, 1.8 and 1.9
+* Supports Python 2.7, 3.x
 
 Quick start
 -----------
@@ -26,6 +34,7 @@ Quick start
 1. Add "cas_server" to your INSTALLED_APPS setting like this::
 
     INSTALLED_APPS = (
+        'django.contrib.admin',
         ...
         'bootstrap3',
         'cas_server',
@@ -40,9 +49,13 @@ Quick start
         ...
     )
 
-2. Include the polls URLconf in your project urls.py like this::
+2. Include the cas_server URLconf in your project urls.py like this::
 
-    url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
+    urlpatterns = [
+        url(r'^admin/', admin.site.urls),
+        ...
+        url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
+    ]
 
 3. Run `python manage.py migrate` to create the cas_server models.
 
@@ -130,7 +143,7 @@ Mysql backend settings. Only usefull is you use the mysql authentication backend
 * ``CAS_SQL_DBCHARSET``: Database charset. The default is ``"utf8"``
 * ``CAS_SQL_USER_QUERY``: The query performed upon user authentication.
   The username must be in field ``username``, the password in ``password``,
-  additional fields are used as the user attributs.
+  additional fields are used as the user attributes.
   The default is ``"SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s"``
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be
   ``"crypt"`` or ``"plain``". The default is ``"crypt"``.
@@ -142,8 +155,8 @@ Authentication backend
 
 * dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempt fails.
 * test backend ``cas_server.auth.TestAuthUser``: username is ``test`` and password is ``test``
-  the returned attributs for the user are: ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``
+  the returned attributes for the user are: ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``
 * django backend ``cas_server.auth.DjangoAuthUser``: Users are anthenticated agains django users system.
-  This is the default backend. The returned attributs are the fields available on the user model.
+  This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
-  The returned attributs are those return by sql query ``CAS_SQL_USER_QUERY``.
+  The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.

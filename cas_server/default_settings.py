@@ -56,6 +56,10 @@ setting_default('CAS_PROXY_GRANTING_TICKET_PREFIX', 'PGT')
 # Services MUST be able to handle PGTIOUs of up to 64 characters in length.
 setting_default('CAS_PROXY_GRANTING_TICKET_IOU_PREFIX', 'PGTIOU')
 
+# Maximum number of parallel single log out requests send
+# if more requests need to be send, there are queued
+setting_default('CAS_SLO_MAX_PARALLEL_REQUESTS', 10)
+
 setting_default('CAS_SQL_HOST', 'localhost')
 setting_default('CAS_SQL_USERNAME', '')
 setting_default('CAS_SQL_PASSWORD', '')

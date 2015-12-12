@@ -67,7 +67,9 @@ class User(models.Model):
     def logout(self, request=None):
         """Sending SLO request to all services the user logged in"""
         async_list = []
-        session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
+        session = FuturesSession(
+            executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
+        )
         # first invalidate all Tickets
         ticket_classes = [ProxyGrantingTicket, ServiceTicket, ProxyTicket]
         for ticket_class in ticket_classes:
@@ -357,7 +359,9 @@ class Ticket(models.Model):
         # sending SLO to timed-out validated tickets
         if cls.TIMEOUT and cls.TIMEOUT > 0:
             async_list = []
-            session = FuturesSession(executor=ThreadPoolExecutor(max_workers=10))
+            session = FuturesSession(
+                executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
+            )
             queryset = cls.objects.filter(
                 creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
             )

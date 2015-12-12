@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-cas-server',
-    version='0.3.1',
+    version='0.3.2',
     packages=['cas_server'],
     include_package_data=True,
     license='GPLv3',
@@ -34,6 +34,7 @@ setup(
             'templates/cas_server/*',
             'static/cas_server/*',
             'locale/*/LC_MESSAGES/*',
+            'migrations/*.py',
         ]
     },
     keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],

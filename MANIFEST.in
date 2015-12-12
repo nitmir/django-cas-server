@@ -2,3 +2,6 @@ include tox.ini
 include LICENSE
 include README.rst
 prune .tox
+recursive-include cas_server/static *
+recursive-include cas_server/templates *
+recursive-include cas_server/locale *

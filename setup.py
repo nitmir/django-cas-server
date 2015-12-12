@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-cas-server',
-    version='0.3.3',
+    version='0.3.4',
     packages=['cas_server', 'cas_server.migrations', 'cas_server.management', 'cas_server.management.commands'],
     include_package_data=True,
     license='GPLv3',

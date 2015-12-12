@@ -1,2 +1,4 @@
+include tox.ini
 include LICENSE
 include README.rst
+prune .tox

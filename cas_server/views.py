@@ -26,6 +26,7 @@ from django.views.generic import View
 import requests
 from lxml import etree
 from datetime import timedelta
+from importlib import import_module
 
 import cas_server.utils as utils
 import cas_server.forms as forms
@@ -34,6 +35,8 @@ import cas_server.models as models
 from .utils import JsonResponse
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
+
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 
 class AttributesMixin(object):
@@ -55,35 +58,29 @@ class AttributesMixin(object):
 
 class LogoutMixin(object):
     """destroy CAS session utils"""
-    def clean_session_variables(self):
-        """Clean sessions variables"""
-        try:
-            del self.request.session["authenticated"]
-        except KeyError:
-            pass
-        try:
-            del self.request.session["username"]
-        except KeyError:
-            pass
-        try:
-            del self.request.session["warn"]
-        except KeyError:
-            pass
-
-    def logout(self):
+    def logout(self, all=False):
         """effectively destroy CAS session"""
+        # logout the user from the current session
         try:
+            username = self.request.session.get("username")
             user = models.User.objects.get(
-                username=self.request.session.get("username"),
+                username=username,
                 session_key=self.request.session.session_key
             )
-            self.clean_session_variables()
             self.request.session.flush()
             user.logout(self.request)
             user.delete()
         except models.User.DoesNotExist:
-            self.clean_session_variables()
+            # if user not found in database, flush the session anyway
             self.request.session.flush()
+
+        # If all is set logout user from alternative sessions
+        if all:
+            for user in models.User.objects.filter(username=username):
+                session = SessionStore(session_key=user.session_key)
+                session.flush()
+                user.logout(self.request)
+                user.delete()
 
 
 class LogoutView(View, LogoutMixin):
@@ -101,7 +98,7 @@ class LogoutView(View, LogoutMixin):
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
         self.init_get(request)
-        self.logout()
+        self.logout(self.request.GET.get("all"))
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app

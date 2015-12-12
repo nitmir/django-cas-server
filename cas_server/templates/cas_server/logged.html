@@ -4,6 +4,13 @@
 {% load i18n %}
 {% block content %}
 <div class="alert alert-success" role="alert">{% trans "Logged" %}</div>
-{% bootstrap_button _('Logout') size='lg' button_class="btn-danger btn-block" href="logout" %}
+<form class="form-signin" method="get" action="logout">
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="all" value="1"> {% trans "Log me out from all my sessions" %}
+    </label>
+  </div>
+  {% bootstrap_button _('Logout') size='lg' button_type="submit" button_class="btn-danger btn-block"%}
+</form>
 {% endblock %}
 

@@ -170,7 +170,12 @@ class ServicePattern(models.Model):
     pattern = models.CharField(
         max_length=255,
         unique=True,
-        verbose_name=_(u"pattern")
+        verbose_name=_(u"pattern"),
+        help_text=_(
+            "A regular expression matching services. "
+            "Will usually looks like '^https://some\\.server\\.com/path/.*$'."
+            "As it is a regular expression, special character must be escaped with a '\\'."
+        )
     )
     user_field = models.CharField(
         max_length=255,

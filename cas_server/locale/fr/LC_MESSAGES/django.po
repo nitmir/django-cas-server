@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-11 19:50+0100\n"
-"PO-Revision-Date: 2015-12-11 19:51+0100\n"
+"POT-Creation-Date: 2015-12-12 18:18+0100\n"
+"PO-Revision-Date: 2015-12-12 18:20+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -46,76 +46,87 @@ msgstr "Nettoyer les sessions supprimées"
 msgid "Clean old trickets"
 msgstr "Nettoyer les vieux tickets"
 
-#: models.py:88
+#: models.py:90
 #, python-format
 msgid "Error during service logout %s"
 msgstr "Une erreur est survenue durant la déconnexion du service %s"
 
-#: models.py:158
+#: models.py:160
 msgid "position"
 msgstr "position"
 
-#: models.py:165 models.py:264
+#: models.py:167 models.py:271
 msgid "name"
 msgstr "nom"
 
-#: models.py:166
+#: models.py:168
 msgid "A name for the service"
 msgstr "Un nom pour le service"
 
-#: models.py:171 models.py:292 models.py:310
+#: models.py:173 models.py:299 models.py:317
 msgid "pattern"
 msgstr "motif"
 
-#: models.py:177
+#: models.py:175
+msgid ""
+"A regular expression matching services. Will usually looks like '^https://"
+"some\\.server\\.com/path/.*$'.As it is a regular expression, special "
+"character must be escaped with a '\\'."
+msgstr ""
+"Une expression rationnelle reconnaissant un service. Devrait généralement "
+"ressemblé à '^https://un\\.serveur\\.fr/chemin/.*$'. Comme il s'agit d'une "
+"expression rationnelle, les caractères spéciaux doivent être échappés avec "
+"un '\\'."
+
+#: models.py:184
 msgid "user field"
 msgstr "champ utilisateur"
 
-#: models.py:178
+#: models.py:185
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
 "Nom de l'attribut devant être transmis comme nom d'utilisateur au service. "
 "vide = nom de connection"
 
-#: models.py:182
+#: models.py:189
 msgid "restrict username"
 msgstr "limiter les noms d'utilisateurs"
 
-#: models.py:183
+#: models.py:190
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
 "Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
 "ci-dessous"
 
-#: models.py:187
+#: models.py:194
 msgid "proxy"
 msgstr "proxy"
 
-#: models.py:188
+#: models.py:195
 msgid "Proxy tickets can be delivered to the service"
 msgstr "des proxy tickets peuvent être délivrés au service"
 
-#: models.py:192
+#: models.py:199
 msgid "proxy callback"
 msgstr ""
 
-#: models.py:193
+#: models.py:200
 msgid "can be used as a proxy callback to deliver PGT"
 msgstr "peut être utilisé comme un callback pour recevoir un PGT"
 
-#: models.py:197
+#: models.py:204
 msgid "single log out"
 msgstr ""
 
-#: models.py:198
+#: models.py:205
 msgid "Enable SLO for the service"
 msgstr "Active le SLO pour le service"
 
-#: models.py:205
+#: models.py:212
 msgid "single log out callback"
 msgstr ""
 
-#: models.py:206
+#: models.py:213
 msgid ""
 "URL where the SLO request will be POST. empty = service url\n"
 "This is usefull for non HTTP proxied services."
@@ -124,55 +135,55 @@ msgstr ""
 "service\n"
 "Ceci n'est utilise que pour des services non HTTP proxifiés"
 
-#: models.py:249
+#: models.py:256
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: models.py:250
+#: models.py:257
 msgid "username allowed to connect to the service"
 msgstr "noms d'utilisateurs autorisé à se connecter au service"
 
-#: models.py:265
+#: models.py:272
 msgid "name of an attribut to send to the service, use * for all attributes"
 msgstr ""
 "nom d'un attribut a envoyer au service, utiliser * pour tous les attributs"
 
-#: models.py:270 models.py:316
+#: models.py:277 models.py:323
 msgid "replace"
 msgstr "remplacement"
 
-#: models.py:271
+#: models.py:278
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
 "nom sous lequel l'attribut sera rendu visible au service. vide = inchangé"
 
-#: models.py:287 models.py:305
+#: models.py:294 models.py:312
 msgid "attribut"
 msgstr "attribut"
 
-#: models.py:288
+#: models.py:295
 msgid "Name of the attribut which must verify pattern"
 msgstr "Nom de l'attribut devant vérifier un motif"
 
-#: models.py:293
+#: models.py:300
 msgid "a regular expression"
 msgstr "une expression régulière"
 
-#: models.py:306
+#: models.py:313
 msgid "Name of the attribut for which the value must be replace"
 msgstr "nom de l'attribue pour lequel la valeur doit être remplacé"
 
-#: models.py:311
+#: models.py:318
 msgid "An regular expression maching whats need to be replaced"
 msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
-#: models.py:317
+#: models.py:324
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr "expression de remplacement, les groupe sont capturé par \\1, \\2"
 
-#: models.py:407
+#: models.py:416
 #, python-format
 msgid ""
 "Error during service logout %(service)s:\n"

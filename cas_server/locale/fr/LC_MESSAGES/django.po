@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-11 13:22+0100\n"
-"PO-Revision-Date: 2015-12-11 13:25+0100\n"
+"POT-Creation-Date: 2015-12-11 19:50+0100\n"
+"PO-Revision-Date: 2015-12-11 19:51+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -193,7 +193,11 @@ msgstr ""
 "déconnecter et fermer votre navigateur lorsque vous avez fini d'accéder aux "
 "services authentifiés."
 
-#: templates/cas_server/logged.html:7
+#: templates/cas_server/logged.html:10
+msgid "Log me out from all my sessions"
+msgstr "Me déconnecter de toutes mes sessions"
+
+#: templates/cas_server/logged.html:13
 msgid "Logout"
 msgstr "Se déconnecter"
 
@@ -205,7 +209,7 @@ msgstr "Merci de se connecter"
 msgid "Login"
 msgstr "Connexion"
 
-#: templates/cas_server/logout.html:6 views.py:115
+#: templates/cas_server/logout.html:6 views.py:112
 msgid "Successfully logout"
 msgstr ""
 "<h3>Déconnexion réussie</h3>\n"
@@ -216,46 +220,46 @@ msgstr ""
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: views.py:189
+#: views.py:186
 msgid "Invalid login ticket"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
-#: views.py:280
+#: views.py:277
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr ""
 "Une demande d'authentification a été émise pour le service %(name)s "
 "(%(url)s)."
 
-#: views.py:314
+#: views.py:311
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "le service %(url)s n'est pas autorisé."
 
-#: views.py:321
+#: views.py:318
 msgid "Username non allowed"
 msgstr "Nom d'utilisateur non authorisé"
 
-#: views.py:328
+#: views.py:325
 msgid "User charateristics non allowed"
 msgstr "Caractéristique utilisateur non autorisée"
 
-#: views.py:335
+#: views.py:332
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
 
-#: views.py:400
+#: views.py:397
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
 
-#: views.py:407
+#: views.py:404
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentification requise par le service %(name)s (%(url)s)."
 
-#: views.py:414
+#: views.py:411
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"

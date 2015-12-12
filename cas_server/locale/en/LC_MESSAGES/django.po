@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-11 13:26+0100\n"
-"PO-Revision-Date: 2015-12-11 13:28+0100\n"
+"POT-Creation-Date: 2015-12-11 19:50+0100\n"
+"PO-Revision-Date: 2015-12-12 11:44+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: en\n"
@@ -126,8 +126,7 @@ msgstr "username allowed to connect to the service"
 
 #: models.py:265
 msgid "name of an attribut to send to the service, use * for all attributes"
-msgstr ""
-"name of an attribut to send to the service, use * for all attributes"
+msgstr "name of an attribut to send to the service, use * for all attributes"
 
 #: models.py:270 models.py:316
 msgid "replace"
@@ -186,7 +185,11 @@ msgstr ""
 "your web browser when you are done accessing services that require "
 "authentication!"
 
-#: templates/cas_server/logged.html:7
+#: templates/cas_server/logged.html:10
+msgid "Log me out from all my sessions"
+msgstr ""
+
+#: templates/cas_server/logged.html:13
 msgid "Logout"
 msgstr "Logout"
 
@@ -198,7 +201,7 @@ msgstr "Please loggin"
 msgid "Login"
 msgstr "Login"
 
-#: templates/cas_server/logout.html:6 views.py:115
+#: templates/cas_server/logout.html:6 views.py:112
 msgid "Successfully logout"
 msgstr ""
 "<h3>Logout successful</h3>You have successfully logged out of the Central "
@@ -208,44 +211,44 @@ msgstr ""
 msgid "Connect to the service"
 msgstr "Connect to the service"
 
-#: views.py:189
+#: views.py:186
 msgid "Invalid login ticket"
 msgstr "Invalid login ticket, please retry to login"
 
-#: views.py:280
+#: views.py:277
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr "Authentication has been required by service %(name)s (%(url)s)"
 
-#: views.py:314
+#: views.py:311
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "Service %(url)s non allowed."
 
-#: views.py:321
+#: views.py:318
 msgid "Username non allowed"
 msgstr "Username non allowed"
 
-#: views.py:328
+#: views.py:325
 msgid "User charateristics non allowed"
 msgstr "User charateristics non allowed"
 
-#: views.py:335
+#: views.py:332
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: views.py:400
+#: views.py:397
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Authentication renewal required by service %(name)s (%(url)s)."
 
-#: views.py:407
+#: views.py:404
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentication required by service %(name)s (%(url)s)."
 
-#: views.py:414
+#: views.py:411
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Service %s non allowed"

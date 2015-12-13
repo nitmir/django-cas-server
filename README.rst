@@ -59,11 +59,35 @@ Quick start
 
 3. Run `python manage.py migrate` to create the cas_server models.
 
-4. Start the development server and visit http://127.0.0.1:8000/admin/
+
+4. You should add some management commands to a crontab: ``clearsessions``,
+   ``cas_clean_tickets`` and ``cas_clean_sessions``.
+
+ * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/1.9/topics/http/sessions/#clearing-the-session-store>`_.
+ * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purge from
+   the database automatically. They are just marked as invalid. ``cas_clean_tickets``
+   is a clean-up management command for this purpose. It send SingleLogOut request
+   to services with timed out tickets and delete them.
+ * ``cas_clean_sessions``: Logout and purge users (sending SLO requests) that are
+   inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
+   seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
+
+ You could for example do as bellow :
+
+   .. code-block::
+
+      0   0  * * * cas-user /path/to/project/manage.py clearsessions
+      */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
+      5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
+
+5. Start the development server and visit http://127.0.0.1:8000/admin/
    to add a first service allowed to authenticate user agains the CAS
    (you'll need the Admin app enabled).
 
-5. Visit http://127.0.0.1:8000/cas/ to login with your django users.
+6. Visit http://127.0.0.1:8000/cas/ to login with your django users.
+
+
+
 
 Settings
 --------
@@ -75,7 +99,7 @@ Template settings:
 
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
-* ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=…`` then
+* ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then
   the user is authenticated and has asked to be warned before beeing connected
   to a service. The default is ``"cas_server/warn.html"``.
 * ``CAS_LOGGED_TEMPLATE``: Path to the template showed on ``/login`` then to user is
@@ -90,6 +114,10 @@ Authentication settings:
 
 *  ``CAS_AUTH_CLASS``: A dotted paths to a class implementing ``cas_server.auth.AuthUser``.
    The default is ``"cas_server.auth.DjangoAuthUser"``
+
+*  ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
+   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
+   reduce it to something like ``86400`` seconds (1 day).
 
 * ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificates authority file. Usually on linux
   the local CAs are in ``/etc/ssl/certs/ca-certificates.crt``. The default is ``True`` which

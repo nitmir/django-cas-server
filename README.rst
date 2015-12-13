@@ -99,6 +99,7 @@ Authentication settings:
 
 * ``CAS_SLO_MAX_PARALLEL_REQUESTS``: Maximum number of parallel single log out requests send.
   If more requests need to be send, there are queued. The default is ``10``.
+* ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
 Tickets validity settings:
 

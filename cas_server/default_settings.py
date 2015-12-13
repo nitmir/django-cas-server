@@ -59,6 +59,8 @@ setting_default('CAS_PROXY_GRANTING_TICKET_IOU_PREFIX', 'PGTIOU')
 # Maximum number of parallel single log out requests send
 # if more requests need to be send, there are queued
 setting_default('CAS_SLO_MAX_PARALLEL_REQUESTS', 10)
+# SLO request timeout.
+setting_default('CAS_SLO_TIMEOUT', 5)
 
 setting_default('CAS_SQL_HOST', 'localhost')
 setting_default('CAS_SQL_USERNAME', '')

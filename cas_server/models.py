@@ -405,6 +405,7 @@ class Ticket(models.Model):
                     session.post(
                         url.encode('utf-8'),
                         data={'logoutRequest': xml.encode('utf-8')},
+                        timeout=settings.CAS_SLO_TIMEOUT
                     )
                 )
             except Exception as error:

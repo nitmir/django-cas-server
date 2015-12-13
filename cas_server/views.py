@@ -23,6 +23,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.views.generic import View
 
+import logging
+import pprint
 import requests
 from lxml import etree
 from datetime import timedelta
@@ -37,6 +39,8 @@ from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
+logger = logging.getLogger(__name__)
 
 
 class AttributesMixin(object):
@@ -60,9 +64,14 @@ class LogoutMixin(object):
     """destroy CAS session utils"""
     def logout(self, all=False):
         """effectively destroy CAS session"""
+        username = self.request.session.get("username")
+        if username:
+            if all:
+                logger.info("Logging out user %s from all of they sessions." % username)
+            else:
+                logger.info("Logging out user %s." % username)
         # logout the user from the current session
         try:
-            username = self.request.session.get("username")
             user = models.User.objects.get(
                 username=username,
                 session_key=self.request.session.session_key
@@ -81,6 +90,7 @@ class LogoutMixin(object):
                 session.flush()
                 user.logout(self.request)
                 user.delete()
+        logger.info("User %s logged out" % username)
 
 
 class LogoutView(View, LogoutMixin):
@@ -97,6 +107,7 @@ class LogoutView(View, LogoutMixin):
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
+        logger.info("logout requested")
         self.init_get(request)
         self.logout(self.request.GET.get("all"))
         # if service is set, redirect to service after logout
@@ -212,6 +223,7 @@ class LoginView(View, LogoutMixin):
             # if not set a new LT and fail
             values['lt'] = self.request.session['lt'][-1]
             self.init_form(values)
+            logger.warning("Receive an invalid login ticket")
             return self.INVALID_LOGIN_TICKET
         elif not self.request.session.get("authenticated") or self.renew:
             self.init_form(self.request.POST)
@@ -222,10 +234,13 @@ class LoginView(View, LogoutMixin):
                 self.request.session["authenticated"] = True
                 self.renewed = True
                 self.warned = True
+                logger.info("User %s successfully authenticated" % self.request.session["username"])
                 return self.USER_LOGIN_OK
             else:
+                logger.warning("A logging attemps failed")
                 return self.USER_LOGIN_FAILURE
         else:
+            logger.warning("Receuve a logging attempt whereas the user is already logged")
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
@@ -356,6 +371,11 @@ class LoginView(View, LogoutMixin):
                 session_key=self.request.session.session_key
             )
         except models.User.DoesNotExist:
+            logger.warning(
+                "User %s seems authenticated but is not found in the database." % (
+                    self.request.session.get("username"),
+                )
+            )
             self.logout()
             if self.ajax:
                 data = {
@@ -503,10 +523,27 @@ class Validate(View):
                 )
                 ticket.validate = True
                 ticket.save()
+                logger.info(
+                    "Validate: Service ticket %s validated, user %s authenticated on service %s" % (
+                        ticket.value,
+                        ticket.user.username,
+                        ticket.service
+                    )
+                )
                 return HttpResponse("yes\n", content_type="text/plain")
             except ServiceTicket.DoesNotExist:
+                logger.warning(
+                    (
+                        "Validate: Service ticket %s not found or "
+                        "already validated, auth to %s failed"
+                    ) % (
+                        ticket,
+                        service
+                    )
+                )
                 return HttpResponse("no\n", content_type="text/plain")
         else:
+            logger.warning("Validate: service or ticket missing")
             return HttpResponse("no\n", content_type="text/plain")
 
 
@@ -548,6 +585,7 @@ class ValidateService(View, AttributesMixin):
         self.renew = True if request.GET.get('renew') else False
 
         if not self.service or not self.ticket:
+            logger.warning("ValidateService: missing ticket or service")
             return ValidateError(
                 'INVALID_REQUEST',
                 "you must specify a service and a ticket"
@@ -568,6 +606,18 @@ class ValidateService(View, AttributesMixin):
                 if self.pgt_url and self.pgt_url.startswith("https://"):
                     return self.process_pgturl(params)
                 else:
+                    logger.info(
+                        "ValidateService: ticket %s validated for user %s on service %s." % (
+                            self.ticket.value,
+                            self.ticket.user.username,
+                            self.ticket.service
+                        )
+                    )
+                    logger.debug(
+                        "ValidateService: User attributs are:\n%s" % (
+                            pprint.pformat(self.ticket.attributs),
+                        )
+                    )
                     return render(
                         request,
                         "cas_server/serviceValidate.xml",
@@ -575,6 +625,9 @@ class ValidateService(View, AttributesMixin):
                         content_type="text/xml; charset=utf-8"
                     )
             except ValidateError as error:
+                logger.warning(
+                    "ValidateService: validation error: %s %s" % (error.code, error.msg)
+                )
                 return error.render(request)
 
     def process_ticket(self):
@@ -598,11 +651,11 @@ class ValidateService(View, AttributesMixin):
                 for prox in ticket.proxies.all():
                     proxies.append(prox.url)
             else:
-                raise ValidateError('INVALID_TICKET')
+                raise ValidateError('INVALID_TICKET', self.ticket)
             ticket.validate = True
             ticket.save()
             if ticket.service != self.service:
-                raise ValidateError('INVALID_SERVICE')
+                raise ValidateError('INVALID_SERVICE', self.service)
             return ticket, proxies
         except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
             raise ValidateError('INVALID_TICKET', 'ticket not found')
@@ -626,6 +679,22 @@ class ValidateService(View, AttributesMixin):
                         params['proxyGrantingTicket'] = proxyid
                     else:
                         pticket.delete()
+                    logger.info(
+                        (
+                            "ValidateService: ticket %s validated for user %s on service %s. "
+                            "Proxy Granting Ticket transmited to %s."
+                        ) % (
+                            self.ticket.value,
+                            self.ticket.user.username,
+                            self.ticket.service,
+                            self.pgt_url
+                        )
+                    )
+                    logger.debug(
+                        "ValidateService: User attributs are:\n%s" % (
+                            pprint.pformat(self.ticket.attributs),
+                        )
+                    )
                     return render(
                         self.request,
                         "cas_server/serviceValidate.xml",
@@ -668,6 +737,7 @@ class Proxy(View):
                     "you must specify and pgt and targetService"
                 )
         except ValidateError as error:
+            logger.warning("Proxy: validation error: %s %s" % (error.code, error.msg))
             return error.render(request)
 
     def process_proxy(self):
@@ -678,7 +748,7 @@ class Proxy(View):
             if not pattern.proxy:
                 raise ValidateError(
                     'UNAUTHORIZED_SERVICE',
-                    'the service do not allow proxy ticket'
+                    'the service %s do not allow proxy ticket' % self.target_service
                 )
             # is the proxy granting ticket valid
             ticket = ProxyGrantingTicket.objects.get(
@@ -694,6 +764,12 @@ class Proxy(View):
                 pattern,
                 renew=False)
             models.Proxy.objects.create(proxy_ticket=pticket, url=ticket.service)
+            logger.info(
+                "Proxy ticket created for user %s on service %s." % (
+                    ticket.user.username,
+                    self.target_service
+                )
+            )
             return render(
                 self.request,
                 "cas_server/proxy.xml",
@@ -701,9 +777,9 @@ class Proxy(View):
                 content_type="text/xml; charset=utf-8"
             )
         except ProxyGrantingTicket.DoesNotExist:
-            raise ValidateError('INVALID_TICKET', 'PGT not found')
+            raise ValidateError('INVALID_TICKET', 'PGT %s not found' % self.pgt)
         except ServicePattern.DoesNotExist:
-            raise ValidateError('UNAUTHORIZED_SERVICE')
+            raise ValidateError('UNAUTHORIZED_SERVICE', self.target_service)
         except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
             raise ValidateError(
                 'UNAUTHORIZED_USER',
@@ -771,6 +847,17 @@ class SamlValidate(View, AttributesMixin):
                 params['username'] = self.ticket.user.attributs.get(
                     self.ticket.service_pattern.user_field
                 )
+            logger.info(
+                "SamlValidate: ticket %s validated for user %s on service %s." % (
+                    self.ticket.value,
+                    self.ticket.user.username,
+                    self.ticket.service
+                )
+            )
+            logger.debug(
+                "SamlValidate: User attributs are:\n%s" % pprint.pformat(self.ticket.attributs)
+            )
+
             return render(
                 request,
                 "cas_server/samlValidate.xml",
@@ -778,6 +865,7 @@ class SamlValidate(View, AttributesMixin):
                 content_type="text/xml; charset=utf-8"
             )
         except SamlValidateError as error:
+            logger.warning("SamlValidate: validation error: %s %s" % (error.code, error.msg))
             return error.render(request)
 
     def process_ticket(self):
@@ -800,17 +888,17 @@ class SamlValidate(View, AttributesMixin):
             else:
                 raise SamlValidateError(
                     'AuthnFailed',
-                    'ticket should begin with PT- or ST-'
+                    'ticket %s should begin with PT- or ST-' % ticket
                 )
             ticket.validate = True
             ticket.save()
             if ticket.service != self.target:
                 raise SamlValidateError(
                     'AuthnFailed',
-                    'TARGET do not match ticket service'
+                    'TARGET %s do not match ticket service' % self.target
                 )
             return ticket
         except (IndexError, KeyError):
             raise SamlValidateError('VersionMismatch')
         except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
-            raise SamlValidateError('AuthnFailed', 'ticket not found')
+            raise SamlValidateError('AuthnFailed', 'ticket %s not found' % ticket)

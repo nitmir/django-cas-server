@@ -22,6 +22,7 @@ from picklefield.fields import PickledObjectField
 import re
 import os
 import sys
+import logging
 from importlib import import_module
 from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
@@ -30,6 +31,8 @@ from requests_futures.sessions import FuturesSession
 import cas_server.utils as utils
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
+logger = logging.getLogger(__name__)
 
 
 class User(models.Model):
@@ -82,6 +85,12 @@ class User(models.Model):
                 try:
                     future.result()
                 except Exception as error:
+                    logger.warning(
+                        "Error during SLO for user %s: %s" % (
+                            self.username,
+                            error
+                        )
+                    )
                     if request is not None:
                         error = utils.unpack_nested_exception(error)
                         messages.add_message(
@@ -125,6 +134,7 @@ class User(models.Model):
         after a Service Ticket has been generated"""
         ticket = self.get_ticket(ServiceTicket, service, service_pattern, renew)
         url = utils.update_url(service, {'ticket': ticket.value})
+        logger.info("Service ticket created for service %s by user %s." % (service, self.username))
         return url
 
 
@@ -220,6 +230,7 @@ class ServicePattern(models.Model):
     def check_user(self, user):
         """Check if `user` if allowed to use theses services"""
         if self.restrict_users and not self.usernames.filter(value=user.username):
+            logger.warning("Username %s not allowed on service %s" % (user.username, self.name))
             raise BadUsername()
         for filtre in self.filters.all():
             if isinstance(user.attributs.get(filtre.attribut, []), list):
@@ -230,12 +241,28 @@ class ServicePattern(models.Model):
                 if re.match(filtre.pattern, str(value)):
                     break
             else:
+                logger.warning(
+                    "User constraint failed for %s, service %s: %s do not match %s %s." % (
+                        user.username,
+                        self.name,
+                        filtre.pattern,
+                        filtre.attribut,
+                        user.attributs.get(filtre.attribut)
+                    )
+                )
                 raise BadFilter('%s do not match %s %s' % (
                     filtre.pattern,
                     filtre.attribut,
                     user.attributs.get(filtre.attribut)
                 ))
         if self.user_field and not user.attributs.get(self.user_field):
+            logger.warning(
+                "Cannot use %s a loggin for user %s on service %s because it is absent" % (
+                    self.user_field,
+                    user.username,
+                    self.name
+                )
+            )
             raise UserFieldNotDefined()
         return True
 
@@ -246,6 +273,7 @@ class ServicePattern(models.Model):
         for service_pattern in cls.objects.all().order_by('pos'):
             if re.match(service_pattern.pattern, service):
                 return service_pattern
+        logger.warning("Service %s not allowed." % service)
         raise cls.DoesNotExist()
 
 
@@ -378,6 +406,7 @@ class Ticket(models.Model):
                     try:
                         future.result()
                     except Exception as error:
+                        logger.warning("Error durring SLO %s" % error)
                         sys.stderr.write("%r\n" % error)
 
     def logout(self, request, session, async_list=None):
@@ -386,6 +415,12 @@ class Ticket(models.Model):
         self.validate = True
         self.save()
         if self.validate and self.single_log_out:
+            logger.info(
+                "Sending SLO requests to service %s for user %s" % (
+                    self.service,
+                    self.user.username
+                )
+            )
             try:
                 xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
      ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
@@ -409,8 +444,15 @@ class Ticket(models.Model):
                     )
                 )
             except Exception as error:
+                error = utils.unpack_nested_exception(error)
+                logger.warning(
+                    "Error durring SLO for user %s on service %s: %s" % (
+                        self.user.username,
+                        self.service,
+                        error
+                    )
+                )
                 if request is not None:
-                    error = utils.unpack_nested_exception(error)
                     messages.add_message(
                         request,
                         messages.WARNING,

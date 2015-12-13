@@ -161,3 +161,71 @@ Authentication backend
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
+
+Logs
+----
+
+``django-cas-server`` logs most of its actions. To enable login, you must set the ``LOGGING``
+(https://docs.djangoproject.com/en/dev/topics/logging) variable is ``settings.py``.
+
+Users successful actions (login, logout) are logged with the level ``INFO``, failures are logged
+with the level ``WARNING`` and user attributes transmitted to a service are logged with the level ``DEBUG``.
+
+For exemple to log to syslog you can use :
+
+.. code-block:: python
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'cas_syslog': {
+                'format': 'cas: %(levelname)s %(message)s'
+            },
+        },
+        'handlers': {
+            'cas_syslog': {
+                'level': 'INFO',
+                'class': 'logging.handlers.SysLogHandler',
+                'address': '/dev/log',
+                'formatter': 'cas_syslog',
+            },
+        },
+        'loggers': {
+            'cas_server': {
+                'handlers': ['cas_syslog'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }
+
+
+Or to log to a file:
+
+.. code-block:: python
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'cas_file': {
+                'format': '%(asctime)s %(levelname)s %(message)s'
+            },
+        },
+        'handlers': {
+            'cas_file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': '/tmp/cas_server.log',
+                'formatter': 'cas_file',
+            },
+        },
+        'loggers': {
+            'cas_server': {
+                'handlers': ['cas_file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }

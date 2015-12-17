@@ -30,9 +30,9 @@ test_venv/cas:
 	sed -i "s/'django.middleware.clickjacking.XFrameOptionsMiddleware',/'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.locale.LocaleMiddleware',/" test_venv/cas/cas/settings.py
 	sed -i 's/from django.conf.urls import url/from django.conf.urls import url, include/' test_venv/cas/cas/urls.py
 	sed -i "s@url(r'^admin/', admin.site.urls),@url(r'^admin/', admin.site.urls),\n    url(r'^', include('cas_server.urls', namespace='cas_server')),@" test_venv/cas/cas/urls.py
-	test_venv/cas/manage.py migrate
-	test_venv/cas/manage.py createsuperuser
+	test_venv/bin/python test_venv/cas/manage.py migrate
+	test_venv/bin/python test_venv/cas/manage.py createsuperuser
 		
 
 run_test_server: test_venv test_venv/cas
-	test_venv/cas/manage.py runserver
+	test_venv/bin/python test_venv/cas/manage.py runserver

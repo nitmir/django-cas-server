@@ -8,3 +8,5 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # (c) 2015 Valentin Samir
+
+default_app_config = 'cas_server.apps.AppConfig'

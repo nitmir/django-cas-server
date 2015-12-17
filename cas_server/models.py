@@ -39,6 +39,8 @@ class User(models.Model):
     """A user logged into the CAS"""
     class Meta:
         unique_together = ("username", "session_key")
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
     session_key = models.CharField(max_length=40, blank=True, null=True)
     username = models.CharField(max_length=30)
     date = models.DateTimeField(auto_now=True)
@@ -164,6 +166,8 @@ class ServicePattern(models.Model):
     """Allowed services pattern agains services are tested to"""
     class Meta:
         ordering = ("pos", )
+        verbose_name = _("Service pattern")
+        verbose_name_plural = _("Services patterns")
 
     pos = models.IntegerField(
         default=100,

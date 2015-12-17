@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-12 18:18+0100\n"
-"PO-Revision-Date: 2015-12-12 18:20+0100\n"
+"POT-Creation-Date: 2015-12-17 19:21+0100\n"
+"PO-Revision-Date: 2015-12-17 19:22+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -17,6 +17,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 1.8.6\n"
+
+#: apps.py:7 templates/cas_server/base.html:3
+msgid "Central Authentication Service"
+msgstr "Service Central d'Authentification"
 
 #: forms.py:23
 msgid "login"
@@ -46,28 +50,44 @@ msgstr "Nettoyer les sessions supprimées"
 msgid "Clean old trickets"
 msgstr "Nettoyer les vieux tickets"
 
-#: models.py:90
+#: models.py:42
+msgid "User"
+msgstr "Utilisateur"
+
+#: models.py:43
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: models.py:101
 #, python-format
 msgid "Error during service logout %s"
 msgstr "Une erreur est survenue durant la déconnexion du service %s"
 
-#: models.py:160
+#: models.py:169
+msgid "Service pattern"
+msgstr "Motif de service"
+
+#: models.py:170
+msgid "Services patterns"
+msgstr "Motifs de services"
+
+#: models.py:174
 msgid "position"
 msgstr "position"
 
-#: models.py:167 models.py:271
+#: models.py:181 models.py:303
 msgid "name"
 msgstr "nom"
 
-#: models.py:168
+#: models.py:182
 msgid "A name for the service"
 msgstr "Un nom pour le service"
 
-#: models.py:173 models.py:299 models.py:317
+#: models.py:187 models.py:331 models.py:349
 msgid "pattern"
 msgstr "motif"
 
-#: models.py:175
+#: models.py:189
 msgid ""
 "A regular expression matching services. Will usually looks like '^https://"
 "some\\.server\\.com/path/.*$'.As it is a regular expression, special "
@@ -78,55 +98,55 @@ msgstr ""
 "expression rationnelle, les caractères spéciaux doivent être échappés avec "
 "un '\\'."
 
-#: models.py:184
+#: models.py:198
 msgid "user field"
 msgstr "champ utilisateur"
 
-#: models.py:185
+#: models.py:199
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
 "Nom de l'attribut devant être transmis comme nom d'utilisateur au service. "
 "vide = nom de connection"
 
-#: models.py:189
+#: models.py:203
 msgid "restrict username"
 msgstr "limiter les noms d'utilisateurs"
 
-#: models.py:190
+#: models.py:204
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
 "Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
 "ci-dessous"
 
-#: models.py:194
+#: models.py:208
 msgid "proxy"
 msgstr "proxy"
 
-#: models.py:195
+#: models.py:209
 msgid "Proxy tickets can be delivered to the service"
 msgstr "des proxy tickets peuvent être délivrés au service"
 
-#: models.py:199
+#: models.py:213
 msgid "proxy callback"
 msgstr ""
 
-#: models.py:200
+#: models.py:214
 msgid "can be used as a proxy callback to deliver PGT"
 msgstr "peut être utilisé comme un callback pour recevoir un PGT"
 
-#: models.py:204
+#: models.py:218
 msgid "single log out"
 msgstr ""
 
-#: models.py:205
+#: models.py:219
 msgid "Enable SLO for the service"
 msgstr "Active le SLO pour le service"
 
-#: models.py:212
+#: models.py:226
 msgid "single log out callback"
 msgstr ""
 
-#: models.py:213
+#: models.py:227
 msgid ""
 "URL where the SLO request will be POST. empty = service url\n"
 "This is usefull for non HTTP proxied services."
@@ -135,55 +155,55 @@ msgstr ""
 "service\n"
 "Ceci n'est utilise que pour des services non HTTP proxifiés"
 
-#: models.py:256
+#: models.py:288
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: models.py:257
+#: models.py:289
 msgid "username allowed to connect to the service"
 msgstr "noms d'utilisateurs autorisé à se connecter au service"
 
-#: models.py:272
+#: models.py:304
 msgid "name of an attribut to send to the service, use * for all attributes"
 msgstr ""
 "nom d'un attribut a envoyer au service, utiliser * pour tous les attributs"
 
-#: models.py:277 models.py:323
+#: models.py:309 models.py:355
 msgid "replace"
 msgstr "remplacement"
 
-#: models.py:278
+#: models.py:310
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
 "nom sous lequel l'attribut sera rendu visible au service. vide = inchangé"
 
-#: models.py:294 models.py:312
+#: models.py:326 models.py:344
 msgid "attribut"
 msgstr "attribut"
 
-#: models.py:295
+#: models.py:327
 msgid "Name of the attribut which must verify pattern"
 msgstr "Nom de l'attribut devant vérifier un motif"
 
-#: models.py:300
+#: models.py:332
 msgid "a regular expression"
 msgstr "une expression régulière"
 
-#: models.py:313
+#: models.py:345
 msgid "Name of the attribut for which the value must be replace"
 msgstr "nom de l'attribue pour lequel la valeur doit être remplacé"
 
-#: models.py:318
+#: models.py:350
 msgid "An regular expression maching whats need to be replaced"
 msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
-#: models.py:324
+#: models.py:356
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr "expression de remplacement, les groupe sont capturé par \\1, \\2"
 
-#: models.py:416
+#: models.py:463
 #, python-format
 msgid ""
 "Error during service logout %(service)s:\n"
@@ -191,10 +211,6 @@ msgid ""
 msgstr ""
 "Une erreur est survenue durant la déconnexion du service %(service)s:"
 "%(error)s"
-
-#: templates/cas_server/base.html:3
-msgid "Central Authentication Service"
-msgstr "Service Central d'Authentification"
 
 #: templates/cas_server/logged.html:6
 msgid "Logged"
@@ -220,7 +236,7 @@ msgstr "Merci de se connecter"
 msgid "Login"
 msgstr "Connexion"
 
-#: templates/cas_server/logout.html:6 views.py:112
+#: templates/cas_server/logout.html:6 views.py:123
 msgid "Successfully logout"
 msgstr ""
 "<h3>Déconnexion réussie</h3>\n"
@@ -231,46 +247,46 @@ msgstr ""
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: views.py:186
+#: views.py:197
 msgid "Invalid login ticket"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
-#: views.py:277
+#: views.py:292
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr ""
 "Une demande d'authentification a été émise pour le service %(name)s "
 "(%(url)s)."
 
-#: views.py:311
+#: views.py:326
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "le service %(url)s n'est pas autorisé."
 
-#: views.py:318
+#: views.py:333
 msgid "Username non allowed"
 msgstr "Nom d'utilisateur non authorisé"
 
-#: views.py:325
+#: views.py:340
 msgid "User charateristics non allowed"
 msgstr "Caractéristique utilisateur non autorisée"
 
-#: views.py:332
+#: views.py:347
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
 
-#: views.py:397
+#: views.py:417
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
 
-#: views.py:404
+#: views.py:424
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentification requise par le service %(name)s (%(url)s)."
 
-#: views.py:411
+#: views.py:431
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"

@@ -25,7 +25,7 @@ dist:
 test_venv: dist
 	mkdir -p test_venv
 	virtualenv test_venv
-	test_venv/bin/pip install -U django-cas-server ./dist/django-cas-server-${VERSION}.tar.gz
+	test_venv/bin/pip install -U django-cas-server -f ./dist/django-cas-server-${VERSION}.tar.gz
 
 test_venv/cas:
 	mkdir -p test_venv/cas

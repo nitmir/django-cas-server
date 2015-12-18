@@ -7,13 +7,17 @@ build:
 install:
 	python setup.py install
 
-clean:
+clean_pyc:
 	find ./ -name '*.pyc' -delete
 	find ./ -name __pycache__ -delete
+clean_build:
 	rm -rf build django_cas_server.egg-info dist
-
-clean_all: clean
-	rm -rf test_venv .tox
+clean_tox:
+	rm -rf .tox
+clean_test_venv:
+	rm -rf test_venv
+clean: clean_pyc clean_build
+clean_all: clean_pyc clean_build clean_tox clean_test_venv
 
 dist:
 	python setup.py sdist

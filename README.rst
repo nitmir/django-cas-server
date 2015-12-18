@@ -1,11 +1,13 @@
 CAS Server
 ==========
 
-.. image:: https://badge.fury.io/py/django-cas-server.svg
-    :target: https://badge.fury.io/py/django-cas-server
-
 .. image:: https://travis-ci.org/nitmir/django-cas-server.svg?branch=master
     :target: https://travis-ci.org/nitmir/django-cas-server
+
+.. image:: https://img.shields.io/pypi/v/django-cas-server.svg
+    :target: https://pypi.python.org/pypi/django-cas-server
+
+.. image:: https://img.shields.io/pypi/l/django-cas-server.svg
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://jasig.github.io/cas/development/protocol/CAS-Protocol-Specification.html>`_.

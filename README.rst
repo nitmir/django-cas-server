@@ -188,7 +188,7 @@ Authentication backend
 * dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempt fails.
 * test backend ``cas_server.auth.TestAuthUser``: username is ``test`` and password is ``test``
   the returned attributes for the user are: ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``
-* django backend ``cas_server.auth.DjangoAuthUser``: Users are anthenticated agains django users system.
+* django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated agains django users system.
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.

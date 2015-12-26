@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-17 19:21+0100\n"
-"PO-Revision-Date: 2015-12-17 19:22+0100\n"
+"POT-Creation-Date: 2015-12-26 15:31+0100\n"
+"PO-Revision-Date: 2015-12-26 15:34+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: en\n"
@@ -92,6 +92,9 @@ msgid ""
 "some\\.server\\.com/path/.*$'.As it is a regular expression, special "
 "character must be escaped with a '\\'."
 msgstr ""
+"A regular expression matching services. Will usually looks like '^https://"
+"some\\.server\\.com/path/.*$'.As it is a regular expression, special "
+"character must be escaped with a '\\'."
 
 #: models.py:198
 msgid "user field"
@@ -210,7 +213,7 @@ msgstr ""
 
 #: templates/cas_server/logged.html:10
 msgid "Log me out from all my sessions"
-msgstr ""
+msgstr "Log me out from all my sessions"
 
 #: templates/cas_server/logged.html:13
 msgid "Logout"
@@ -224,54 +227,80 @@ msgstr "Please loggin"
 msgid "Login"
 msgstr "Login"
 
-#: templates/cas_server/logout.html:6 views.py:123
-msgid "Successfully logout"
-msgstr ""
-"<h3>Logout successful</h3>You have successfully logged out of the Central "
-"Authentication Service.</br>For security reasons, exit your web browser."
-
 #: templates/cas_server/warn.html:7
 msgid "Connect to the service"
 msgstr "Connect to the service"
 
-#: views.py:197
+#: views.py:128
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+msgstr ""
+"<h3>Logout successful</h3>You have successfully logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+
+#: views.py:134
+#, python-format
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from %s sessions "
+"of the Central Authentication Service. For security reasons, exit your web "
+"browser."
+msgstr ""
+"<h3>Logout successful</h3>You have successfully logged out from %s sessions "
+"of the Central Authentication Service. For security reasons, exit your web "
+"browser."
+
+#: views.py:141
+msgid ""
+"<h3>Logout successful</h3>You were already logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+msgstr ""
+"<h3>Logout successful</h3>You were already logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+
+#: views.py:230
 msgid "Invalid login ticket"
 msgstr "Invalid login ticket, please retry to login"
 
-#: views.py:292
+#: views.py:325
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr "Authentication has been required by service %(name)s (%(url)s)"
 
-#: views.py:326
+#: views.py:359
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "Service %(url)s non allowed."
 
-#: views.py:333
+#: views.py:366
 msgid "Username non allowed"
 msgstr "Username non allowed"
 
-#: views.py:340
+#: views.py:373
 msgid "User charateristics non allowed"
 msgstr "User charateristics non allowed"
 
-#: views.py:347
+#: views.py:380
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: views.py:417
+#: views.py:450
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Authentication renewal required by service %(name)s (%(url)s)."
 
-#: views.py:424
+#: views.py:457
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentication required by service %(name)s (%(url)s)."
 
-#: views.py:431
+#: views.py:464
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Service %s non allowed"
+
+#~ msgid "Successfully logout"
+#~ msgstr ""
+#~ "<h3>Logout successful</h3>You have successfully logged out of the Central "
+#~ "Authentication Service.</br>For security reasons, exit your web browser."

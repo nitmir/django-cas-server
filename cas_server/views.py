@@ -64,6 +64,7 @@ class LogoutMixin(object):
     """destroy CAS session utils"""
     def logout(self, all=False):
         """effectively destroy CAS session"""
+        session_nb = 0
         username = self.request.session.get("username")
         if username:
             if all:
@@ -79,6 +80,7 @@ class LogoutMixin(object):
             self.request.session.flush()
             user.logout(self.request)
             user.delete()
+            session_nb += 1
         except models.User.DoesNotExist:
             # if user not found in database, flush the session anyway
             self.request.session.flush()
@@ -90,7 +92,9 @@ class LogoutMixin(object):
                 session.flush()
                 user.logout(self.request)
                 user.delete()
+                session_nb += 1
         logger.info("User %s logged out" % username)
+        return session_nb
 
 
 class LogoutView(View, LogoutMixin):
@@ -109,7 +113,7 @@ class LogoutView(View, LogoutMixin):
         """methode called on GET request on this view"""
         logger.info("logout requested")
         self.init_get(request)
-        self.logout(self.request.GET.get("all"))
+        session_nb = self.logout(self.request.GET.get("all"))
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
@@ -119,20 +123,49 @@ class LogoutView(View, LogoutMixin):
             return HttpResponseRedirect(self.url)
         # else redirect to login page
         else:
+            if session_nb == 1:
+                logout_msg = _(
+                    "<h3>Logout successful</h3>"
+                    "You have successfully logged out from the Central Authentication Service. "
+                    "For security reasons, exit your web browser."
+                )
+            elif session_nb > 1:
+                logout_msg = _(
+                    "<h3>Logout successful</h3>"
+                    "You have successfully logged out from %s sessions of the Central "
+                    "Authentication Service. "
+                    "For security reasons, exit your web browser."
+                ) % session_nb
+            else:
+                logout_msg = _(
+                    "<h3>Logout successful</h3>"
+                    "You were already logged out from the Central Authentication Service. "
+                    "For security reasons, exit your web browser."
+                )
+
             if settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT:
-                messages.add_message(request, messages.SUCCESS, _(u'Successfully logout'))
+                messages.add_message(request, messages.SUCCESS, logout_msg)
                 if self.ajax:
                     url = reverse("cas_server:login")
-                    data = {'status': 'success', 'detail': 'logout', 'url': url}
+                    data = {
+                        'status': 'success',
+                        'detail': 'logout',
+                        'url': url,
+                        'session_nb': session_nb
+                    }
                     return JsonResponse(request, data)
                 else:
                     return redirect("cas_server:login")
             else:
                 if self.ajax:
-                    data = {'status': 'success', 'detail': 'logout'}
+                    data = {'status': 'success', 'detail': 'logout', 'session_nb': session_nb}
                     return JsonResponse(request, data)
                 else:
-                    return render(request, settings.CAS_LOGOUT_TEMPLATE)
+                    return render(
+                        request,
+                        settings.CAS_LOGOUT_TEMPLATE,
+                        {'logout_msg': logout_msg}
+                    )
 
 
 class LoginView(View, LogoutMixin):

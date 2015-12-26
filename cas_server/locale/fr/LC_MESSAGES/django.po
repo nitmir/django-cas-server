@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-17 19:21+0100\n"
-"PO-Revision-Date: 2015-12-17 19:22+0100\n"
+"POT-Creation-Date: 2015-12-26 15:31+0100\n"
+"PO-Revision-Date: 2015-12-26 15:34+0100\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -236,60 +236,88 @@ msgstr "Merci de se connecter"
 msgid "Login"
 msgstr "Connexion"
 
-#: templates/cas_server/logout.html:6 views.py:123
-msgid "Successfully logout"
-msgstr ""
-"<h3>Déconnexion réussie</h3>\n"
-"Vous vous êtes déconnecté(e) du Service Central d'Authentification.<br/>Pour "
-"des raisons de sécurité, veuillez fermer votre navigateur."
-
 #: templates/cas_server/warn.html:7
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: views.py:197
+#: views.py:128
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+msgstr ""
+"<h3>Déconnexion réussie</h3>Vous vous êtes déconnecté(e) du Service Central "
+"d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
+"navigateur."
+
+#: views.py:134
+#, python-format
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from %s sessions "
+"of the Central Authentication Service. For security reasons, exit your web "
+"browser."
+msgstr ""
+"<h3>Déconnexion réussie</h3>Vous vous êtes déconnecté(e) de %s sessions du "
+"Service Central d'Authentification. Pour des raisons de sécurité, veuillez "
+"fermer votre navigateur."
+
+#: views.py:141
+msgid ""
+"<h3>Logout successful</h3>You were already logged out from the Central "
+"Authentication Service. For security reasons, exit your web browser."
+msgstr ""
+"<h3>Déconnexion réussie</h3>Vous étiez déjà déconnecté(e) du Service Central "
+"d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
+"navigateur."
+
+#: views.py:230
 msgid "Invalid login ticket"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
-#: views.py:292
+#: views.py:325
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr ""
 "Une demande d'authentification a été émise pour le service %(name)s "
 "(%(url)s)."
 
-#: views.py:326
+#: views.py:359
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "le service %(url)s n'est pas autorisé."
 
-#: views.py:333
+#: views.py:366
 msgid "Username non allowed"
 msgstr "Nom d'utilisateur non authorisé"
 
-#: views.py:340
+#: views.py:373
 msgid "User charateristics non allowed"
 msgstr "Caractéristique utilisateur non autorisée"
 
-#: views.py:347
+#: views.py:380
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
 
-#: views.py:417
+#: views.py:450
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
 
-#: views.py:424
+#: views.py:457
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentification requise par le service %(name)s (%(url)s)."
 
-#: views.py:431
+#: views.py:464
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"
+
+#~ msgid "Successfully logout"
+#~ msgstr ""
+#~ "<h3>Déconnexion réussie</h3>\n"
+#~ "Vous vous êtes déconnecté(e) du Service Central d'Authentification.<br/"
+#~ ">Pour des raisons de sécurité, veuillez fermer votre navigateur."
 
 #~ msgid ""
 #~ "A ProxyGrantingTicket can be delivered to the service in order to "

@@ -19,6 +19,10 @@ use any sources (see auth classes in the auth.py file)
 The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_
 but you can use your own templates using settings variables.
 
+Note that for Django 1.7 compatibility, you need a version of
+`django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_ < 7.0.0
+like the 6.2.2 version.
+
 Features
 --------
 

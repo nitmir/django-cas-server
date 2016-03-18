@@ -36,7 +36,7 @@ setup(
     license='GPLv3',
     description=(
         'A Django Central Authentication Service server '
-       'implementing the CAS Protocol 3.0 Specification'
+        'implementing the CAS Protocol 3.0 Specification'
     ),
     long_description=README,
     author='Valentin Samir',

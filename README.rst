@@ -119,7 +119,7 @@ Template settings:
 
 Authentication settings:
 
-*  ``CAS_AUTH_CLASS``: A dotted paths to a class implementing ``cas_server.auth.AuthUser``.
+*  ``CAS_AUTH_CLASS``: A dotted path to a class implementing ``cas_server.auth.AuthUser``.
    The default is ``"cas_server.auth.DjangoAuthUser"``
 
 *  ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after

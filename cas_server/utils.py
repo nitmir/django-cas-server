@@ -39,8 +39,15 @@ def import_attr(path):
     """transform a python module.attr path to the attr"""
     if not isinstance(path, str):
         return string
+    if "." not in path:
+        ValueError("%r should be of the form `module.attr` and we just got `attr`" % path)
     module, attr = path.rsplit('.', 1)
-    return getattr(import_module(module), attr)
+    try:
+        return getattr(import_module(module), attr)
+    except ImportError:
+        raise ImportError("Module %r not found" % module)
+    except AttributeError:
+        raise AttributeError("Module %r has not attribut %r" % (module, attr))
 
 
 def redirect_params(url_name, params=None):

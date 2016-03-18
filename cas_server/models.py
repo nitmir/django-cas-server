@@ -388,8 +388,8 @@ class Ticket(models.Model):
             (
                 Q(single_log_out=False) & Q(validate=True)
             ) | (
-                Q(validate=False)
-                & Q(creation__lt=(timezone.now() - timedelta(seconds=cls.VALIDITY)))
+                Q(validate=False) &
+                Q(creation__lt=(timezone.now() - timedelta(seconds=cls.VALIDITY)))
             )
         ).delete()
 

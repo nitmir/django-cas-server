@@ -20,10 +20,14 @@ except pkg_resources.VersionConflict:
         pkg_resources.require('Django >= 1.7')
         django_bootstrap3 = 'django-bootstrap3 >= 5.4,<7.0.0'
         django = 'Django >= 1.7,<1.8'
-    except pkg_resources.VersionConflict:
+    except (pkg_resources.VersionConflict, pkg_resources.DistributionNotFound):
         # Else we need to install Django, assume version will be >= 1.8
         django_bootstrap3 = 'django-bootstrap3 >= 5.4'
         django = 'Django >= 1.8,<1.10'
+# No version of django installed, assume version will be >= 1.8
+except pkg_resources.DistributionNotFound:
+    django_bootstrap3 = 'django-bootstrap3 >= 5.4'
+    django = 'Django >= 1.8,<1.10'
 
 setup(
     name='django-cas-server',

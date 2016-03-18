@@ -27,7 +27,7 @@ except pkg_resources.VersionConflict:
 
 setup(
     name='django-cas-server',
-    version='0.4.1',
+    version='0.4.2',
     packages=[
         'cas_server', 'cas_server.migrations',
         'cas_server.management', 'cas_server.management.commands'

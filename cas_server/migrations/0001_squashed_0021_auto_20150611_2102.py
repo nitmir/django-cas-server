@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('username', models.CharField(max_length=30)),
                 ('date', models.DateTimeField(auto_now=True, auto_now_add=True)),
-                ('session', models.OneToOneField(related_name='cas_server_user', null=True, blank=True, to='sessions.Session')),
+                ('session_key', models.CharField(max_length=40, null=True, blank=True)),
             ],
             options={
             },
@@ -312,26 +312,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='user',
-            unique_together=set([('username', 'session')]),
-        ),
-        migrations.AlterField(
-            model_name='user',
-            name='session',
-            field=models.OneToOneField(related_name='cas_server_user', null=True, on_delete=django.db.models.deletion.SET_NULL, blank=True, to='sessions.Session'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='session_key',
-            field=models.CharField(max_length=40, null=True, blank=True),
-            preserve_default=True,
-        ),
-        migrations.AlterUniqueTogether(
-            name='user',
             unique_together=set([('username', 'session_key')]),
-        ),
-        migrations.RemoveField(
-            model_name='user',
-            name='session',
         ),
     ]

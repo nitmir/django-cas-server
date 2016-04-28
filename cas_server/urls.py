@@ -12,13 +12,20 @@
 """urls for the app"""
 from django.conf.urls import patterns, url
 from django.views.generic import RedirectView
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
 import views
 
 urlpatterns = patterns(
     '',
     url(r'^$', RedirectView.as_view(pattern_name="cas_server:login")),
-    url('^login$', views.LoginView.as_view(), name='login'),
+    url(
+        '^login$',
+        sensitive_post_parameters('password')(
+            views.LoginView.as_view()
+        ),
+        name='login'
+    ),
     url('^logout$', views.LogoutView.as_view(), name='logout'),
     url('^validate$', views.Validate.as_view(), name='validate'),
     url(
@@ -43,5 +50,13 @@ urlpatterns = patterns(
         name='p3_proxyValidate'
     ),
     url('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
-    url('^auth$', views.Auth.as_view(), name='auth'),
+    url(
+        '^auth$',
+        sensitive_variables('password')(
+            sensitive_post_parameters('password')(
+                views.Auth.as_view()
+            )
+        ),
+        name='auth'
+    ),
 )

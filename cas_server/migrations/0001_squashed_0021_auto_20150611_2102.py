@@ -9,7 +9,7 @@ import picklefield.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'cas_server', '0001_initial'), (b'cas_server', '0002_auto_20150517_1406'), (b'cas_server', '0003_auto_20150518_1648'), (b'cas_server', '0004_auto_20150518_1659'), (b'cas_server', '0005_auto_20150518_1717'), (b'cas_server', '0006_auto_20150518_1720'), (b'cas_server', '0007_auto_20150518_1727'), (b'cas_server', '0008_servicepattern_name'), (b'cas_server', '0009_auto_20150518_1740'), (b'cas_server', '0010_auto_20150518_2139'), (b'cas_server', '0011_auto_20150523_1731'), (b'cas_server', '0012_auto_20150527_1956'), (b'cas_server', '0013_servicepattern_single_sign_out'), (b'cas_server', '0014_auto_20150528_0012'), (b'cas_server', '0015_auto_20150528_1202'), (b'cas_server', '0016_auto_20150528_1326'), (b'cas_server', '0017_remove_user_attributs'), (b'cas_server', '0018_auto_20150608_1621'), (b'cas_server', '0019_auto_20150609_1903'), (b'cas_server', '0020_auto_20150609_1917'), (b'cas_server', '0021_auto_20150611_2102')]
+    #replaces = [(b'cas_server', '0001_initial'), (b'cas_server', '0002_auto_20150517_1406'), (b'cas_server', '0003_auto_20150518_1648'), (b'cas_server', '0004_auto_20150518_1659'), (b'cas_server', '0005_auto_20150518_1717'), (b'cas_server', '0006_auto_20150518_1720'), (b'cas_server', '0007_auto_20150518_1727'), (b'cas_server', '0008_servicepattern_name'), (b'cas_server', '0009_auto_20150518_1740'), (b'cas_server', '0010_auto_20150518_2139'), (b'cas_server', '0011_auto_20150523_1731'), (b'cas_server', '0012_auto_20150527_1956'), (b'cas_server', '0013_servicepattern_single_sign_out'), (b'cas_server', '0014_auto_20150528_0012'), (b'cas_server', '0015_auto_20150528_1202'), (b'cas_server', '0016_auto_20150528_1326'), (b'cas_server', '0017_remove_user_attributs'), (b'cas_server', '0018_auto_20150608_1621'), (b'cas_server', '0019_auto_20150609_1903'), (b'cas_server', '0020_auto_20150609_1917'), (b'cas_server', '0021_auto_20150611_2102')]
 
     dependencies = [
         ('sessions', '0001_initial'),
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('username', models.CharField(max_length=30)),
                 ('date', models.DateTimeField(auto_now=True, auto_now_add=True)),
-                ('session', models.OneToOneField(related_name='cas_server_user', null=True, blank=True, to='sessions.Session')),
+                ('session_key', models.CharField(max_length=40, null=True, blank=True)),
             ],
             options={
             },
@@ -312,26 +312,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='user',
-            unique_together=set([('username', 'session')]),
-        ),
-        migrations.AlterField(
-            model_name='user',
-            name='session',
-            field=models.OneToOneField(related_name='cas_server_user', null=True, on_delete=django.db.models.deletion.SET_NULL, blank=True, to='sessions.Session'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='session_key',
-            field=models.CharField(max_length=40, null=True, blank=True),
-            preserve_default=True,
-        ),
-        migrations.AlterUniqueTogether(
-            name='user',
             unique_together=set([('username', 'session_key')]),
-        ),
-        migrations.RemoveField(
-            model_name='user',
-            name='session',
         ),
     ]

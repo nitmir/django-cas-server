@@ -29,8 +29,8 @@
               </ConfirmationMethod>
             </SubjectConfirmation>
           </Subject>
-{% for name, value in attributes %}          <Attribute AttributeName="name" AttributeNamespace="http://www.ja-sig.org/products/cas/">
-            <AttributeValue>value</AttributeValue>
+{% for name, value in attributes %}          <Attribute AttributeName="{{name}}" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+            <AttributeValue>{{value}}</AttributeValue>
           </Attribute>
 {% endfor %}        </AttributeStatement>
         <AuthenticationStatement AuthenticationInstant="{{IssueInstant}}"

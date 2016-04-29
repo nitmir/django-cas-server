@@ -563,7 +563,21 @@ class Validate(View):
                         ticket.service
                     )
                 )
-                return HttpResponse("yes\n", content_type="text/plain")
+                if (ticket.service_pattern.user_field and
+                        ticket.user.attributs.get(ticket.service_pattern.user_field)):
+                    username = ticket.user.attributs.get(
+                        ticket.service_pattern.user_field
+                    )
+                    if isinstance(username, list):
+                        try:
+                            username = username[0]
+                        except IndexError:
+                            username = None
+                    if not username:
+                        username = ""
+                else:
+                    username = ticket.user.username
+                return HttpResponse("yes\n%s\n" % username, content_type="text/plain")
             except ServiceTicket.DoesNotExist:
                 logger.warning(
                     (

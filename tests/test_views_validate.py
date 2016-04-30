@@ -23,7 +23,7 @@ def test_validate_view_ok():
     response = validate.get(request)
 
     assert response.status_code == 200
-    assert response.content == b"yes\n"
+    assert response.content == b"yes\ntest\n"
 
 
 

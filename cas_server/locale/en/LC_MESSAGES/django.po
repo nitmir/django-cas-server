@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-26 15:31+0100\n"
-"PO-Revision-Date: 2015-12-26 15:34+0100\n"
+"POT-Creation-Date: 2016-05-03 23:50+0200\n"
+"PO-Revision-Date: 2016-05-03 23:50+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: apps.py:7 templates/cas_server/base.html:3
 msgid "Central Authentication Service"
@@ -220,8 +220,8 @@ msgid "Logout"
 msgstr "Logout"
 
 #: templates/cas_server/login.html:7
-msgid "Please loggin"
-msgstr "Please loggin"
+msgid "Please log in"
+msgstr "Please log in"
 
 #: templates/cas_server/login.html:10
 msgid "Login"

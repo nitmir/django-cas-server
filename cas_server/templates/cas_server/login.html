@@ -4,7 +4,7 @@
 {% load i18n %}
 {% block content %}
       <form class="form-signin" method="post">
-        <h2 class="form-signin-heading">{% trans "Please loggin" %}</h2>
+        <h2 class="form-signin-heading">{% trans "Please log in" %}</h2>
 {% csrf_token %}
 {% bootstrap_form form %}
 {% bootstrap_button _('Login') size='lg' button_type="submit" button_class="btn-primary btn-block"%}

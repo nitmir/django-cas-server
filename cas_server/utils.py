@@ -38,7 +38,7 @@ def JsonResponse(request, data):
 def import_attr(path):
     """transform a python module.attr path to the attr"""
     if not isinstance(path, str):
-        return string
+        return path
     if "." not in path:
         ValueError("%r should be of the form `module.attr` and we just got `attr`" % path)
     module, attr = path.rsplit('.', 1)

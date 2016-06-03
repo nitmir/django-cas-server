@@ -197,7 +197,7 @@ class LoginView(View, LogoutMixin):
     def init_post(self, request):
         self.request = request
         self.service = request.POST.get('service')
-        if request.POST.get('renew') and request.POST['renew'] != "False" :
+        if request.POST.get('renew') and request.POST['renew'] != "False":
             self.renew = True
         else:
             self.renew = False

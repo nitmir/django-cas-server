@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import cas_server.utils as utils
 import cas_server.models as models
 
+
 class WarnForm(forms.Form):
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
@@ -24,6 +25,7 @@ class WarnForm(forms.Form):
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warned = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
+
 
 class UserCredential(forms.Form):
     """Form used on the login page to retrive user credentials"""

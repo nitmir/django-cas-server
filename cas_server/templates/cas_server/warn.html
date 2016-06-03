@@ -4,6 +4,10 @@
 {% load i18n %}
 
 {% block content %}
-{% bootstrap_button _('Connect to the service') size='lg' button_class="btn-primary btn-block" href=service_ticket_url %}
+      <form class="form-signin" method="post">
+{% csrf_token %}
+{% bootstrap_form form %}
+{% bootstrap_button _('Login') size='lg' button_type="submit" button_class="btn-primary btn-block"%}
+      </form>
+{{request.session.authenticated}}
 {% endblock %}
-

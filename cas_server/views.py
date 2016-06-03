@@ -197,10 +197,15 @@ class LoginView(View, LogoutMixin):
     def init_post(self, request):
         self.request = request
         self.service = request.POST.get('service')
-        self.renew = True if request.POST.get('renew') else False
+        if request.POST.get('renew') and request.POST['renew'] != "False" :
+            self.renew = True
+        else:
+            self.renew = False
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
+        if request.POST.get('warned') and request.POST['warned'] != "False":
+            self.warned = True
 
     def check_lt(self):
         # save LT for later check
@@ -279,7 +284,10 @@ class LoginView(View, LogoutMixin):
     def init_get(self, request):
         self.request = request
         self.service = request.GET.get('service')
-        self.renew = True if request.GET.get('renew') else False
+        if request.GET.get('renew') and request.GET['renew'] != "False":
+            self.renew = True
+        else:
+            self.renew = False
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
@@ -329,14 +337,18 @@ class LoginView(View, LogoutMixin):
                     data = {"status": "error", "detail": "confirmation needed"}
                     return JsonResponse(self.request, data)
                 else:
+                    warn_form = forms.WarnForm(initial={
+                        'service': self.service,
+                        'renew': self.renew,
+                        'gateway': self.gateway,
+                        'method': self.method,
+                        'warned': True,
+                        'lt': self.request.session['lt'][-1]
+                    })
                     return render(
                         self.request,
                         settings.CAS_WARN_TEMPLATE,
-                        {'service_ticket_url': self.user.get_service_url(
-                            self.service,
-                            service_pattern,
-                            renew=self.renew
-                        )}
+                        {'form': warn_form}
                     )
             else:
                 # redirect, using method ?

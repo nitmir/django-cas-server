@@ -31,7 +31,7 @@ except pkg_resources.DistributionNotFound:
 
 setup(
     name='django-cas-server',
-    version='0.4.4',
+    version='0.5.0',
     packages=[
         'cas_server', 'cas_server.migrations',
         'cas_server.management', 'cas_server.management.commands'
@@ -67,7 +67,8 @@ setup(
     keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
     install_requires=[
         django, 'requests >= 2.4', 'requests_futures >= 0.9.5',
-        'django-picklefield >= 0.3.1', django_bootstrap3, 'lxml >= 3.4'
+        'django-picklefield >= 0.3.1', django_bootstrap3, 'lxml >= 3.4',
+        'six >= 1'
     ],
     url="https://github.com/nitmir/django-cas-server",
     download_url="https://github.com/nitmir/django-cas-server/releases",

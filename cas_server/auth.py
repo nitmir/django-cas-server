@@ -12,12 +12,17 @@
 """Some authentication classes for the CAS"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from datetime import timedelta
 try:
     import MySQLdb
     import MySQLdb.cursors
     import crypt
 except ImportError:
     MySQLdb = None
+
+from .models import FederatedUser
 
 
 class AuthUser(object):
@@ -140,3 +145,37 @@ class DjangoAuthUser(AuthUser):
             for field in self.user._meta.fields:
                 attr[field.attname] = getattr(self.user, field.attname)
             return attr
+
+
+class CASFederateAuth(AuthUser):
+    user = None
+
+    def __init__(self, username):
+        component = username.split('@')
+        username = '@'.join(component[:-1])
+        provider = component[-1]
+        try:
+            self.user = FederatedUser.objects.get(username=username, provider=provider)
+            super(CASFederateAuth, self).__init__(
+                "%s@%s" % (self.user.username, self.user.provider)
+            )
+        except FederatedUser.DoesNotExist:
+            super(CASFederateAuth, self).__init__("%s@%s" % (username, provider))
+
+    def test_password(self, ticket):
+        """test `password` agains the user"""
+        if not self.user or not self.user.ticket:
+            return False
+        else:
+            return (
+                ticket == self.user.ticket and
+                self.user.last_update >
+                (timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+            )
+
+    def attributs(self):
+        """return a dict of user attributes"""
+        if not self.user:
+            return {}
+        else:
+            return self.user.attributs

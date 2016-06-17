@@ -37,6 +37,7 @@ import cas_server.models as models
 from .utils import JsonResponse
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
+from .federate import CASFederateValidateUser
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
@@ -113,7 +114,18 @@ class LogoutView(View, LogoutMixin):
         """methode called on GET request on this view"""
         logger.info("logout requested")
         self.init_get(request)
+        # if CAS federation mode is enable, bakup the provider before flushing the sessions
+        if settings.CAS_FEDERATE:
+            component = self.request.session.get("username").split('@')
+            provider = component[-1]
+            auth = CASFederateValidateUser(provider, service_url="")
         session_nb = self.logout(self.request.GET.get("all"))
+        # if CAS federation mode is enable, redirect to user CAS logout page
+        if settings.CAS_FEDERATE:
+            params = utils.copy_params(request.GET)
+            url = utils.update_url(auth.get_logout_url(), params)
+            if url:
+                return HttpResponseRedirect(url)
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
@@ -168,6 +180,45 @@ class LogoutView(View, LogoutMixin):
                     )
 
 
+class FederateAuth(View):
+    def post(self, request, provider=None):
+        form = forms.FederateSelect(request.POST)
+        if form.is_valid():
+            params = utils.copy_params(
+                request.POST,
+                ignore={"provider", "csrfmiddlewaretoken", "ticket"}
+            )
+            url = utils.reverse_params(
+                "cas_server:federateAuth",
+                kwargs=dict(provider=form.cleaned_data["provider"]),
+                params=params
+            )
+            response = HttpResponseRedirect(url)
+            if form.cleaned_data["remember"]:
+                max_age = 7 * 24 * 60 * 60  # one week
+                utils.set_cookie(response, "_remember_provider", request.POST["provider"], max_age)
+            return response
+        else:
+            return redirect("cas_server:login")
+
+    def get(self, request, provider=None):
+        if provider not in settings.CAS_FEDERATE_PROVIDERS:
+            return redirect("cas_server:login")
+        service_url = utils.get_current_url(request, {"ticket", "provider"})
+        auth = CASFederateValidateUser(provider, service_url)
+        if 'ticket' not in request.GET:
+            return HttpResponseRedirect(auth.get_login_url())
+        else:
+            ticket = request.GET['ticket']
+            if auth.verify_ticket(ticket):
+                params = utils.copy_params(request.GET)
+                params['username'] = "%s@%s" % (auth.username, auth.provider)
+                url = utils.reverse_params("cas_server:login", params)
+                return HttpResponseRedirect(url)
+            else:
+                return HttpResponseRedirect(auth.get_login_url())
+
+
 class LoginView(View, LogoutMixin):
     """credential requestor / acceptor"""
 
@@ -206,6 +257,10 @@ class LoginView(View, LogoutMixin):
         self.ajax = 'HTTP_X_AJAX' in request.META
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
+        self.warn = request.POST.get('warn')
+        if settings.CAS_FEDERATE:
+            self.username = request.POST.get('username')
+            self.ticket = request.POST.get('ticket')
 
     def check_lt(self):
         # save LT for later check
@@ -248,6 +303,7 @@ class LoginView(View, LogoutMixin):
                 )
                 self.user.save()
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
+            self.ticket = None
             self.logout()
         elif ret == self.USER_ALREADY_LOGGED:
             pass
@@ -291,6 +347,10 @@ class LoginView(View, LogoutMixin):
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
+        self.warn = request.GET.get('warn')
+        if settings.CAS_FEDERATE:
+            self.username = request.GET.get('username')
+            self.ticket = request.GET.get('ticket')
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -308,15 +368,28 @@ class LoginView(View, LogoutMixin):
         return self.USER_AUTHENTICATED
 
     def init_form(self, values=None):
-        self.form = forms.UserCredential(
-            values,
-            initial={
-                'service': self.service,
-                'method': self.method,
-                'warn': self.request.session.get("warn"),
-                'lt': self.request.session['lt'][-1]
-            }
-        )
+        form_initial = {
+            'service': self.service,
+            'method': self.method,
+            'warn': self.warn or self.request.session.get("warn"),
+            'lt': self.request.session['lt'][-1]
+        }
+        if settings.CAS_FEDERATE:
+            if self.username and self.ticket:
+                form_initial['username'] = self.username
+                form_initial['password'] = self.ticket
+                form_initial['ticket'] = self.ticket
+                self.form = forms.FederateUserCredential(
+                    values,
+                    initial=form_initial
+                )
+            else:
+                self.form = forms.FederateSelect(values, initial=form_initial)
+        else:
+            self.form = forms.UserCredential(
+                values,
+                initial=form_initial
+            )
 
     def service_login(self):
         """Perform login agains a service"""
@@ -483,7 +556,38 @@ class LoginView(View, LogoutMixin):
             }
             return JsonResponse(self.request, data)
         else:
-            return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
+            if settings.CAS_FEDERATE:
+                if self.username and self.ticket:
+                    return render(
+                        self.request,
+                        settings.CAS_LOGIN_TEMPLATE,
+                        {
+                            'form': self.form,
+                            'auto_submit': True,
+                            'post_url': reverse("cas_server:login")
+                        }
+                    )
+                else:
+                    if (
+                        self.request.COOKIES.get('_remember_provider') and
+                        self.request.COOKIES['_remember_provider'] in
+                        settings.CAS_FEDERATE_PROVIDERS
+                    ):
+                        params = utils.copy_params(self.request.GET)
+                        url = utils.reverse_params(
+                            "cas_server:federateAuth",
+                            params=params,
+                            kwargs=dict(provider=self.request.COOKIES['_remember_provider'])
+                        )
+                        return HttpResponseRedirect(url)
+                    else:
+                        return render(
+                            self.request,
+                            settings.CAS_FEDERATE_TEMPLATE,
+                            {'form': self.form}
+                        )
+            else:
+                return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
 
     def common(self):
         """Part execute uppon GET and POST request"""

@@ -18,6 +18,7 @@ def setting_default(name, default_value):
     setattr(settings, name, value)
 
 setting_default('CAS_LOGIN_TEMPLATE', 'cas_server/login.html')
+setting_default('CAS_FEDERATE_TEMPLATE', 'cas_server/federate.html')
 setting_default('CAS_WARN_TEMPLATE', 'cas_server/warn.html')
 setting_default('CAS_LOGGED_TEMPLATE', 'cas_server/logged.html')
 setting_default('CAS_LOGOUT_TEMPLATE', 'cas_server/logout.html')
@@ -70,3 +71,14 @@ setting_default('CAS_SQL_DBCHARSET', 'utf8')
 setting_default('CAS_SQL_USER_QUERY', 'SELECT user AS usersame, pass AS '
                 'password, users.* FROM users WHERE user = %s')
 setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt')  # crypt or plain
+
+
+setting_default('CAS_FEDERATE', False)
+# A dict of "provider name" -> (provider CAS server url, CAS version)
+setting_default('CAS_FEDERATE_PROVIDERS', {})
+
+if settings.CAS_FEDERATE:
+    settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"
+
+CAS_FEDERATE_PROVIDERS_LIST = settings.CAS_FEDERATE_PROVIDERS.keys()
+CAS_FEDERATE_PROVIDERS_LIST.sort()

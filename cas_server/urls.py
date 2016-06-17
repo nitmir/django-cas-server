@@ -59,4 +59,5 @@ urlpatterns = patterns(
         ),
         name='auth'
     ),
+    url("^federate(?:/(?P<provider>([^/]+)))?$", views.FederateAuth.as_view(), name='federateAuth'),
 )

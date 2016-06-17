@@ -35,6 +35,16 @@ SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 logger = logging.getLogger(__name__)
 
 
+class FederatedUser(models.Model):
+    class Meta:
+        unique_together = ("username", "provider")
+    username = models.CharField(max_length=124)
+    provider = models.CharField(max_length=124)
+    attributs = PickledObjectField()
+    ticket = models.CharField(max_length=255)
+    last_update = models.DateTimeField(auto_now=True)
+
+
 class User(models.Model):
     """A user logged into the CAS"""
     class Meta:

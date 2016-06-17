@@ -3,7 +3,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% block content %}
-      <form class="form-signin" method="post" id="login_form"{% if post_url %} action="{{post_url}}"{% endif %}>
+      <form class="form-signin" method="post" id="login_form" action="{% url "cas_server:federateAuth" %}">
 {% if auto_submit %}<noscript>{% endif %}
         <h2 class="form-signin-heading">{% trans "Please log in" %}</h2>
 {% if auto_submit %}</noscript>{% endif %}

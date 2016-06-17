@@ -20,6 +20,7 @@ import random
 import string
 import json
 from importlib import import_module
+from datetime import datetime, timedelta
 
 try:
     from urlparse import urlparse, urlunparse, parse_qsl
@@ -60,7 +61,43 @@ def redirect_params(url_name, params=None):
 def reverse_params(url_name, params=None, **kwargs):
     url = reverse(url_name, **kwargs)
     params = urlencode(params if params else {})
-    return url + "?%s" % params
+    if params:
+        return url + "?%s" % params
+    else:
+        return url
+
+
+def copy_params(get_or_post_params, ignore=set()):
+    params = {}
+    for key in get_or_post_params:
+        if key not in ignore and get_or_post_params[key]:
+            params[key] = get_or_post_params[key]
+    return params
+
+
+def set_cookie(response, key, value, max_age):
+    expires = datetime.strftime(
+        datetime.utcnow() + timedelta(seconds=max_age),
+        "%a, %d-%b-%Y %H:%M:%S GMT"
+    )
+    response.set_cookie(
+        key,
+        value,
+        max_age=max_age,
+        expires=expires,
+        domain=settings.SESSION_COOKIE_DOMAIN,
+        secure=settings.SESSION_COOKIE_SECURE or None
+    )
+
+
+def get_current_url(request, ignore_params=set()):
+    protocol = 'https' if request.is_secure() else "http"
+    service_url = "%s://%s%s" % (protocol, request.get_host(), request.path)
+    if request.GET:
+        params = copy_params(request.GET, ignore_params)
+        if params:
+            service_url += "?%s" % urlencode(params)
+    return service_url
 
 
 def update_url(url, params):

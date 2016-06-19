@@ -44,6 +44,9 @@ class FederatedUser(models.Model):
     ticket = models.CharField(max_length=255)
     last_update = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return u"%s@%s" % (self.username, self.provider)
+
 
 class User(models.Model):
     """A user logged into the CAS"""

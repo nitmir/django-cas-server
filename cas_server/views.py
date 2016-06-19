@@ -182,6 +182,8 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(View):
     def post(self, request, provider=None):
+        if not settings.CAS_FEDERATE:
+            return redirect("cas_server:login")
         form = forms.FederateSelect(request.POST)
         if form.is_valid():
             params = utils.copy_params(
@@ -202,6 +204,8 @@ class FederateAuth(View):
             return redirect("cas_server:login")
 
     def get(self, request, provider=None):
+        if not settings.CAS_FEDERATE:
+            return redirect("cas_server:login")
         if provider not in settings.CAS_FEDERATE_PROVIDERS:
             return redirect("cas_server:login")
         service_url = utils.get_current_url(request, {"ticket", "provider"})

@@ -164,7 +164,7 @@ class LogoutView(View, LogoutMixin):
                     return render(
                         request,
                         settings.CAS_LOGOUT_TEMPLATE,
-                        {'logout_msg': logout_msg}
+                        utils.context({'logout_msg': logout_msg})
                     )
 
 
@@ -348,7 +348,7 @@ class LoginView(View, LogoutMixin):
                     return render(
                         self.request,
                         settings.CAS_WARN_TEMPLATE,
-                        {'form': warn_form}
+                        utils.context({'form': warn_form})
                     )
             else:
                 # redirect, using method ?
@@ -402,7 +402,7 @@ class LoginView(View, LogoutMixin):
             return render(
                 self.request,
                 settings.CAS_LOGGED_TEMPLATE,
-                {'session': self.request.session}
+                utils.context({'session': self.request.session})
             )
         else:
             data = {"status": "error", "detail": "auth", "code": error}
@@ -443,7 +443,7 @@ class LoginView(View, LogoutMixin):
                 return render(
                     self.request,
                     settings.CAS_LOGGED_TEMPLATE,
-                    {'session': self.request.session}
+                    utils.context({'session': self.request.session})
                 )
 
     def not_authenticated(self):
@@ -483,7 +483,11 @@ class LoginView(View, LogoutMixin):
             }
             return JsonResponse(self.request, data)
         else:
-            return render(self.request, settings.CAS_LOGIN_TEMPLATE, {'form': self.form})
+            return render(
+                self.request,
+                settings.CAS_LOGIN_TEMPLATE,
+                utils.context({'form': self.form})
+            )
 
     def common(self):
         """Part execute uppon GET and POST request"""

@@ -40,3 +40,10 @@ body {
   border-top-right-radius: 0;
 }
 
+#app-name {
+    text-align: center;
+}
+#app-name img {
+     width:110px;
+}
+

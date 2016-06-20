@@ -28,6 +28,11 @@ except ImportError:
     from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
+def context(params):
+    params["settings"] = settings
+    return params
+
+
 def JsonResponse(request, data):
     data["messages"] = []
     for msg in messages.get_messages(request):

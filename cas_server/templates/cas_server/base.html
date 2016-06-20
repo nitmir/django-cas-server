@@ -12,6 +12,15 @@
 
 {% block bootstrap3_content %}
 <div class="container">
+ <div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <h1 id="app-name">
+        {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}"></img> {% endif %}
+        {% trans "Central Authentication Service" %}</h1>
+  </div>
+  <div class="col-md-2"></div>
+</div>
 <div class="row">
 <div class="col-md-3"></div>
 <div class="col-md-6">

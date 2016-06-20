@@ -286,7 +286,7 @@ Federation mode
 ``django-cas-server`` comes with a federation mode. Then ``CAS_FEDERATE`` is ``True``,
 user are invited to choose an identity provider on the login page, then, they are redirected
 to the provider CAS to authenticate. This provider transmit to ``django-cas-server`` the user
-username and attributes. The user is now logged in on ``django-cas-server`` and can user
+username and attributes. The user is now logged in on ``django-cas-server`` and can use
 services using ``django-cas-server`` as CAS.
 
 The list of allowed identity providers is defined using the ``CAS_FEDERATE_PROVIDERS`` parameter.
@@ -306,4 +306,13 @@ For instance:
 In federation mode, ``django-cas-server`` build user's username as follow:
 ``provider_returned_username@provider_name``.
 You can choose the provider returned username for ``django-cas-server`` and the provider name
-in order than to builed username make sense.
+in order to make sense.
+
+
+Then using federate mode, you should add one command to a daily crontab: ``cas_clean_federate``.
+This command clean the local cache of federated user from old unused users.
+ You could for example do as bellow :
+
+   .. code-block::
+
+      10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate

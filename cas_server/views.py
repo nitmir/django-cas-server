@@ -587,8 +587,11 @@ class LoginView(View, LogoutMixin):
                     else:
                         return render(
                             self.request,
-                            settings.CAS_FEDERATE_TEMPLATE,
-                            utils.context({'form': self.form})
+                            settings.CAS_LOGIN_TEMPLATE,
+                            utils.context({
+                                'form': self.form,
+                                'post_url': reverse("cas_server:federateAuth")
+                            })
                         )
             else:
                 return render(

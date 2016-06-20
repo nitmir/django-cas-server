@@ -139,6 +139,15 @@ Authentication settings:
   If more requests need to be send, there are queued. The default is ``10``.
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
+
+Federation settings:
+
+* ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
+  The default is ``False``.
+* ``CAS_FEDERATE_PROVIDERS``: A distionnary for the allowed identity providers (see the federate
+  section below). The default is ``{}``.
+
+
 Tickets validity settings:
 
 * ``CAS_TICKET_VALIDITY``: Number of seconds the service tickets and proxy tickets are valid.
@@ -199,6 +208,8 @@ Authentication backend
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
+* federated backend ``cas_server.auth.CASFederateAuth``: It is automatically used then ``CAS_FEDERATE`` is ``True``.
+  You should not set it manually without setting ``CAS_FEDERATE`` to ``True``.
 
 Logs
 ----
@@ -267,3 +278,32 @@ Or to log to a file:
             },
         },
     }
+
+
+Federation mode
+---------------
+
+``django-cas-server`` comes with a federation mode. Then ``CAS_FEDERATE`` is ``True``,
+user are invited to choose an identity provider on the login page, then, they are redirected
+to the provider CAS to authenticate. This provider transmit to ``django-cas-server`` the user
+username and attributes. The user is now logged in on ``django-cas-server`` and can user
+services using ``django-cas-server`` as CAS.
+
+The list of allowed identity providers is defined using the ``CAS_FEDERATE_PROVIDERS`` parameter.
+For instance:
+
+.. code-block:: python
+
+    CAS_FEDERATE_PROVIDERS = {
+        "example.com": ("https://cas.example.com", 3),
+        "exemple.fr": ("https://cas.exemple.fr", 3),
+    }
+
+
+``CAS_FEDERATE_PROVIDERS`` is a dictionnary using provider names as key and a tuple
+(cas address, cas version protocol) as value.
+
+In federation mode, ``django-cas-server`` build user's username as follow:
+``provider_returned_username@provider_name``.
+You can choose the provider returned username for ``django-cas-server`` and the provider name
+in order than to builed username make sense.

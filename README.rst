@@ -311,8 +311,10 @@ in order to make sense.
 
 Then using federate mode, you should add one command to a daily crontab: ``cas_clean_federate``.
 This command clean the local cache of federated user from old unused users.
- You could for example do as bellow :
 
-   .. code-block::
 
-      10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+You could for example do as bellow :
+
+.. code-block::
+
+    10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate

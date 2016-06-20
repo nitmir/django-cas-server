@@ -12,7 +12,8 @@
 
 {% block bootstrap3_content %}
 <div class="container">
- <div class="row">
+{% if auto_submit %}<noscript>{% endif %}
+<div class="row">
   <div class="col-md-2"></div>
   <div class="col-md-8">
     <h1 id="app-name">
@@ -21,6 +22,7 @@
   </div>
   <div class="col-md-2"></div>
 </div>
+{% if auto_submit %}</noscript>{% endif %}
 <div class="row">
 <div class="col-md-3"></div>
 <div class="col-md-6">

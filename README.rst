@@ -104,6 +104,9 @@ All settings are optional. Add them to ``settings.py`` to customize ``django-cas
 
 Template settings:
 
+* ``CAS_LOGO_URL``: Url to the logo showed in the up left corner on the default
+  templates. Set it to ``False`` to disable it.
+
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
 * ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then

@@ -10,12 +10,15 @@
 # (c) 2015 Valentin Samir
 """Default values for the app's settings"""
 from django.conf import settings
+from django.contrib.staticfiles.templatetags.staticfiles import static
 
 
 def setting_default(name, default_value):
     """if the config `name` is not set, set it the `default_value`"""
     value = getattr(settings, name, default_value)
     setattr(settings, name, value)
+
+setting_default('CAS_LOGO_URL', static("cas_server/logo.png"))
 
 setting_default('CAS_LOGIN_TEMPLATE', 'cas_server/login.html')
 setting_default('CAS_FEDERATE_TEMPLATE', 'cas_server/federate.html')

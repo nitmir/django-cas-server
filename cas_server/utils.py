@@ -181,3 +181,10 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+
+def get_tuple(tuple, index, default=None):
+    try:
+        return tuple[index]
+    except IndexError:
+        return default

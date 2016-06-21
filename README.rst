@@ -295,18 +295,20 @@ For instance:
 .. code-block:: python
 
     CAS_FEDERATE_PROVIDERS = {
-        "example.com": ("https://cas.example.com", 3),
-        "exemple.fr": ("https://cas.exemple.fr", 3),
+        "example.com": ("https://cas.example.com", 3, "Example dot com"),
+        "exemple.fr": ("https://cas.exemple.fr", 3, "Exemple point fr"),
     }
 
 
 ``CAS_FEDERATE_PROVIDERS`` is a dictionnary using provider names as key and a tuple
-(cas address, cas version protocol) as value.
+(cas address, cas version protocol, provider verbose name) as value.
 
 In federation mode, ``django-cas-server`` build user's username as follow:
 ``provider_returned_username@provider_name``.
 You can choose the provider returned username for ``django-cas-server`` and the provider name
 in order to make sense.
+
+The "provider verbose name" is showed on the select menu of the login page.
 
 
 Then using federate mode, you should add one command to a daily crontab: ``cas_clean_federate``.

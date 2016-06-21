@@ -9,7 +9,7 @@
 #
 # (c) 2015 Valentin Samir
 """forms for the app"""
-from .default_settings import settings, CAS_FEDERATE_PROVIDERS_LIST
+from .default_settings import settings
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
@@ -30,7 +30,12 @@ class WarnForm(forms.Form):
 class FederateSelect(forms.Form):
     provider = forms.ChoiceField(
         label=_('Identity provider'),
-        choices=[(p, p) for p in CAS_FEDERATE_PROVIDERS_LIST]
+        choices=[
+            (
+                p,
+                utils.get_tuple(settings.CAS_FEDERATE_PROVIDERS[p], 2, p)
+            ) for p in settings.CAS_FEDERATE_PROVIDERS_LIST
+        ]
     )
     service = forms.CharField(label=_('service'), widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)

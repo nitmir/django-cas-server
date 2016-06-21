@@ -12,6 +12,9 @@
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
+import re
+import six
+
 
 def setting_default(name, default_value):
     """if the config `name` is not set, set it the `default_value`"""
@@ -76,11 +79,30 @@ setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt')  # crypt or plain
 
 
 setting_default('CAS_FEDERATE', False)
-# A dict of "provider name" -> (provider CAS server url, CAS version)
+# A dict of "provider suffix" -> (provider CAS server url, CAS version, verbose name)
 setting_default('CAS_FEDERATE_PROVIDERS', {})
 
 if settings.CAS_FEDERATE:
     settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"
 
-CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
-CAS_FEDERATE_PROVIDERS_LIST.sort()
+__CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
+
+
+def __CAS_FEDERATE_PROVIDERS_LIST_sort(key):
+    if len(settings.CAS_FEDERATE_PROVIDERS[key]) > 2:
+        key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
+    else:
+        key = key.lower()
+    if isinstance(key, six.string_types) or isinstance(key, six.text_type):
+        return tuple(
+            int(num) if num else alpha
+            for num, alpha in __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize(key)
+        )
+    else:
+        return key
+
+
+__CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
+__CAS_FEDERATE_PROVIDERS_LIST.sort(key=__CAS_FEDERATE_PROVIDERS_LIST_sort)
+
+settings.CAS_FEDERATE_PROVIDERS_LIST = __CAS_FEDERATE_PROVIDERS_LIST

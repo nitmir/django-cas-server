@@ -1,3 +1,4 @@
+# ⁻*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -86,24 +87,26 @@ setting_default('CAS_FEDERATE_REMEMBER_TIMEOUT', 604800)  # one week
 if settings.CAS_FEDERATE:
     settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"
 
-__CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
+#  create CAS_FEDERATE_PROVIDERS_LIST default value if not set: list of
+#  the keys of CAS_FEDERATE_PROVIDERS in natural order: 2 < 10 < 20 < a = A < … < z = Z
+try:
+    getattr(settings, 'CAS_FEDERATE_PROVIDERS_LIST')
+except AttributeError:
+    __CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
 
+    def __CAS_FEDERATE_PROVIDERS_LIST_sort(key):
+        if len(settings.CAS_FEDERATE_PROVIDERS[key]) > 2:
+            key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
+        else:
+            key = key.lower()
+        if isinstance(key, six.string_types) or isinstance(key, six.text_type):
+            return tuple(
+                int(num) if num else alpha
+                for num, alpha in __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize(key)
+            )
+        else:
+            return key
+    __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
+    __CAS_FEDERATE_PROVIDERS_LIST.sort(key=__CAS_FEDERATE_PROVIDERS_LIST_sort)
 
-def __CAS_FEDERATE_PROVIDERS_LIST_sort(key):
-    if len(settings.CAS_FEDERATE_PROVIDERS[key]) > 2:
-        key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
-    else:
-        key = key.lower()
-    if isinstance(key, six.string_types) or isinstance(key, six.text_type):
-        return tuple(
-            int(num) if num else alpha
-            for num, alpha in __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize(key)
-        )
-    else:
-        return key
-
-
-__CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
-__CAS_FEDERATE_PROVIDERS_LIST.sort(key=__CAS_FEDERATE_PROVIDERS_LIST_sort)
-
-settings.CAS_FEDERATE_PROVIDERS_LIST = __CAS_FEDERATE_PROVIDERS_LIST
+    setting_default('CAS_FEDERATE_PROVIDERS_LIST', __CAS_FEDERATE_PROVIDERS_LIST)

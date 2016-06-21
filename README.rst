@@ -144,8 +144,12 @@ Federation settings:
 
 * ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
   The default is ``False``.
-* ``CAS_FEDERATE_PROVIDERS``: A distionnary for the allowed identity providers (see the federate
+* ``CAS_FEDERATE_PROVIDERS``: A dictionnary for the allowed identity providers (see the federate
   section below). The default is ``{}``.
+* ``CAS_FEDERATE_PROVIDERS_LIST``: A list in with the keys of ``CAS_FEDERATE_PROVIDERS`` are ordened
+  for beeing displayed on the login page. The default is the list of all the keys of
+  ``CAS_FEDERATE_PROVIDERS`` sorted in natural order (0 < 2 < 10 < 20 < a = A < … < z = Z and
+  lexicographical)
 * ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
   provider" expire. The default is ``604800``, one week. The cookie is called
   ``_remember_provider``.

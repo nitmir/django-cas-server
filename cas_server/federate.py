@@ -24,7 +24,7 @@ class CASFederateValidateUser(object):
         self.provider = provider
 
         if provider in settings.CAS_FEDERATE_PROVIDERS:
-            (server_url, version) = settings.CAS_FEDERATE_PROVIDERS[provider]
+            (server_url, version) = settings.CAS_FEDERATE_PROVIDERS[provider][:2]
             self.client = CASClient(
                 service_url=service_url,
                 version=version,

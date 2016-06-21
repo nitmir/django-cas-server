@@ -146,6 +146,9 @@ Federation settings:
   The default is ``False``.
 * ``CAS_FEDERATE_PROVIDERS``: A distionnary for the allowed identity providers (see the federate
   section below). The default is ``{}``.
+* ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
+  provider" expire. The default is ``604800``, one week. The cookie is called
+  ``_remember_provider``.
 
 
 Tickets validity settings:

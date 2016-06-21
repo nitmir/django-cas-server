@@ -197,7 +197,7 @@ class FederateAuth(View):
             )
             response = HttpResponseRedirect(url)
             if form.cleaned_data["remember"]:
-                max_age = 7 * 24 * 60 * 60  # one week
+                max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
                 utils.set_cookie(response, "_remember_provider", request.POST["provider"], max_age)
             return response
         else:

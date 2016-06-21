@@ -81,6 +81,7 @@ setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt')  # crypt or plain
 setting_default('CAS_FEDERATE', False)
 # A dict of "provider suffix" -> (provider CAS server url, CAS version, verbose name)
 setting_default('CAS_FEDERATE_PROVIDERS', {})
+setting_default('CAS_FEDERATE_REMEMBER_TIMEOUT', 604800)  # one week
 
 if settings.CAS_FEDERATE:
     settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"

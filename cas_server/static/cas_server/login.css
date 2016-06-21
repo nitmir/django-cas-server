@@ -4,12 +4,6 @@ body {
   background-color: #eee;
 }
 
-/*.form-signin {
-  max-width: 330px;
-  padding: 15px;
-  margin: 0 auto;
-}
-*/
 .form-signin .form-signin-heading,
 .form-signin .checkbox {
   margin-bottom: 10px;
@@ -47,3 +41,16 @@ body {
      width:110px;
 }
 
+@media screen and (max-width: 680px) {
+    #app-name {
+        margin: 0px;
+    }
+    #app-name img {
+        display: block;
+        margin: auto;
+    }
+    body {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+}

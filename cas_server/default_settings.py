@@ -82,5 +82,5 @@ setting_default('CAS_FEDERATE_PROVIDERS', {})
 if settings.CAS_FEDERATE:
     settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"
 
-CAS_FEDERATE_PROVIDERS_LIST = settings.CAS_FEDERATE_PROVIDERS.keys()
+CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
 CAS_FEDERATE_PROVIDERS_LIST.sort()

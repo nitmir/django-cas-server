@@ -215,8 +215,9 @@ class FederateAuth(View):
         else:
             ticket = request.GET['ticket']
             if auth.verify_ticket(ticket):
-                params = utils.copy_params(request.GET)
-                params['username'] = "%s@%s" % (auth.username, auth.provider)
+                params = utils.copy_params(request.GET, ignore={"ticket"})
+                request.session["federate_username"] = "%s@%s" % (auth.username, auth.provider)
+                request.session["federate_ticket"] = ticket
                 url = utils.reverse_params("cas_server:login", params)
                 return HttpResponseRedirect(url)
             else:
@@ -241,6 +242,10 @@ class LoginView(View, LogoutMixin):
 
     renewed = False
     warned = False
+
+    if settings.CAS_FEDERATE:
+        username = None
+        ticket = None
 
     INVALID_LOGIN_TICKET = 1
     USER_LOGIN_OK = 2
@@ -307,7 +312,10 @@ class LoginView(View, LogoutMixin):
                 )
                 self.user.save()
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
-            self.ticket = None
+            if settings.CAS_FEDERATE:
+                self.ticket = None
+                self.usernalme = None
+                self.init_form()
             self.logout()
         elif ret == self.USER_ALREADY_LOGGED:
             pass
@@ -353,8 +361,12 @@ class LoginView(View, LogoutMixin):
         self.ajax = 'HTTP_X_AJAX' in request.META
         self.warn = request.GET.get('warn')
         if settings.CAS_FEDERATE:
-            self.username = request.GET.get('username')
-            self.ticket = request.GET.get('ticket')
+            self.username = request.session.get("federate_username")
+            self.ticket = request.session.get("federate_ticket")
+            if self.username:
+                del request.session["federate_username"]
+            if self.ticket:
+                del request.session["federate_ticket"]
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""

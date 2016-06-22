@@ -29,7 +29,6 @@ class CASFederateValidateUser(object):
                 service_url=service_url,
                 version=version,
                 server_url=server_url,
-                extra_login_params={"provider": provider},
                 renew=False,
             )
 

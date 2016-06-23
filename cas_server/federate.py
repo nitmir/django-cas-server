@@ -44,6 +44,8 @@ class CASFederateValidateUser(object):
             return False
         username, attributs, pgtiou = self.client.verify_ticket(ticket)
         if username is not None:
+            if attributs is None:
+                attributs = {}
             attributs["provider"] = self.provider
             self.username = username
             self.attributs = attributs

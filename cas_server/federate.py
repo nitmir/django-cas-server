@@ -12,7 +12,11 @@
 from .default_settings import settings
 
 from .cas import CASClient
-from .models import FederatedUser
+from .models import FederatedUser, FederateSLO, User
+
+from importlib import import_module
+
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 
 class CASFederateValidateUser(object):
@@ -68,3 +72,33 @@ class CASFederateValidateUser(object):
             return True
         else:
             return False
+
+    def register_slo(self, username, session_key, ticket):
+        FederateSLO.objects.create(
+            username=username,
+            session_key=session_key,
+            ticket=ticket
+        )
+
+    def clean_sessions(self, logout_request):
+        try:
+            SLOs = self.client.get_saml_slos(logout_request)
+        except NameError:
+            SLOs = []
+        for slo in SLOs:
+            try:
+                for federate_slo in FederateSLO.objects.filter(ticket=slo.text):
+                    session = SessionStore(session_key=federate_slo.session_key)
+                    session.flush()
+                    try:
+                        user = User.objects.get(
+                            username=federate_slo.username,
+                            session_key=federate_slo.session_key
+                        )
+                        user.logout()
+                        user.delete()
+                    except User.DoesNotExist:
+                        pass
+                    federate_slo.delete()
+            except FederateSLO.DoesNotExist:
+                pass

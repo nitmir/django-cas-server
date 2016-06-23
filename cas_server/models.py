@@ -48,6 +48,25 @@ class FederatedUser(models.Model):
         return u"%s@%s" % (self.username, self.provider)
 
 
+class FederateSLO(models.Model):
+    class Meta:
+        unique_together = ("username", "session_key")
+    username = models.CharField(max_length=30)
+    session_key = models.CharField(max_length=40, blank=True, null=True)
+    ticket = models.CharField(max_length=255)
+
+    @property
+    def provider(self):
+        component = self.username.split("@")
+        return component[-1]
+
+    @classmethod
+    def clean_deleted_sessions(cls):
+        for federate_slo in cls.objects.all():
+            if not SessionStore(session_key=federate_slo.session_key).get('authenticated'):
+                federate_slo.delete()
+
+
 class User(models.Model):
     """A user logged into the CAS"""
     class Meta:

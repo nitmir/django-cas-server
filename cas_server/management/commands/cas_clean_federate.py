@@ -16,6 +16,8 @@ class Command(BaseCommand):
         federated_users = models.FederatedUser.objects.filter(
             last_update__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT))
         )
+        known_users = {user.username for user in models.User.objects.all()}
         for user in federated_users:
-            if not models.User.objects.filter(username='%s@%s' % (user.username, user.provider)):
+            if not ('%s@%s' % (user.username, user.provider)) in known_users:
                 user.delete()
+        models.FederateSLO.clean_deleted_sessions()

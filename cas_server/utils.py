@@ -184,6 +184,8 @@ def gen_saml_id():
 
 
 def get_tuple(tuple, index, default=None):
+    if tuple is None:
+        return default
     try:
         return tuple[index]
     except IndexError:

@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-
+from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
 
 import logging
@@ -78,6 +78,11 @@ class LogoutMixin(object):
                 username=username,
                 session_key=self.request.session.session_key
             )
+            if settings.CAS_FEDERATE:
+                models.FederateSLO.objects.filter(
+                    username=username,
+                    session_key=self.request.session.session_key
+                ).delete()
             self.request.session.flush()
             user.logout(self.request)
             user.delete()
@@ -181,43 +186,73 @@ class LogoutView(View, LogoutMixin):
 
 
 class FederateAuth(View):
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(FederateAuth, self).dispatch(request, *args, **kwargs)
+
+    def get_cas_client(self, request, provider):
+        if provider in settings.CAS_FEDERATE_PROVIDERS:
+            service_url = utils.get_current_url(request, {"ticket", "provider"})
+            return CASFederateValidateUser(provider, service_url)
+
     def post(self, request, provider=None):
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
-        form = forms.FederateSelect(request.POST)
-        if form.is_valid():
-            params = utils.copy_params(
-                request.POST,
-                ignore={"provider", "csrfmiddlewaretoken", "ticket"}
-            )
-            url = utils.reverse_params(
-                "cas_server:federateAuth",
-                kwargs=dict(provider=form.cleaned_data["provider"]),
-                params=params
-            )
-            response = HttpResponseRedirect(url)
-            if form.cleaned_data["remember"]:
-                max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
-                utils.set_cookie(response, "_remember_provider", request.POST["provider"], max_age)
-            return response
+        # POST with a provider, this is probably an SLO request
+        if provider in settings.CAS_FEDERATE_PROVIDERS:
+            auth = self.get_cas_client(request, provider)
+            try:
+                auth.clean_sessions(request.POST['logoutRequest'])
+            except KeyError:
+                pass
+            return HttpResponse("ok")
+        # else, a User is trying to log in using an identity provider
         else:
-            return redirect("cas_server:login")
+            # Manually checking for csrf to protect the code below
+            reason = CsrfViewMiddleware().process_view(request, None, (), {})
+            if reason is not None:
+                return reason  # Failed the test, stop here.
+            form = forms.FederateSelect(request.POST)
+            if form.is_valid():
+                params = utils.copy_params(
+                    request.POST,
+                    ignore={"provider", "csrfmiddlewaretoken", "ticket"}
+                )
+                url = utils.reverse_params(
+                    "cas_server:federateAuth",
+                    kwargs=dict(provider=form.cleaned_data["provider"]),
+                    params=params
+                )
+                response = HttpResponseRedirect(url)
+                if form.cleaned_data["remember"]:
+                    max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
+                    utils.set_cookie(
+                        response,
+                        "_remember_provider",
+                        request.POST["provider"],
+                        max_age
+                    )
+                return response
+            else:
+                return redirect("cas_server:login")
 
     def get(self, request, provider=None):
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
         if provider not in settings.CAS_FEDERATE_PROVIDERS:
             return redirect("cas_server:login")
-        service_url = utils.get_current_url(request, {"ticket", "provider"})
-        auth = CASFederateValidateUser(provider, service_url)
+        auth = self.get_cas_client(request, provider)
         if 'ticket' not in request.GET:
             return HttpResponseRedirect(auth.get_login_url())
         else:
             ticket = request.GET['ticket']
             if auth.verify_ticket(ticket):
                 params = utils.copy_params(request.GET, ignore={"ticket"})
-                request.session["federate_username"] = "%s@%s" % (auth.username, auth.provider)
+                username = "%s@%s" % (auth.username, auth.provider)
+                request.session["federate_username"] = username
                 request.session["federate_ticket"] = ticket
+                auth.register_slo(username, request.session.session_key, ticket)
                 url = utils.reverse_params("cas_server:login", params)
                 return HttpResponseRedirect(url)
             else:

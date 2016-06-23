@@ -134,7 +134,7 @@ class CASClientV1(CASClientBase):
 
         Returns username on success and None on failure.
         """
-        params = [('ticket', ticket), ('service', self.service)]
+        params = [('ticket', ticket), ('service', self.service_url)]
         url = (urllib_parse.urljoin(self.server_url, 'validate') + '?' +
                urllib_parse.urlencode(params))
         page = urllib_request.urlopen(url)
@@ -294,6 +294,9 @@ class CASClientWithSAMLV1(CASClientV2, SingleLogoutMixin):
             success = tree.find('.//' + SAML_1_0_PROTOCOL_NS + 'StatusCode')
             if success is not None and success.attrib['Value'].endswith(':Success'):
                 # User is validated
+                name_identifier = tree.find('.//' + SAML_1_0_ASSERTION_NS + 'NameIdentifier')
+                if name_identifier is not None:
+                    user = name_identifier.text
                 attrs = tree.findall('.//' + SAML_1_0_ASSERTION_NS + 'Attribute')
                 for at in attrs:
                     if self.username_attribute in list(at.attrib.values()):

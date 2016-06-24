@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.views.generic import View
 
+import re
 import logging
 import pprint
 import requests
@@ -666,7 +667,10 @@ class ValidateService(View, AttributesMixin):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
-                if self.pgt_url and self.pgt_url.startswith("https://"):
+                if self.pgt_url and (
+                    self.pgt_url.startswith("https://") or
+                    re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
+                ):
                     return self.process_pgturl(params)
                 else:
                     logger.info(

@@ -14,7 +14,7 @@ from django.conf.urls import patterns, url
 from django.views.generic import RedirectView
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
-import views
+from cas_server import views
 
 urlpatterns = patterns(
     '',

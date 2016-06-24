@@ -19,15 +19,10 @@ from django.contrib import messages
 import random
 import string
 import json
-import BaseHTTPServer
 from threading import Thread
 from importlib import import_module
-
-try:
-    from urlparse import urlparse, urlunparse, parse_qsl
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+from six.moves import BaseHTTPServer
+from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def context(params):
@@ -153,13 +148,12 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(s):
         s.send_response(200)
-        s.send_header("Content-type", "text/plain")
+        s.send_header(b"Content-type", "text/plain")
         s.end_headers()
-        s.wfile.write("ok")
+        s.wfile.write(b"ok")
         url = urlparse(s.path)
         params = dict(parse_qsl(url.query))
         PGTUrlHandler.PARAMS.update(params)
-        s.wfile.write("%s" % params)
 
     def log_message(self, format, *args):
         return

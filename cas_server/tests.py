@@ -5,8 +5,8 @@ from django.test import Client
 
 from lxml import etree
 
-import models
-import utils
+from cas_server import models
+from cas_server import utils
 
 
 def get_login_page_params():
@@ -79,8 +79,8 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -100,11 +100,11 @@ class LoginTestCase(TestCase):
         response = client.post('/login', params)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("Invalid login ticket" in response.content)
+        self.assertTrue(b"Invalid login ticket" in response.content)
         self.assertFalse(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -117,14 +117,14 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "The credentials you provided cannot be "
-                "determined to be authentic"
+                b"The credentials you provided cannot be "
+                b"determined to be authentic"
             ) in response.content
         )
         self.assertFalse(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -155,7 +155,7 @@ class LoginTestCase(TestCase):
         client = get_auth_client()
         response = client.get("/login?service=https://www.example.org")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("Service https://www.example.org non allowed" in response.content)
+        self.assertTrue(b"Service https://www.example.org non allowed" in response.content)
 
 
 class LogoutTestCase(TestCase):
@@ -170,8 +170,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -179,8 +179,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "You have successfully logged out from "
-                "the Central Authentication Service"
+                b"You have successfully logged out from "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -188,8 +188,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -205,8 +205,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -222,8 +222,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(
             (
-                "You have successfully logged into "
-                "the Central Authentication Service"
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
             ) in response.content
         )
 
@@ -251,7 +251,7 @@ class AuthTestCase(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'yes\n')
+        self.assertEqual(response.content, b'yes\n')
 
     def test_auth_view_badpass(self):
         settings.CAS_AUTH_SHARED_SECRET = 'test'
@@ -266,7 +266,7 @@ class AuthTestCase(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'no\n')
+        self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badservice(self):
         settings.CAS_AUTH_SHARED_SECRET = 'test'
@@ -281,7 +281,7 @@ class AuthTestCase(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'no\n')
+        self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badsecret(self):
         settings.CAS_AUTH_SHARED_SECRET = 'test'
@@ -296,7 +296,7 @@ class AuthTestCase(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'no\n')
+        self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badsettings(self):
         settings.CAS_AUTH_SHARED_SECRET = None
@@ -311,7 +311,7 @@ class AuthTestCase(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, "no\nplease set CAS_AUTH_SHARED_SECRET")
+        self.assertEqual(response.content, b"no\nplease set CAS_AUTH_SHARED_SECRET")
 
 
 class ValidateTestCase(TestCase):
@@ -331,7 +331,7 @@ class ValidateTestCase(TestCase):
         client = Client()
         response = client.get('/validate', {'ticket': ticket.value, 'service': self.service})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'yes\ntest\n')
+        self.assertEqual(response.content, b'yes\ntest\n')
 
     def test_validate_view_badservice(self):
         (user, ticket) = get_user_ticket_request(self.service)
@@ -342,7 +342,7 @@ class ValidateTestCase(TestCase):
             {'ticket': ticket.value, 'service': "https://www.example.org"}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'no\n')
+        self.assertEqual(response.content, b'no\n')
 
     def test_validate_view_badticket(self):
         (user, ticket) = get_user_ticket_request(self.service)
@@ -353,7 +353,7 @@ class ValidateTestCase(TestCase):
             {'ticket': "%s-RANDOM" % settings.CAS_SERVICE_TICKET_PREFIX, 'service': self.service}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'no\n')
+        self.assertEqual(response.content, b'no\n')
 
 
 class ValidateServiceTestCase(TestCase):

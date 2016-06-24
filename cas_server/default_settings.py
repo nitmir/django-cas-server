@@ -76,4 +76,7 @@ setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt')  # crypt or plain
 
 setting_default('CAS_TEST_USER', 'test')
 setting_default('CAS_TEST_PASSWORD', 'test')
-setting_default('CAS_TEST_ATTRIBUTES', {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'})
+setting_default(
+    'CAS_TEST_ATTRIBUTES',
+    {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
+)

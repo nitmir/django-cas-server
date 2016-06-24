@@ -149,7 +149,8 @@ def gen_saml_id():
 
 
 class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    PARAMS={}
+    PARAMS = {}
+
     def do_GET(s):
         s.send_response(200)
         s.send_header("Content-type", "text/plain")
@@ -159,6 +160,7 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         params = dict(parse_qsl(url.query))
         PGTUrlHandler.PARAMS.update(params)
         s.wfile.write("%s" % params)
+
     def log_message(self, format, *args):
         return
 
@@ -166,11 +168,12 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def run():
         server_class = BaseHTTPServer.HTTPServer
         httpd = server_class(("127.0.0.1", 0), PGTUrlHandler)
-        (host, port) =  httpd.socket.getsockname()
+        (host, port) = httpd.socket.getsockname()
+
         def lauch():
             httpd.handle_request()
-            #httpd.serve_forever()
             httpd.server_close()
+
         httpd_thread = Thread(target=lauch)
         httpd_thread.daemon = True
         httpd_thread.start()

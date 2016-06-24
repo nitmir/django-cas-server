@@ -19,6 +19,8 @@ from django.contrib import messages
 import random
 import string
 import json
+import BaseHTTPServer
+from threading import Thread
 from importlib import import_module
 
 try:
@@ -144,3 +146,32 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+
+class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    PARAMS={}
+    def do_GET(s):
+        s.send_response(200)
+        s.send_header("Content-type", "text/plain")
+        s.end_headers()
+        s.wfile.write("ok")
+        url = urlparse(s.path)
+        params = dict(parse_qsl(url.query))
+        PGTUrlHandler.PARAMS.update(params)
+        s.wfile.write("%s" % params)
+    def log_message(self, format, *args):
+        return
+
+    @staticmethod
+    def run():
+        server_class = BaseHTTPServer.HTTPServer
+        httpd = server_class(("127.0.0.1", 0), PGTUrlHandler)
+        (host, port) =  httpd.socket.getsockname()
+        def lauch():
+            httpd.handle_request()
+            #httpd.serve_forever()
+            httpd.server_close()
+        httpd_thread = Thread(target=lauch)
+        httpd_thread.daemon = True
+        httpd_thread.start()
+        return (httpd_thread, host, port)

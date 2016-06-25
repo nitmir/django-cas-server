@@ -5,4 +5,4 @@ requests_futures>=0.9.5
 django-picklefield>=0.3.1
 django-bootstrap3>=5.4
 lxml>=3.4
-
+six>=1

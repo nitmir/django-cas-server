@@ -44,3 +44,8 @@ test_project: test_venv test_venv/cas/manage.py
 
 run_test_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
+
+coverage: test_venv
+	test_venv/bin/pip install coverage
+	test_venv/bin/coverage run --source='cas_server' run_tests
+	test_venv/bin/coverage html

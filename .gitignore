@@ -1,5 +1,7 @@
 *.pyc
 *.egg-info
+*~
+*.swp
 
 build/
 bootstrap3
@@ -10,3 +12,5 @@ manage.py
 
 .tox
 test_venv
+.coverage
+htmlcov/

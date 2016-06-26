@@ -200,7 +200,8 @@ Mysql backend settings. Only usefull if you are using the mysql authentication b
   additional fields are used as the user attributes.
   The default is ``"SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s"``
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
-    * ``"crypt"`` (see `<https://en.wikipedia.org/wiki/Crypt_(C)>`), the password in the database
+
+    * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
       should begin this $
     * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
       the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},

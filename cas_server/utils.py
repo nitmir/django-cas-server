@@ -30,7 +30,7 @@ def context(params):
     return params
 
 
-def JsonResponse(request, data):
+def json_response(request, data):
     data["messages"] = []
     for msg in messages.get_messages(request):
         data["messages"].append({'message': msg.message, 'level': msg.level_tag})
@@ -146,16 +146,16 @@ def gen_saml_id():
 class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     PARAMS = {}
 
-    def do_GET(s):
-        s.send_response(200)
-        s.send_header(b"Content-type", "text/plain")
-        s.end_headers()
-        s.wfile.write(b"ok")
-        url = urlparse(s.path)
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header(b"Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"ok")
+        url = urlparse(self.path)
         params = dict(parse_qsl(url.query))
         PGTUrlHandler.PARAMS.update(params)
 
-    def log_message(self, template, *args):
+    def log_message(self, *args):
         return
 
     @staticmethod

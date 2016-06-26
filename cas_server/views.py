@@ -35,7 +35,7 @@ import cas_server.utils as utils
 import cas_server.forms as forms
 import cas_server.models as models
 
-from .utils import JsonResponse
+from .utils import json_response
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 
@@ -154,13 +154,13 @@ class LogoutView(View, LogoutMixin):
                         'url': url,
                         'session_nb': session_nb
                     }
-                    return JsonResponse(request, data)
+                    return json_response(request, data)
                 else:
                     return redirect("cas_server:login")
             else:
                 if self.ajax:
                     data = {'status': 'success', 'detail': 'logout', 'session_nb': session_nb}
-                    return JsonResponse(request, data)
+                    return json_response(request, data)
                 else:
                     return render(
                         request,
@@ -253,7 +253,7 @@ class LoginView(View, LogoutMixin):
             raise EnvironmentError("invalid output for LoginView.process_post")
         return self.common()
 
-    def process_post(self, pytest=False):
+    def process_post(self):
         if not self.check_lt():
             values = self.request.POST.copy()
             # if not set a new LT and fail
@@ -330,7 +330,7 @@ class LoginView(View, LogoutMixin):
                 )
                 if self.ajax:
                     data = {"status": "error", "detail": "confirmation needed"}
-                    return JsonResponse(self.request, data)
+                    return json_response(self.request, data)
                 else:
                     warn_form = forms.WarnForm(initial={
                         'service': self.service,
@@ -357,7 +357,7 @@ class LoginView(View, LogoutMixin):
                     return HttpResponseRedirect(redirect_url)
                 else:
                     data = {"status": "success", "detail": "auth", "url": redirect_url}
-                    return JsonResponse(self.request, data)
+                    return json_response(self.request, data)
         except ServicePattern.DoesNotExist:
             error = 1
             messages.add_message(
@@ -401,7 +401,7 @@ class LoginView(View, LogoutMixin):
             )
         else:
             data = {"status": "error", "detail": "auth", "code": error}
-            return JsonResponse(self.request, data)
+            return json_response(self.request, data)
 
     def authenticated(self):
         """Processing authenticated users"""
@@ -423,7 +423,7 @@ class LoginView(View, LogoutMixin):
                     "detail": "login required",
                     "url": utils.reverse_params("cas_server:login", params=self.request.GET)
                 }
-                return JsonResponse(self.request, data)
+                return json_response(self.request, data)
             else:
                 return utils.redirect_params("cas_server:login", params=self.request.GET)
 
@@ -433,7 +433,7 @@ class LoginView(View, LogoutMixin):
         else:
             if self.ajax:
                 data = {"status": "success", "detail": "logged"}
-                return JsonResponse(self.request, data)
+                return json_response(self.request, data)
             else:
                 return render(
                     self.request,
@@ -476,7 +476,7 @@ class LoginView(View, LogoutMixin):
                 "detail": "login required",
                 "url": utils.reverse_params("cas_server:login",  params=self.request.GET)
             }
-            return JsonResponse(self.request, data)
+            return json_response(self.request, data)
         else:
             return render(
                 self.request,

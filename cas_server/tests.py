@@ -10,25 +10,25 @@ from cas_server import utils
 
 
 def get_login_page_params():
-        client = Client()
-        response = client.get('/login')
-        form = response.context["form"]
-        params = {}
-        for field in form:
-            if field.value():
-                params[field.name] = field.value()
-            else:
-                params[field.name] = ""
-        return client, params
+    client = Client()
+    response = client.get('/login')
+    form = response.context["form"]
+    params = {}
+    for field in form:
+        if field.value():
+            params[field.name] = field.value()
+        else:
+            params[field.name] = ""
+    return client, params
 
 
 def get_auth_client():
-        client, params = get_login_page_params()
-        params["username"] = settings.CAS_TEST_USER
-        params["password"] = settings.CAS_TEST_PASSWORD
+    client, params = get_login_page_params()
+    params["username"] = settings.CAS_TEST_USER
+    params["password"] = settings.CAS_TEST_PASSWORD
 
-        client.post('/login', params)
-        return client
+    client.post('/login', params)
+    return client
 
 
 def get_user_ticket_request(service):

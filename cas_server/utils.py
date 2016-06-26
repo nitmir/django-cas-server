@@ -177,6 +177,7 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         httpd_thread.start()
         return (httpd_thread, host, port)
 
+
 class LdapHashUserPassword(object):
     """Please see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html"""
 
@@ -204,8 +205,6 @@ class LdapHashUserPassword(object):
         b"{SSHA512}": 64,
     }
 
-
-
     class BadScheme(ValueError):
         pass
 
@@ -217,9 +216,9 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _raise_bad_scheme(cls, scheme, valid, msg):
-        valid_schemes = [s for s in valid]
+        valid_schemes = [s.decode() for s in valid]
         valid_schemes.sort()
-        raise cls.BadScheme(msg % (scheme, ", ".join(valid_schemes)))
+        raise cls.BadScheme(msg % (scheme, u", ".join(valid_schemes)))
 
     @classmethod
     def _test_scheme(cls, scheme):
@@ -258,7 +257,9 @@ class LdapHashUserPassword(object):
         elif salt is not None:
             cls._test_scheme_salt(scheme)
         try:
-            return scheme + base64.b64encode(cls._schemes_to_hash[scheme](password + salt).digest() + salt)
+            return scheme + base64.b64encode(
+                cls._schemes_to_hash[scheme](password + salt).digest() + salt
+            )
         except KeyError:
             if six.PY3:
                 password = password.decode(charset)
@@ -272,12 +273,11 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def get_scheme(cls, hashed_passord):
-        if not hashed_passord[0] == b'{' or not b'}' in hashed_passord:
+        if not hashed_passord[0] == b'{'[0] or b'}' not in hashed_passord:
             raise cls.BadHash("%r should start with the scheme enclosed with { }" % hashed_passord)
         scheme = hashed_passord.split(b'}', 1)[0]
         scheme = scheme.upper() + b"}"
         return scheme
-
 
     @classmethod
     def get_salt(cls, hashed_passord):
@@ -292,7 +292,6 @@ class LdapHashUserPassword(object):
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
                 raise cls.BadHash("Hash too short for the scheme %s" % scheme)
             return hashed_passord[cls._schemes_to_len[scheme]:]
-
 
 
 def check_password(method, password, hashed_password, charset):
@@ -325,6 +324,9 @@ def check_password(method, password, hashed_password, charset):
        method.startswith("hex_") and
        method[4:] in {"md5", "sha1", "sha224", "sha256", "sha384", "sha512"}
     ):
-        return getattr(hashlib, method[4:])(password).hexdigest() == hashed_password.lower()
+        return getattr(
+            hashlib,
+            method[4:]
+        )(password).hexdigest().encode("ascii") == hashed_password.lower()
     else:
         raise ValueError("Unknown password method check %r" % method)

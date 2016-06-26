@@ -3,6 +3,7 @@ from .default_settings import settings
 from django.test import TestCase
 from django.test import Client
 
+import six
 from lxml import etree
 
 from cas_server import models
@@ -57,6 +58,60 @@ def get_pgt():
     params["user"] = user
 
     return params
+
+
+class CheckPasswordCase(TestCase):
+
+    def setUp(self):
+        self.password1 = utils.gen_saml_id()
+        self.password2 = utils.gen_saml_id()
+        if not isinstance(self.password1, bytes):
+            self.password1 = self.password1.encode("utf8")
+            self.password2 = self.password2.encode("utf8")
+
+    def test_setup(self):
+        self.assertIsInstance(self.password1, bytes)
+        self.assertIsInstance(self.password2, bytes)
+
+    def test_plain(self):
+        self.assertTrue(utils.check_password("plain", self.password1, self.password1, "utf8"))
+        self.assertFalse(utils.check_password("plain", self.password1, self.password2, "utf8"))
+
+    def test_crypt(self):
+        if six.PY3:
+            hashed_password1 = utils.crypt.crypt(
+                self.password1.decode("utf8"),
+                "$6$UVVAQvrMyXMF3FF3"
+            ).encode("utf8")
+        else:
+            hashed_password1 = utils.crypt.crypt(self.password1, "$6$UVVAQvrMyXMF3FF3")
+
+        self.assertTrue(utils.check_password("crypt", self.password1, hashed_password1, "utf8"))
+        self.assertFalse(utils.check_password("crypt", self.password2, hashed_password1, "utf8"))
+
+    def test_ldap_ssha(self):
+        salt = b"UVVAQvrMyXMF3FF3"
+        hashed_password1 = utils.LdapHashUserPassword.hash(b'{SSHA}', self.password1, salt, "utf8")
+
+        self.assertIsInstance(hashed_password1, bytes)
+        self.assertTrue(utils.check_password("ldap", self.password1, hashed_password1, "utf8"))
+        self.assertFalse(utils.check_password("ldap", self.password2, hashed_password1, "utf8"))
+
+    def test_hex_md5(self):
+        hashed_password1 = utils.hashlib.md5(self.password1).hexdigest()
+
+        self.assertTrue(utils.check_password("hex_md5", self.password1, hashed_password1, "utf8"))
+        self.assertFalse(utils.check_password("hex_md5", self.password2, hashed_password1, "utf8"))
+
+    def test_hox_sha512(self):
+        hashed_password1 = utils.hashlib.sha512(self.password1).hexdigest()
+
+        self.assertTrue(
+            utils.check_password("hex_sha512", self.password1, hashed_password1, "utf8")
+        )
+        self.assertFalse(
+            utils.check_password("hex_sha512", self.password2, hashed_password1, "utf8")
+        )
 
 
 class LoginTestCase(TestCase):

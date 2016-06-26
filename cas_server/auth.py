@@ -15,7 +15,6 @@ from django.contrib.auth import get_user_model
 try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors
-    import crypt
     from utils import check_password
 except ImportError:
     MySQLdb = None

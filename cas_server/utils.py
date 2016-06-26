@@ -206,22 +206,30 @@ class LdapHashUserPassword(object):
     }
 
     class BadScheme(ValueError):
+        """Error raised then the hash scheme is not in schemes_salt + schemes_nosalt"""
         pass
 
     class BadHash(ValueError):
+        """Error raised then the hash is too short"""
         pass
 
     class BadSalt(ValueError):
+        """Error raised then with the scheme {CRYPT} the salt is invalid"""
         pass
 
     @classmethod
     def _raise_bad_scheme(cls, scheme, valid, msg):
+        """
+            Raise BadScheme error for `scheme`, possible valid scheme are
+            in `valid`, the error message is `msg`
+        """
         valid_schemes = [s.decode() for s in valid]
         valid_schemes.sort()
         raise cls.BadScheme(msg % (scheme, u", ".join(valid_schemes)))
 
     @classmethod
     def _test_scheme(cls, scheme):
+        """Test if a scheme is valide or raise BadScheme"""
         if scheme not in cls.schemes_salt and scheme not in cls.schemes_nosalt:
             cls._raise_bad_scheme(
                 scheme,
@@ -231,6 +239,7 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _test_scheme_salt(cls, scheme):
+        """Test if the scheme need a salt or raise BadScheme"""
         if scheme not in cls.schemes_salt:
             cls._raise_bad_scheme(
                 scheme,
@@ -240,6 +249,7 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _test_scheme_nosalt(cls, scheme):
+        """Test if the scheme need no salt or raise BadScheme"""
         if scheme not in cls.schemes_nosalt:
             cls._raise_bad_scheme(
                 scheme,
@@ -249,6 +259,10 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def hash(cls, scheme, password, salt=None, charset="utf8"):
+        """
+           Hash `password` with `scheme` using `salt`.
+           This three variable beeing encoded in `charset`.
+        """
         scheme = scheme.upper()
         cls._test_scheme(scheme)
         if salt is None or salt == b"":
@@ -273,6 +287,7 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def get_scheme(cls, hashed_passord):
+        """Return the scheme of `hashed_passord` or raise BadHash"""
         if not hashed_passord[0] == b'{'[0] or b'}' not in hashed_passord:
             raise cls.BadHash("%r should start with the scheme enclosed with { }" % hashed_passord)
         scheme = hashed_passord.split(b'}', 1)[0]
@@ -281,6 +296,7 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def get_salt(cls, hashed_passord):
+        """Return the salt of `hashed_passord` possibly empty"""
         scheme = cls.get_scheme(hashed_passord)
         cls._test_scheme(scheme)
         if scheme in cls.schemes_nosalt:
@@ -295,6 +311,10 @@ class LdapHashUserPassword(object):
 
 
 def check_password(method, password, hashed_password, charset):
+    """
+        Check that `password` match `hashed_password` using `method`,
+        assuming the encoding is `charset`.
+    """
     if not isinstance(password, six.binary_type):
         password = password.encode(charset)
     if not isinstance(hashed_password, six.binary_type):

@@ -9,6 +9,7 @@ cas/
 dist/
 db.sqlite3
 manage.py
+coverage.xml
 
 .tox
 test_venv

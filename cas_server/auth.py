@@ -12,7 +12,7 @@
 """Some authentication classes for the CAS"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
-try:
+try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors
     import crypt
@@ -33,7 +33,7 @@ class AuthUser(object):
         raise NotImplementedError()
 
 
-class DummyAuthUser(AuthUser):
+class DummyAuthUser(AuthUser):  # pragma: no cover
     """A Dummy authentication class"""
 
     def __init__(self, username):
@@ -64,7 +64,7 @@ class TestAuthUser(AuthUser):
         return settings.CAS_TEST_ATTRIBUTES
 
 
-class MysqlAuthUser(AuthUser):
+class MysqlAuthUser(AuthUser):  # pragma: no cover
     """A mysql auth class: authentication user agains a mysql database"""
     user = None
 
@@ -89,9 +89,7 @@ class MysqlAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        if not self.user:
-            return False
-        else:
+        if self.user:
             if settings.CAS_SQL_PASSWORD_CHECK == "plain":
                 return password == self.user["password"]
             elif settings.CAS_SQL_PASSWORD_CHECK == "crypt":
@@ -103,16 +101,18 @@ class MysqlAuthUser(AuthUser):
                         password,
                         self.user["password"][:2]
                     ) == self.user["password"]
+        else:
+            return False
 
     def attributs(self):
         """return a dict of user attributes"""
-        if not self.user:
-            return {}
-        else:
+        if self.user:
             return self.user
+        else:
+            return {}
 
 
-class DjangoAuthUser(AuthUser):
+class DjangoAuthUser(AuthUser):  # pragma: no cover
     """A django auth class: authenticate user agains django internal users"""
     user = None
 
@@ -126,17 +126,17 @@ class DjangoAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        if not self.user:
-            return False
-        else:
+        if self.user:
             return self.user.check_password(password)
+        else:
+            return False
 
     def attributs(self):
         """return a dict of user attributes"""
-        if not self.user:
-            return {}
-        else:
+        if self.user:
             attr = {}
             for field in self.user._meta.fields:
                 attr[field.attname] = getattr(self.user, field.attname)
             return attr
+        else:
+            return {}

@@ -14,9 +14,9 @@ from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket, User, Servi
 from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterAttributValue
 from .forms import TicketForm
 
-tickets_readonly_fields = ('validate', 'service', 'service_pattern',
+TICKETS_READONLY_FIELDS = ('validate', 'service', 'service_pattern',
                            'creation', 'renew', 'single_log_out', 'value')
-tickets_fields = ('validate', 'service', 'service_pattern',
+TICKETS_FIELDS = ('validate', 'service', 'service_pattern',
                   'creation', 'renew', 'single_log_out')
 
 
@@ -25,8 +25,8 @@ class ServiceTicketInline(admin.TabularInline):
     model = ServiceTicket
     extra = 0
     form = TicketForm
-    readonly_fields = tickets_readonly_fields
-    fields = tickets_fields
+    readonly_fields = TICKETS_READONLY_FIELDS
+    fields = TICKETS_FIELDS
 
 
 class ProxyTicketInline(admin.TabularInline):
@@ -34,8 +34,8 @@ class ProxyTicketInline(admin.TabularInline):
     model = ProxyTicket
     extra = 0
     form = TicketForm
-    readonly_fields = tickets_readonly_fields
-    fields = tickets_fields
+    readonly_fields = TICKETS_READONLY_FIELDS
+    fields = TICKETS_FIELDS
 
 
 class ProxyGrantingInline(admin.TabularInline):
@@ -43,8 +43,8 @@ class ProxyGrantingInline(admin.TabularInline):
     model = ProxyGrantingTicket
     extra = 0
     form = TicketForm
-    readonly_fields = tickets_readonly_fields
-    fields = tickets_fields[1:]
+    readonly_fields = TICKETS_READONLY_FIELDS
+    fields = TICKETS_FIELDS[1:]
 
 
 class UserAdmin(admin.ModelAdmin):

@@ -47,7 +47,7 @@ run_test_server: test_project
 
 coverage: test_venv
 	test_venv/bin/pip install coverage
-	test_venv/bin/coverage run --source='cas_server' run_tests
+	test_venv/bin/coverage run --source='cas_server' --omit='cas_server/migrations*' run_tests
 	test_venv/bin/coverage html
 	test_venv/bin/coverage xml
 

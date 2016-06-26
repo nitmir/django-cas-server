@@ -44,7 +44,7 @@ def get_user_ticket_request(service):
 
 
 def get_pgt():
-    (httpd_thread, host, port) = utils.PGTUrlHandler.run()
+    (host, port) = utils.PGTUrlHandler.run()[1:3]
     service = "http://%s:%s" % (host, port)
 
     (user, ticket) = get_user_ticket_request(service)
@@ -326,7 +326,7 @@ class ValidateTestCase(TestCase):
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
 
     def test_validate_view_ok(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
         response = client.get('/validate', {'ticket': ticket.value, 'service': self.service})
@@ -334,7 +334,7 @@ class ValidateTestCase(TestCase):
         self.assertEqual(response.content, b'yes\ntest\n')
 
     def test_validate_view_badservice(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
         response = client.get(
@@ -345,7 +345,7 @@ class ValidateTestCase(TestCase):
         self.assertEqual(response.content, b'no\n')
 
     def test_validate_view_badticket(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        get_user_ticket_request(self.service)
 
         client = Client()
         response = client.get(
@@ -369,7 +369,7 @@ class ValidateServiceTestCase(TestCase):
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
 
     def test_validate_service_view_ok(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
         response = client.get('/serviceValidate', {'ticket': ticket.value, 'service': self.service})
@@ -404,7 +404,7 @@ class ValidateServiceTestCase(TestCase):
         self.assertEqual(attrs1, settings.CAS_TEST_ATTRIBUTES)
 
     def test_validate_service_view_badservice(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
         bad_service = "https://www.example.org"
@@ -421,7 +421,7 @@ class ValidateServiceTestCase(TestCase):
         self.assertEqual(error[0].text, bad_service)
 
     def test_validate_service_view_badticket_goodprefix(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        get_user_ticket_request(self.service)
 
         client = Client()
         bad_ticket = "%s-RANDOM" % settings.CAS_SERVICE_TICKET_PREFIX
@@ -438,7 +438,7 @@ class ValidateServiceTestCase(TestCase):
         self.assertEqual(error[0].text, 'ticket not found')
 
     def test_validate_service_view_badticket_badprefix(self):
-        (user, ticket) = get_user_ticket_request(self.service)
+        get_user_ticket_request(self.service)
 
         client = Client()
         bad_ticket = "RANDOM"
@@ -455,10 +455,10 @@ class ValidateServiceTestCase(TestCase):
         self.assertEqual(error[0].text, bad_ticket)
 
     def test_validate_service_view_ok_pgturl(self):
-        (httpd_thread, host, port) = utils.PGTUrlHandler.run()
+        (host, port) = utils.PGTUrlHandler.run()[1:3]
         service = "http://%s:%s" % (host, port)
 
-        (user, ticket) = get_user_ticket_request(service)
+        ticket = get_user_ticket_request(service)[1]
 
         client = Client()
         response = client.get(
@@ -480,7 +480,7 @@ class ValidateServiceTestCase(TestCase):
     def test_validate_service_pgturl_bad_proxy_callback(self):
         self.service_pattern.proxy_callback = False
         self.service_pattern.save()
-        (user, ticket) = get_user_ticket_request(self.service)
+        ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
         response = client.get(

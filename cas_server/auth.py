@@ -26,11 +26,11 @@ class AuthUser(object):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def attributs(self):
         """return a dict of user attributes"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class DummyAuthUser(AuthUser):

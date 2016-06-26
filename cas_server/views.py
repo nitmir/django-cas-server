@@ -63,12 +63,12 @@ class AttributesMixin(object):
 
 class LogoutMixin(object):
     """destroy CAS session utils"""
-    def logout(self, all=False):
+    def logout(self, all_session=False):
         """effectively destroy CAS session"""
         session_nb = 0
         username = self.request.session.get("username")
         if username:
-            if all:
+            if all_session:
                 logger.info("Logging out user %s from all of they sessions." % username)
             else:
                 logger.info("Logging out user %s." % username)
@@ -86,8 +86,8 @@ class LogoutMixin(object):
             # if user not found in database, flush the session anyway
             self.request.session.flush()
 
-        # If all is set logout user from alternative sessions
-        if all:
+        # If all_session is set logout user from alternative sessions
+        if all_session:
             for user in models.User.objects.filter(username=username):
                 session = SessionStore(session_key=user.session_key)
                 session.flush()
@@ -198,10 +198,7 @@ class LoginView(View, LogoutMixin):
     def init_post(self, request):
         self.request = request
         self.service = request.POST.get('service')
-        if request.POST.get('renew') and request.POST['renew'] != "False":
-            self.renew = True
-        else:
-            self.renew = False
+        self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
@@ -285,10 +282,7 @@ class LoginView(View, LogoutMixin):
     def init_get(self, request):
         self.request = request
         self.service = request.GET.get('service')
-        if request.GET.get('renew') and request.GET['renew'] != "False":
-            self.renew = True
-        else:
-            self.renew = False
+        self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META

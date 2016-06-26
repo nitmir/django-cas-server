@@ -80,9 +80,9 @@ def update_url(url, params):
     query = dict(parse_qsl(url_parts[4]))
     query.update(params)
     url_parts[4] = urlencode(query)
-    for i in range(len(url_parts)):
-        if not isinstance(url_parts[i], bytes):
-            url_parts[i] = url_parts[i].encode('utf-8')
+    for i, url_part in enumerate(url_parts):
+        if not isinstance(url_part, bytes):
+            url_parts[i] = url_part.encode('utf-8')
     return urlunparse(url_parts).decode('utf-8')
 
 
@@ -155,7 +155,7 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         params = dict(parse_qsl(url.query))
         PGTUrlHandler.PARAMS.update(params)
 
-    def log_message(self, format, *args):
+    def log_message(self, template, *args):
         return
 
     @staticmethod

@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors
-    import crypt
+    from utils import check_password
 except ImportError:
     MySQLdb = None
 
@@ -90,17 +90,12 @@ class MysqlAuthUser(AuthUser):  # pragma: no cover
     def test_password(self, password):
         """test `password` agains the user"""
         if self.user:
-            if settings.CAS_SQL_PASSWORD_CHECK == "plain":
-                return password == self.user["password"]
-            elif settings.CAS_SQL_PASSWORD_CHECK == "crypt":
-                if self.user["password"].startswith('$'):
-                    salt = '$'.join(self.user["password"].split('$', 3)[:-1])
-                    return crypt.crypt(password, salt) == self.user["password"]
-                else:
-                    return crypt.crypt(
-                        password,
-                        self.user["password"][:2]
-                    ) == self.user["password"]
+            check_password(
+                settings.CAS_SQL_PASSWORD_CHECK,
+                password,
+                self.user["password"],
+                settings.CAS_SQL_DBCHARSET
+            )
         else:
             return False
 

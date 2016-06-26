@@ -199,8 +199,18 @@ Mysql backend settings. Only usefull if you are using the mysql authentication b
   The username must be in field ``username``, the password in ``password``,
   additional fields are used as the user attributes.
   The default is ``"SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s"``
-* ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be
-  ``"crypt"`` or ``"plain``". The default is ``"crypt"``.
+* ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
+    * ``"crypt"`` (see `<https://en.wikipedia.org/wiki/Crypt_(C)>`), the password in the database
+      should begin this $
+    * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
+      the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
+      {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
+      The hashed password in the database is compare to the hexadecimal digest of the clear
+      password hashed with the corresponding algorithm.
+    * ``"plain"``, the password in the database must be in clear.
+
+  The default is ``"crypt"``.
 
 
 Test backend settings. Only usefull if you are using the test authentication backend:

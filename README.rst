@@ -10,8 +10,14 @@ CAS Server
 .. image:: https://img.shields.io/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
+.. image:: https://api.codacy.com/project/badge/Grade/255c21623d6946ef8802fa7995b61366
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+
+.. image:: https://api.codacy.com/project/badge/Coverage/255c21623d6946ef8802fa7995b61366
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
-<https://jasig.github.io/cas/development/protocol/CAS-Protocol-Specification.html>`_.
+<https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
 By defaut, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
@@ -70,7 +76,7 @@ Quick start
 4. You should add some management commands to a crontab: ``clearsessions``,
    ``cas_clean_tickets`` and ``cas_clean_sessions``.
 
- * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/1.9/topics/http/sessions/#clearing-the-session-store>`_.
+ * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/stable/topics/http/sessions/#clearing-the-session-store>`_.
  * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purge from
    the database automatically. They are just marked as invalid. ``cas_clean_tickets``
    is a clean-up management command for this purpose. It send SingleLogOut request
@@ -204,7 +210,7 @@ Logs
 ----
 
 ``django-cas-server`` logs most of its actions. To enable login, you must set the ``LOGGING``
-(https://docs.djangoproject.com/en/dev/topics/logging) variable is ``settings.py``.
+(https://docs.djangoproject.com/en/stable/topics/logging) variable is ``settings.py``.
 
 Users successful actions (login, logout) are logged with the level ``INFO``, failures are logged
 with the level ``WARNING`` and user attributes transmitted to a service are logged with the level ``DEBUG``.

@@ -1,5 +1,7 @@
 *.pyc
 *.egg-info
+*~
+*.swp
 
 build/
 bootstrap3
@@ -7,6 +9,9 @@ cas/
 dist/
 db.sqlite3
 manage.py
+coverage.xml
 
 .tox
 test_venv
+.coverage
+htmlcov/

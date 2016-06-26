@@ -9,4 +9,4 @@
 #
 # (c) 2015 Valentin Samir
 
-default_app_config = 'cas_server.apps.AppConfig'
+default_app_config = 'cas_server.apps.CasAppConfig'

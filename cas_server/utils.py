@@ -19,13 +19,10 @@ from django.contrib import messages
 import random
 import string
 import json
+from threading import Thread
 from importlib import import_module
-
-try:
-    from urlparse import urlparse, urlunparse, parse_qsl
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+from six.moves import BaseHTTPServer
+from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def context(params):
@@ -83,9 +80,9 @@ def update_url(url, params):
     query = dict(parse_qsl(url_parts[4]))
     query.update(params)
     url_parts[4] = urlencode(query)
-    for i in range(len(url_parts)):
-        if not isinstance(url_parts[i], bytes):
-            url_parts[i] = url_parts[i].encode('utf-8')
+    for i, url_part in enumerate(url_parts):
+        if not isinstance(url_part, bytes):
+            url_parts[i] = url_part.encode('utf-8')
     return urlunparse(url_parts).decode('utf-8')
 
 
@@ -144,3 +141,34 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+
+class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    PARAMS = {}
+
+    def do_GET(s):
+        s.send_response(200)
+        s.send_header(b"Content-type", "text/plain")
+        s.end_headers()
+        s.wfile.write(b"ok")
+        url = urlparse(s.path)
+        params = dict(parse_qsl(url.query))
+        PGTUrlHandler.PARAMS.update(params)
+
+    def log_message(self, template, *args):
+        return
+
+    @staticmethod
+    def run():
+        server_class = BaseHTTPServer.HTTPServer
+        httpd = server_class(("127.0.0.1", 0), PGTUrlHandler)
+        (host, port) = httpd.socket.getsockname()
+
+        def lauch():
+            httpd.handle_request()
+            httpd.server_close()
+
+        httpd_thread = Thread(target=lauch)
+        httpd_thread.daemon = True
+        httpd_thread.start()
+        return (httpd_thread, host, port)

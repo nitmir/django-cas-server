@@ -26,11 +26,11 @@ class AuthUser(object):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def attributs(self):
         """return a dict of user attributes"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class DummyAuthUser(AuthUser):
@@ -57,11 +57,11 @@ class TestAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        return self.username == "test" and password == "test"
+        return self.username == settings.CAS_TEST_USER and password == settings.CAS_TEST_PASSWORD
 
     def attributs(self):
         """return a dict of user attributes"""
-        return {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
+        return settings.CAS_TEST_ATTRIBUTES
 
 
 class MysqlAuthUser(AuthUser):

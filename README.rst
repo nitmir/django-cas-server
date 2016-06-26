@@ -43,6 +43,15 @@ Features
 
 Quick start
 -----------
+0. If you want to make a virtualenv for ``django-cas-server``, you will need the following
+   dependencies on a bare debian like system::
+
+    virtualenv build-essential python-dev libxml2-dev libxslt1-dev zlib1g-dev
+
+   If you want to use python3 instead of python2, replace ``python-dev`` with ``python3-dev``.
+
+   If you intend to run the tox tests you will also need ``python3.4-dev`` depending of the current
+   version of python3 on your system.
 
 1. Add "cas_server" to your INSTALLED_APPS setting like this::
 
@@ -128,14 +137,14 @@ Template settings:
 
 Authentication settings:
 
-*  ``CAS_AUTH_CLASS``: A dotted path to a class implementing ``cas_server.auth.AuthUser``.
-   The default is ``"cas_server.auth.DjangoAuthUser"``
+*  ``CAS_AUTH_CLASS``: A dotted path to a class or a class implementing
+  ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
 
 *  ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
    which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
    reduce it to something like ``86400`` seconds (1 day).
 
-* ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificates authority file. Usually on linux
+* ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificate authorities file. Usually on linux
   the local CAs are in ``/etc/ssl/certs/ca-certificates.crt``. The default is ``True`` which
   tell requests to use its internal certificat authorities. Settings it to ``False`` should
   disable all x509 certificates validation and MUST not be done in production.
@@ -152,7 +161,7 @@ Tickets validity settings:
   application. The default is ``60``.
 * ``CAS_PGT_VALIDITY``: Number of seconds the proxy granting tickets are valid.
   The default is ``3600`` (1 hour).
-* ``CAS_TICKET_TIMEOUT``: Number of seconds a ticket is kept is the database before sending
+* ``CAS_TICKET_TIMEOUT``: Number of seconds a ticket is kept in the database before sending
   Single Log Out request and being cleared. The default is ``86400`` (24 hours).
 
 Tickets miscellaneous settings:
@@ -174,12 +183,12 @@ Tickets miscellaneous settings:
 * ``CAS_SERVICE_TICKET_PREFIX``: Prefix of service tickets. The default is ``"ST"``.
   The CAS specification mandate that service tickets MUST begin with the characters ST
   so you should not change this.
-* ``CAS_PROXY_TICKET_PREFIX``: Prefix of proxy ticket. The default is ``"ST"``.
+* ``CAS_PROXY_TICKET_PREFIX``: Prefix of proxy ticket. The default is ``"PT"``.
 * ``CAS_PROXY_GRANTING_TICKET_PREFIX``: Prefix of proxy granting ticket. The default is ``"PGT"``.
 * ``CAS_PROXY_GRANTING_TICKET_IOU_PREFIX``: Prefix of proxy granting ticket IOU. The default is ``"PGTIOU"``.
 
 
-Mysql backend settings. Only usefull is you use the mysql authentication backend:
+Mysql backend settings. Only usefull if you are using the mysql authentication backend:
 
 * ``CAS_SQL_HOST``: Host for the SQL server. The default is ``"localhost"``.
 * ``CAS_SQL_USERNAME``: Username for connecting to the SQL server.
@@ -193,14 +202,23 @@ Mysql backend settings. Only usefull is you use the mysql authentication backend
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be
   ``"crypt"`` or ``"plain``". The default is ``"crypt"``.
 
+
+Test backend settings. Only usefull if you are using the test authentication backend:
+
+* ``CAS_TEST_USER``: Username of the test user. The default is ``"test"``.
+* ``CAS_TEST_PASSWORD``: Password of the test user. The default is ``"test"``.
+* ``CAS_TEST_ATTRIBUTES``: Attributes of the test user. The default is
+  ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``.
+
+
 Authentication backend
 ----------------------
 
 ``django-cas-server`` comes with some authentication backends:
 
 * dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempt fails.
-* test backend ``cas_server.auth.TestAuthUser``: username is ``test`` and password is ``test``
-  the returned attributes for the user are: ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``
+* test backend ``cas_server.auth.TestAuthUser``: username, password and returned attributes
+  for the user are defined by the ``CAS_TEST_*`` settings.
 * django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated agains django users system.
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
@@ -210,7 +228,7 @@ Logs
 ----
 
 ``django-cas-server`` logs most of its actions. To enable login, you must set the ``LOGGING``
-(https://docs.djangoproject.com/en/stable/topics/logging) variable is ``settings.py``.
+(https://docs.djangoproject.com/en/stable/topics/logging) variable in ``settings.py``.
 
 Users successful actions (login, logout) are logged with the level ``INFO``, failures are logged
 with the level ``WARNING`` and user attributes transmitted to a service are logged with the level ``DEBUG``.

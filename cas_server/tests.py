@@ -1,5 +1,6 @@
 from .default_settings import settings
 
+import django
 from django.test import TestCase
 from django.test import Client
 
@@ -333,8 +334,8 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "Authentication required by service "
-                "example (https://www.example.com)"
+                b"Authentication required by service "
+                b"example (https://www.example.com)"
             ) in response.content
         )
 
@@ -343,7 +344,7 @@ class LoginTestCase(TestCase):
         client = Client()
         response = client.get("/login?service=https://www.example.net")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("Service https://www.example.net non allowed" in response.content)
+        self.assertTrue(b"Service https://www.example.net non allowed" in response.content)
 
     def test_view_login_get_auth_allowed_service(self):
         """Request a ticket for an allowed service by an authenticated client"""
@@ -360,8 +361,8 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
-                "Authentication has been required by service "
-                "example (https://www.example.com)"
+                b"Authentication has been required by service "
+                b"example (https://www.example.com)"
             ) in response.content
         )
 
@@ -386,7 +387,10 @@ class LoginTestCase(TestCase):
         response = client.get("/login")
 
         self.assert_login_failed(client, response, code=302)
-        self.assertEqual(response["Location"], "/login?")
+        if django.VERSION < (1, 9):
+            self.assertEqual(response["Location"], "http://testserver/login")
+        else:
+            self.assertEqual(response["Location"], "/login?")
 
     def test_service_restrict_user(self):
         """Testing the restric user capability fro a service"""
@@ -394,7 +398,7 @@ class LoginTestCase(TestCase):
         client = get_auth_client()
         response = client.get("/login", {'service': service})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("Username non allowed" in response.content)
+        self.assertTrue(b"Username non allowed" in response.content)
 
         service = "https://restrict_user_success.example.com"
         response = client.get("/login", {'service': service})
@@ -407,7 +411,7 @@ class LoginTestCase(TestCase):
         client = get_auth_client()
         response = client.get("/login", {'service': service})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("User charateristics non allowed" in response.content)
+        self.assertTrue(b"User charateristics non allowed" in response.content)
 
         service = "https://filter_success.example.com"
         response = client.get("/login", {'service': service})
@@ -420,7 +424,7 @@ class LoginTestCase(TestCase):
         client = get_auth_client()
         response = client.get("/login", {'service': service})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("The attribut uid is needed to use that service" in response.content)
+        self.assertTrue(b"The attribut uid is needed to use that service" in response.content)
 
         service = "https://field_needed_success.example.com"
         response = client.get("/login", {'service': service})
@@ -689,8 +693,8 @@ class ValidateServiceTestCase(TestCase):
         original = set()
         for key, value in settings.CAS_TEST_ATTRIBUTES.items():
             if isinstance(value, list):
-                for v in value:
-                    original.add((key, v))
+                for sub_value in value:
+                    original.add((key, sub_value))
             else:
                 original.add((key, value))
         self.assertEqual(attrs1, attrs2)
@@ -865,8 +869,8 @@ class ProxyTestCase(TestCase):
         original = set()
         for key, value in settings.CAS_TEST_ATTRIBUTES.items():
             if isinstance(value, list):
-                for v in value:
-                    original.add((key, v))
+                for sub_value in value:
+                    original.add((key, sub_value))
             else:
                 original.add((key, value))
         self.assertEqual(attrs1, attrs2)

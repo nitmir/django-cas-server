@@ -46,7 +46,7 @@ class CASFederateValidateUser(object):
         """test `password` agains the user"""
         if self.client is None:
             return False
-        username, attributs, pgtiou = self.client.verify_ticket(ticket)
+        username, attributs = self.client.verify_ticket(ticket)[:2]
         if username is not None:
             if attributs is None:
                 attributs = {}
@@ -73,7 +73,8 @@ class CASFederateValidateUser(object):
         else:
             return False
 
-    def register_slo(self, username, session_key, ticket):
+    @staticmethod
+    def register_slo(username, session_key, ticket):
         FederateSLO.objects.create(
             username=username,
             session_key=session_key,
@@ -82,10 +83,10 @@ class CASFederateValidateUser(object):
 
     def clean_sessions(self, logout_request):
         try:
-            SLOs = self.client.get_saml_slos(logout_request)
+            slos = self.client.get_saml_slos(logout_request)
         except NameError:
-            SLOs = []
-        for slo in SLOs:
+            slos = []
+        for slo in slos:
             try:
                 for federate_slo in FederateSLO.objects.filter(ticket=slo.text):
                     session = SessionStore(session_key=federate_slo.session_key)

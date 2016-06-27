@@ -193,7 +193,8 @@ class FederateAuth(View):
     def dispatch(self, request, *args, **kwargs):
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
-    def get_cas_client(self, request, provider):
+    @staticmethod
+    def get_cas_client(request, provider):
         if provider in settings.CAS_FEDERATE_PROVIDERS:
             service_url = utils.get_current_url(request, {"ticket", "provider"})
             return CASFederateValidateUser(provider, service_url)

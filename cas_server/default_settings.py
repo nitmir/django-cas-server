@@ -105,7 +105,7 @@ try:
 except AttributeError:
     __CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
 
-    def __CAS_FEDERATE_PROVIDERS_LIST_sort(key):
+    def __cas_federate_providers_list_sort(key):
         if len(settings.CAS_FEDERATE_PROVIDERS[key]) > 2:
             key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
         else:
@@ -113,11 +113,11 @@ except AttributeError:
         if isinstance(key, six.string_types) or isinstance(key, six.text_type):
             return tuple(
                 int(num) if num else alpha
-                for num, alpha in __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize(key)
+                for num, alpha in __cas_federate_providers_list_sort.tokenize(key)
             )
         else:
             return key
-    __CAS_FEDERATE_PROVIDERS_LIST_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
-    __CAS_FEDERATE_PROVIDERS_LIST.sort(key=__CAS_FEDERATE_PROVIDERS_LIST_sort)
+    __cas_federate_providers_list_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
+    __CAS_FEDERATE_PROVIDERS_LIST.sort(key=__cas_federate_providers_list_sort)
 
     setting_default('CAS_FEDERATE_PROVIDERS_LIST', __CAS_FEDERATE_PROVIDERS_LIST)

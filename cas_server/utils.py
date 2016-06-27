@@ -73,7 +73,9 @@ def reverse_params(url_name, params=None, **kwargs):
         return url
 
 
-def copy_params(get_or_post_params, ignore=set()):
+def copy_params(get_or_post_params, ignore=None):
+    if ignore is None:
+        ignore = set()
     params = {}
     for key in get_or_post_params:
         if key not in ignore and get_or_post_params[key]:
@@ -96,7 +98,9 @@ def set_cookie(response, key, value, max_age):
     )
 
 
-def get_current_url(request, ignore_params=set()):
+def get_current_url(request, ignore_params=None):
+    if ignore_params is None:
+        ignore_params = set()
     protocol = 'https' if request.is_secure() else "http"
     service_url = "%s://%s%s" % (protocol, request.get_host(), request.path)
     if request.GET:
@@ -184,11 +188,11 @@ def gen_saml_id():
     return _gen_ticket('_')
 
 
-def get_tuple(tuple, index, default=None):
-    if tuple is None:
+def get_tuple(nuplet, index, default=None):
+    if nuplet is None:
         return default
     try:
-        return tuple[index]
+        return nuplet[index]
     except IndexError:
         return default
 

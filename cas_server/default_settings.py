@@ -78,6 +78,17 @@ setting_default('CAS_SQL_USER_QUERY', 'SELECT user AS usersame, pass AS '
                 'password, users.* FROM users WHERE user = %s')
 setting_default('CAS_SQL_PASSWORD_CHECK', 'crypt')  # crypt or plain
 
+setting_default('CAS_TEST_USER', 'test')
+setting_default('CAS_TEST_PASSWORD', 'test')
+setting_default(
+    'CAS_TEST_ATTRIBUTES',
+    {
+        'nom': 'Nymous',
+        'prenom': 'Ano',
+        'email': 'anonymous@example.net',
+        'alias': ['demo1', 'demo2']
+    }
+)
 
 setting_default('CAS_FEDERATE', False)
 # A dict of "provider suffix" -> (provider CAS server url, CAS version, verbose name)

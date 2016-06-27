@@ -15,10 +15,10 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from datetime import timedelta
-try:
+try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors
-    import crypt
+    from utils import check_password
 except ImportError:
     MySQLdb = None
 
@@ -31,14 +31,14 @@ class AuthUser(object):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def attributs(self):
         """return a dict of user attributes"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
-class DummyAuthUser(AuthUser):
+class DummyAuthUser(AuthUser):  # pragma: no cover
     """A Dummy authentication class"""
 
     def __init__(self, username):
@@ -62,14 +62,14 @@ class TestAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        return self.username == "test" and password == "test"
+        return self.username == settings.CAS_TEST_USER and password == settings.CAS_TEST_PASSWORD
 
     def attributs(self):
         """return a dict of user attributes"""
-        return {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
+        return settings.CAS_TEST_ATTRIBUTES
 
 
-class MysqlAuthUser(AuthUser):
+class MysqlAuthUser(AuthUser):  # pragma: no cover
     """A mysql auth class: authentication user agains a mysql database"""
     user = None
 
@@ -94,30 +94,25 @@ class MysqlAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        if not self.user:
-            return False
+        if self.user:
+            return check_password(
+                settings.CAS_SQL_PASSWORD_CHECK,
+                password,
+                self.user["password"],
+                settings.CAS_SQL_DBCHARSET
+            )
         else:
-            if settings.CAS_SQL_PASSWORD_CHECK == "plain":
-                return password == self.user["password"]
-            elif settings.CAS_SQL_PASSWORD_CHECK == "crypt":
-                if self.user["password"].startswith('$'):
-                    salt = '$'.join(self.user["password"].split('$', 3)[:-1])
-                    return crypt.crypt(password, salt) == self.user["password"]
-                else:
-                    return crypt.crypt(
-                        password,
-                        self.user["password"][:2]
-                    ) == self.user["password"]
+            return False
 
     def attributs(self):
         """return a dict of user attributes"""
-        if not self.user:
-            return {}
-        else:
+        if self.user:
             return self.user
+        else:
+            return {}
 
 
-class DjangoAuthUser(AuthUser):
+class DjangoAuthUser(AuthUser):  # pragma: no cover
     """A django auth class: authenticate user agains django internal users"""
     user = None
 
@@ -131,21 +126,20 @@ class DjangoAuthUser(AuthUser):
 
     def test_password(self, password):
         """test `password` agains the user"""
-        if not self.user:
-            return False
-        else:
+        if self.user:
             return self.user.check_password(password)
+        else:
+            return False
 
     def attributs(self):
         """return a dict of user attributes"""
-        if not self.user:
-            return {}
-        else:
+        if self.user:
             attr = {}
             for field in self.user._meta.fields:
                 attr[field.attname] = getattr(self.user, field.attname)
             return attr
-
+        else:
+            return {}
 
 class CASFederateAuth(AuthUser):
     user = None

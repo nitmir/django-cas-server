@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
 
+import re
 import logging
 import pprint
 import requests
@@ -34,7 +35,7 @@ import cas_server.utils as utils
 import cas_server.forms as forms
 import cas_server.models as models
 
-from .utils import JsonResponse
+from .utils import json_response
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern
 from .federate import CASFederateValidateUser
@@ -63,12 +64,12 @@ class AttributesMixin(object):
 
 class LogoutMixin(object):
     """destroy CAS session utils"""
-    def logout(self, all=False):
+    def logout(self, all_session=False):
         """effectively destroy CAS session"""
         session_nb = 0
         username = self.request.session.get("username")
         if username:
-            if all:
+            if all_session:
                 logger.info("Logging out user %s from all of they sessions." % username)
             else:
                 logger.info("Logging out user %s." % username)
@@ -91,8 +92,8 @@ class LogoutMixin(object):
             # if user not found in database, flush the session anyway
             self.request.session.flush()
 
-        # If all is set logout user from alternative sessions
-        if all:
+        # If all_session is set logout user from alternative sessions
+        if all_session:
             for user in models.User.objects.filter(username=username):
                 session = SessionStore(session_key=user.session_key)
                 session.flush()
@@ -110,6 +111,7 @@ class LogoutView(View, LogoutMixin):
     service = None
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
@@ -170,13 +172,13 @@ class LogoutView(View, LogoutMixin):
                         'url': url,
                         'session_nb': session_nb
                     }
-                    return JsonResponse(request, data)
+                    return json_response(request, data)
                 else:
                     return redirect("cas_server:login")
             else:
                 if self.ajax:
                     data = {'status': 'success', 'detail': 'logout', 'session_nb': session_nb}
-                    return JsonResponse(request, data)
+                    return json_response(request, data)
                 else:
                     return render(
                         request,
@@ -290,12 +292,10 @@ class LoginView(View, LogoutMixin):
     USER_NOT_AUTHENTICATED = 6
 
     def init_post(self, request):
+        """Initialize POST received parameters"""
         self.request = request
         self.service = request.POST.get('service')
-        if request.POST.get('renew') and request.POST['renew'] != "False":
-            self.renew = True
-        else:
-            self.renew = False
+        self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
@@ -306,15 +306,19 @@ class LoginView(View, LogoutMixin):
             self.username = request.POST.get('username')
             self.ticket = request.POST.get('ticket')
 
-    def check_lt(self):
-        # save LT for later check
-        lt_valid = self.request.session.get('lt', [])
-        lt_send = self.request.POST.get('lt')
-        # generate a new LT (by posting the LT has been consumed)
+    def gen_lt(self):
+        """Generate a new LoginTicket and add it to the list of valid LT for the user"""
         self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
         if len(self.request.session['lt']) > 100:
             self.request.session['lt'] = self.request.session['lt'][-100:]
 
+    def check_lt(self):
+        """Check is the POSTed LoginTicket is valid, if yes invalide it"""
+        # save LT for later check
+        lt_valid = self.request.session.get('lt', [])
+        lt_send = self.request.POST.get('lt')
+        # generate a new LT (by posting the LT has been consumed)
+        self.gen_lt()
         # check if send LT is valid
         if lt_valid is None or lt_send not in lt_valid:
             return False
@@ -339,7 +343,7 @@ class LoginView(View, LogoutMixin):
                     username=self.request.session['username'],
                     session_key=self.request.session.session_key
                 )
-                self.user.save()
+                self.user.save()  # pragma: no cover (should not happend)
             except models.User.DoesNotExist:
                 self.user = models.User.objects.create(
                     username=self.request.session['username'],
@@ -355,10 +359,15 @@ class LoginView(View, LogoutMixin):
         elif ret == self.USER_ALREADY_LOGGED:
             pass
         else:
-            raise EnvironmentError("invalid output for LoginView.process_post")
+            raise EnvironmentError("invalid output for LoginView.process_post")  # pragma: no cover
         return self.common()
 
-    def process_post(self, pytest=False):
+    def process_post(self):
+        """
+            Analyse the POST request:
+                * check that the LoginTicket is valid
+                * check that the user sumited credentials are valid
+        """
         if not self.check_lt():
             values = self.request.POST.copy()
             # if not set a new LT and fail
@@ -385,12 +394,10 @@ class LoginView(View, LogoutMixin):
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
-        if request.GET.get('renew') and request.GET['renew'] != "False":
-            self.renew = True
-        else:
-            self.renew = False
+        self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
@@ -410,15 +417,16 @@ class LoginView(View, LogoutMixin):
         return self.common()
 
     def process_get(self):
-        # generate a new LT if none is present
-        self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
-
+        """Analyse the GET request"""
+        # generate a new LT
+        self.gen_lt()
         if not self.request.session.get("authenticated") or self.renew:
             self.init_form()
             return self.USER_NOT_AUTHENTICATED
         return self.USER_AUTHENTICATED
 
     def init_form(self, values=None):
+        """Initialization of the good form depending of POST and GET parameters"""
         form_initial = {
             'service': self.service,
             'method': self.method,
@@ -459,7 +467,7 @@ class LoginView(View, LogoutMixin):
                 )
                 if self.ajax:
                     data = {"status": "error", "detail": "confirmation needed"}
-                    return JsonResponse(self.request, data)
+                    return json_response(self.request, data)
                 else:
                     warn_form = forms.WarnForm(initial={
                         'service': self.service,
@@ -486,7 +494,7 @@ class LoginView(View, LogoutMixin):
                     return HttpResponseRedirect(redirect_url)
                 else:
                     data = {"status": "success", "detail": "auth", "url": redirect_url}
-                    return JsonResponse(self.request, data)
+                    return json_response(self.request, data)
         except ServicePattern.DoesNotExist:
             error = 1
             messages.add_message(
@@ -530,7 +538,7 @@ class LoginView(View, LogoutMixin):
             )
         else:
             data = {"status": "error", "detail": "auth", "code": error}
-            return JsonResponse(self.request, data)
+            return json_response(self.request, data)
 
     def authenticated(self):
         """Processing authenticated users"""
@@ -552,7 +560,7 @@ class LoginView(View, LogoutMixin):
                     "detail": "login required",
                     "url": utils.reverse_params("cas_server:login", params=self.request.GET)
                 }
-                return JsonResponse(self.request, data)
+                return json_response(self.request, data)
             else:
                 return utils.redirect_params("cas_server:login", params=self.request.GET)
 
@@ -562,7 +570,7 @@ class LoginView(View, LogoutMixin):
         else:
             if self.ajax:
                 data = {"status": "success", "detail": "logged"}
-                return JsonResponse(self.request, data)
+                return json_response(self.request, data)
             else:
                 return render(
                     self.request,
@@ -605,7 +613,7 @@ class LoginView(View, LogoutMixin):
                 "detail": "login required",
                 "url": utils.reverse_params("cas_server:login",  params=self.request.GET)
             }
-            return JsonResponse(self.request, data)
+            return json_response(self.request, data)
         else:
             if settings.CAS_FEDERATE:
                 if self.username and self.ticket:
@@ -824,7 +832,10 @@ class ValidateService(View, AttributesMixin):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
-                if self.pgt_url and self.pgt_url.startswith("https://"):
+                if self.pgt_url and (
+                    self.pgt_url.startswith("https://") or
+                    re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
+                ):
                     return self.process_pgturl(params)
                 else:
                     logger.info(

@@ -90,7 +90,7 @@ class MysqlAuthUser(AuthUser):  # pragma: no cover
     def test_password(self, password):
         """test `password` agains the user"""
         if self.user:
-            check_password(
+            return check_password(
                 settings.CAS_SQL_PASSWORD_CHECK,
                 password,
                 self.user["password"],

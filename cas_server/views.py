@@ -105,6 +105,7 @@ class LogoutView(View, LogoutMixin):
     service = None
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
@@ -196,6 +197,7 @@ class LoginView(View, LogoutMixin):
     USER_NOT_AUTHENTICATED = 6
 
     def init_post(self, request):
+        """Initialize POST received parameters"""
         self.request = request
         self.service = request.POST.get('service')
         self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
@@ -205,15 +207,19 @@ class LoginView(View, LogoutMixin):
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
 
-    def check_lt(self):
-        # save LT for later check
-        lt_valid = self.request.session.get('lt', [])
-        lt_send = self.request.POST.get('lt')
-        # generate a new LT (by posting the LT has been consumed)
+    def gen_lt(self):
+        """Generate a new LoginTicket and add it to the list of valid LT for the user"""
         self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
         if len(self.request.session['lt']) > 100:
             self.request.session['lt'] = self.request.session['lt'][-100:]
 
+    def check_lt(self):
+        """Check is the POSTed LoginTicket is valid, if yes invalide it"""
+        # save LT for later check
+        lt_valid = self.request.session.get('lt', [])
+        lt_send = self.request.POST.get('lt')
+        # generate a new LT (by posting the LT has been consumed)
+        self.gen_lt()
         # check if send LT is valid
         if lt_valid is None or lt_send not in lt_valid:
             return False
@@ -238,7 +244,7 @@ class LoginView(View, LogoutMixin):
                     username=self.request.session['username'],
                     session_key=self.request.session.session_key
                 )
-                self.user.save()
+                self.user.save()  # pragma: no cover (should not happend)
             except models.User.DoesNotExist:
                 self.user = models.User.objects.create(
                     username=self.request.session['username'],
@@ -250,10 +256,15 @@ class LoginView(View, LogoutMixin):
         elif ret == self.USER_ALREADY_LOGGED:
             pass
         else:
-            raise EnvironmentError("invalid output for LoginView.process_post")
+            raise EnvironmentError("invalid output for LoginView.process_post")  # pragma: no cover
         return self.common()
 
     def process_post(self):
+        """
+            Analyse the POST request:
+                * check that the LoginTicket is valid
+                * check that the user sumited credentials are valid
+        """
         if not self.check_lt():
             values = self.request.POST.copy()
             # if not set a new LT and fail
@@ -280,6 +291,7 @@ class LoginView(View, LogoutMixin):
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
         self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
@@ -294,15 +306,16 @@ class LoginView(View, LogoutMixin):
         return self.common()
 
     def process_get(self):
-        # generate a new LT if none is present
-        self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
-
+        """Analyse the GET request"""
+        # generate a new LT
+        self.gen_lt()
         if not self.request.session.get("authenticated") or self.renew:
             self.init_form()
             return self.USER_NOT_AUTHENTICATED
         return self.USER_AUTHENTICATED
 
     def init_form(self, values=None):
+        """Initialization of the good form depending of POST and GET parameters"""
         self.form = forms.UserCredential(
             values,
             initial={

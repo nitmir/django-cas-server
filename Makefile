@@ -49,8 +49,9 @@ coverage: test_venv
 	test_venv/bin/pip install coverage
 	test_venv/bin/coverage run --source='cas_server' --omit='cas_server/migrations*' run_tests
 	test_venv/bin/coverage html
-	test_venv/bin/coverage xml
+	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
 coverage_codacy: coverage
+	test_venv/bin/coverage xml
 	test_venv/bin/pip install codacy-coverage
 	test_venv/bin/python-codacy-coverage -r coverage.xml

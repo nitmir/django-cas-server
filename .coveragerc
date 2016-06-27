@@ -5,3 +5,4 @@ exclude_lines =
     def __unicode__
     raise AssertionError
     raise NotImplementedError
+    if six.PY3:

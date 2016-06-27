@@ -52,7 +52,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
-ROOT_URLCONF = 'cas_server.urls'
+ROOT_URLCONF = 'urls_tests'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases

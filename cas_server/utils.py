@@ -192,6 +192,7 @@ def get_tuple(tuple, index, default=None):
     except IndexError:
         return default
 
+
 class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     PARAMS = {}
 

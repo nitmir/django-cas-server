@@ -141,6 +141,7 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
         else:
             return {}
 
+
 class CASFederateAuth(AuthUser):
     user = None
 

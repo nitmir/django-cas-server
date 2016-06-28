@@ -264,8 +264,8 @@ class LoginTestCase(TestCase):
         """Check we only keep the last 100 Login Ticket for a user"""
         client, params = get_login_page_params()
         current_lt = params["lt"]
-        i_in_test = random.randint(0, 100)
-        i_not_in_test = random.randint(100, 150)
+        i_in_test = random.randint(0, 99)
+        i_not_in_test = random.randint(101, 150)
         for i in range(150):
             if i == i_in_test:
                 self.assertTrue(current_lt in client.session['lt'])
@@ -708,8 +708,12 @@ class LogoutTestCase(TestCase):
 
 
 class AuthTestCase(TestCase):
-
+    """
+        Test for the auth view, used for external services
+        to validate (user, pass, service) tuples.
+    """
     def setUp(self):
+        """preparing test context"""
         settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'https://www.example.com'
         models.ServicePattern.objects.create(
@@ -718,6 +722,7 @@ class AuthTestCase(TestCase):
         )
 
     def test_auth_view_goodpass(self):
+        """successful request are awsered by yes"""
         settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
@@ -733,6 +738,7 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.content, b'yes\n')
 
     def test_auth_view_badpass(self):
+        """ bag user password => no"""
         settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
@@ -748,6 +754,7 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badservice(self):
+        """bad service => no"""
         settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
@@ -763,6 +770,7 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badsecret(self):
+        """bad api key => no"""
         settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
@@ -778,6 +786,7 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.content, b'no\n')
 
     def test_auth_view_badsettings(self):
+        """api not set => error"""
         settings.CAS_AUTH_SHARED_SECRET = None
         client = Client()
         response = client.post(
@@ -791,6 +800,23 @@ class AuthTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b"no\nplease set CAS_AUTH_SHARED_SECRET")
+
+    def test_auth_view_missing_parameter(self):
+        """missing parameter in request => no"""
+        settings.CAS_AUTH_SHARED_SECRET = 'test'
+        client = Client()
+        params = {
+            'username': settings.CAS_TEST_USER,
+            'password': settings.CAS_TEST_PASSWORD,
+            'service': self.service,
+            'secret': 'test'
+        }
+        for key in ['username', 'password', 'service']:
+            send_params = params.copy()
+            del send_params[key]
+            response = client.post('/auth', send_params)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, b'no\n')
 
 
 class ValidateTestCase(TestCase):

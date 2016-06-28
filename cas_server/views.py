@@ -864,7 +864,7 @@ class Proxy(View):
         except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
             raise ValidateError(
                 'UNAUTHORIZED_USER',
-                '%s not allowed on %s' % (ticket.user, self.target_service)
+                'User %s not allowed on %s' % (ticket.user.username, self.target_service)
             )
 
 

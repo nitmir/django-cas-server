@@ -432,6 +432,22 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response["Location"].startswith("%s?ticket=" % service))
 
+    def test_service_user_field_evaluate_to_false(self):
+        """
+            Test using a user attribute as username:
+            case the attribute exists but evaluate to False
+        """
+        service = "https://field_needed_success.example.com"
+        saved_nom = settings.CAS_TEST_ATTRIBUTES["nom"]
+        settings.CAS_TEST_ATTRIBUTES["nom"] = []
+
+        client = get_auth_client()
+        response = client.get("/login", {"service": service})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(b"The attribut nom is needed to use that service" in response.content)
+
+        settings.CAS_TEST_ATTRIBUTES["nom"] = saved_nom
+
     def test_gateway(self):
         """test gateway parameter"""
 
@@ -820,17 +836,25 @@ class AuthTestCase(TestCase):
 
 
 class ValidateTestCase(TestCase):
-
+    """tests for the validate view"""
     def setUp(self):
+        """preparing test context"""
         settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'https://www.example.com'
         self.service_pattern = models.ServicePattern.objects.create(
             name="example",
             pattern="^https://www\.example\.com(/.*)?$"
         )
+        self.service_user_field = "https://user_field.example.com"
+        self.service_pattern_user_field = models.ServicePattern.objects.create(
+            name="user field",
+            pattern="^https://user_field\.example\.com(/.*)?$",
+            user_field="alias"
+        )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
 
     def test_validate_view_ok(self):
+        """test for a valid (ticket, service)"""
         ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
@@ -839,6 +863,7 @@ class ValidateTestCase(TestCase):
         self.assertEqual(response.content, b'yes\ntest\n')
 
     def test_validate_view_badservice(self):
+        """test for a valid ticket but bad service"""
         ticket = get_user_ticket_request(self.service)[1]
 
         client = Client()
@@ -850,6 +875,7 @@ class ValidateTestCase(TestCase):
         self.assertEqual(response.content, b'no\n')
 
     def test_validate_view_badticket(self):
+        """test for a bad ticket but valid service"""
         get_user_ticket_request(self.service)
 
         client = Client()
@@ -859,6 +885,33 @@ class ValidateTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'no\n')
+
+    def test_validate_user_field_ok(self):
+        """
+            test with a good user_field. A bad user_field (that evaluate to False)
+            wont happed cause it is filtered in the login view
+        """
+        ticket = get_user_ticket_request(self.service_user_field)[1]
+        client = Client()
+        response = client.get(
+            '/validate',
+            {'ticket': ticket.value, 'service': self.service_user_field}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'yes\ndemo1\n')
+
+    def test_validate_missing_parameter(self):
+        """test with a missing GET parameter among [service, ticket]"""
+        ticket = get_user_ticket_request(self.service)[1]
+
+        client = Client()
+        params = {'ticket': ticket.value, 'service': self.service}
+        for key in ['ticket', 'service']:
+            send_params = params.copy()
+            del send_params[key]
+            response = client.get('/validate', send_params)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, b'no\n')
 
 
 class ValidateServiceTestCase(TestCase):

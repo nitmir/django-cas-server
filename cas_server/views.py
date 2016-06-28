@@ -596,12 +596,9 @@ class Validate(View):
                         ticket.service_pattern.user_field
                     )
                     if isinstance(username, list):
-                        try:
-                            username = username[0]
-                        except IndexError:
-                            username = None
-                    if not username:
-                        username = ""
+                        # the list not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        username = username[0]
                 else:
                     username = ticket.user.username
                 return HttpResponse("yes\n%s\n" % username, content_type="text/plain")

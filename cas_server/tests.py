@@ -1333,3 +1333,18 @@ class ProxyTestCase(TestCase, BaseServicePattern, XmlContent):
                 "UNAUTHORIZED_USER",
                 'User %s not allowed on %s' % (settings.CAS_TEST_USER, service)
             )
+
+    def test_proxy_missing_parameter(self):
+        """Try to get a PGT with some missing GET parameters. The PT should not be emited"""
+        params = get_pgt()
+        base_params = {'pgt': params['pgtId'], 'targetService': "https://www.example.org"}
+        for key in ["pgt", 'targetService']:
+            send_params = base_params.copy()
+            del send_params[key]
+            client = Client()
+            response = client.get("/proxy", send_params)
+            self.assert_error(
+                response,
+                "INVALID_REQUEST",
+                'you must specify and pgt and targetService'
+            )

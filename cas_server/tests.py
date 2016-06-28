@@ -7,6 +7,7 @@ from django.test import Client
 import re
 import six
 import random
+import json
 from lxml import etree
 from six.moves import range
 
@@ -448,9 +449,11 @@ class LoginTestCase(TestCase):
         self.assertEqual(response["Location"], service)
 
     def test_renew(self):
+        """test the authentication renewal request from a service"""
         service = "https://www.example.com"
         client = get_auth_client()
         response = client.get("/login", {'service': service, 'renew': 'on'})
+        # we are ask to reauthenticate
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             (
@@ -466,7 +469,72 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         ticket_value = response['Location'].split('ticket=')[-1]
         ticket = models.ServiceTicket.objects.get(value=ticket_value)
+        # the created ticket is marked has being gottent after a renew
         self.assertEqual(ticket.renew, True)
+
+    def test_ajax_login_required(self):
+        """test ajax, login required"""
+        client = Client()
+        response = client.get("/login", HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "error")
+        self.assertEqual(data["detail"], "login required")
+        self.assertEqual(data["url"], "/login?")
+
+    def test_ajax_logged_user_deleted(self):
+        """test ajax user logged deleted: login required"""
+        client = get_auth_client()
+        user = models.User.objects.get(
+            username=settings.CAS_TEST_USER,
+            session_key=client.session.session_key
+        )
+        user.delete()
+        response = client.get("/login", HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "error")
+        self.assertEqual(data["detail"], "login required")
+        self.assertEqual(data["url"], "/login?")
+
+    def test_ajax_logged(self):
+        """test ajax user is successfully logged"""
+        client = get_auth_client()
+        response = client.get("/login", HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["detail"], "logged")
+
+    def test_ajax_get_ticket_success(self):
+        """test ajax retrieve a ticket for an allowed service"""
+        service = "https://www.example.com"
+        client = get_auth_client()
+        response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["detail"], "auth")
+        self.assertTrue(data["url"].startswith('%s?ticket=' % service))
+
+    def test_ajax_get_ticket_fail(self):
+        """test ajax retrieve a ticket for a denied service"""
+        service = "https://www.example.org"
+        client = get_auth_client()
+        response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "error")
+        self.assertEqual(data["detail"], "auth")
+        self.assertEqual(data["messages"][0]["level"], "error")
+        self.assertEqual(
+            data["messages"][0]["message"],
+            "Service https://www.example.org non allowed."
+        )
+
+    def test_ajax_get_ticket_warn(self):
+        """test get a ticket but user asked to be warned"""
+        service = "https://www.example.com"
+        client = get_auth_client(warn="on")
+        response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "error")
+        self.assertEqual(data["detail"], "confirmation needed")
 
 
 class LogoutTestCase(TestCase):

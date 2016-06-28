@@ -206,6 +206,7 @@ class LoginView(View, LogoutMixin):
         self.ajax = 'HTTP_X_AJAX' in request.META
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
+        self.warn = request.POST.get('warn')
 
     def gen_lt(self):
         """Generate a new LoginTicket and add it to the list of valid LT for the user"""
@@ -298,6 +299,7 @@ class LoginView(View, LogoutMixin):
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
         self.ajax = 'HTTP_X_AJAX' in request.META
+        self.warn = request.GET.get('warn')
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -322,7 +324,8 @@ class LoginView(View, LogoutMixin):
                 'service': self.service,
                 'method': self.method,
                 'warn': self.request.session.get("warn"),
-                'lt': self.request.session['lt'][-1]
+                'lt': self.request.session['lt'][-1],
+                'renew': self.renew
             }
         )
 
@@ -364,7 +367,7 @@ class LoginView(View, LogoutMixin):
                 redirect_url = self.user.get_service_url(
                     self.service,
                     service_pattern,
-                    renew=self.renew
+                    renew=self.renewed
                 )
                 if not self.ajax:
                     return HttpResponseRedirect(redirect_url)

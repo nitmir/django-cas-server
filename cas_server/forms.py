@@ -35,6 +35,7 @@ class UserCredential(forms.Form):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
+    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(UserCredential, self).__init__(*args, **kwargs)
@@ -46,6 +47,7 @@ class UserCredential(forms.Form):
             cleaned_data["username"] = auth.username
         else:
             raise forms.ValidationError(_(u"Bad user"))
+        return cleaned_data
 
 
 class TicketForm(forms.ModelForm):

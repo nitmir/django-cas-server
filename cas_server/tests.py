@@ -476,6 +476,7 @@ class LoginTestCase(TestCase):
         """test ajax, login required"""
         client = Client()
         response = client.get("/login", HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "login required")
@@ -490,6 +491,7 @@ class LoginTestCase(TestCase):
         )
         user.delete()
         response = client.get("/login", HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "login required")
@@ -499,6 +501,7 @@ class LoginTestCase(TestCase):
         """test ajax user is successfully logged"""
         client = get_auth_client()
         response = client.get("/login", HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "success")
         self.assertEqual(data["detail"], "logged")
@@ -508,6 +511,7 @@ class LoginTestCase(TestCase):
         service = "https://www.example.com"
         client = get_auth_client()
         response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "success")
         self.assertEqual(data["detail"], "auth")
@@ -518,6 +522,7 @@ class LoginTestCase(TestCase):
         service = "https://www.example.org"
         client = get_auth_client()
         response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "auth")
@@ -532,6 +537,7 @@ class LoginTestCase(TestCase):
         service = "https://www.example.com"
         client = get_auth_client(warn="on")
         response = client.get("/login", {'service': service}, HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "confirmation needed")
@@ -540,10 +546,22 @@ class LoginTestCase(TestCase):
 class LogoutTestCase(TestCase):
 
     def setUp(self):
+        """prepare logout test context"""
         settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
 
+    def test_logout(self):
+        """logout is idempotent"""
+        client = Client()
+
+        client.get("/logout")
+
+        self.assertFalse(client.session.get("username"))
+        self.assertFalse(client.session.get("authenticated"))
+
     def test_logout_view(self):
+        """test simple logout"""
         client = get_auth_client()
+        client2 = get_auth_client()
 
         response = client.get("/login")
         self.assertEqual(response.status_code, 200)
@@ -553,6 +571,8 @@ class LogoutTestCase(TestCase):
                 b"the Central Authentication Service"
             ) in response.content
         )
+        self.assertTrue(client.session["username"] == settings.CAS_TEST_USER)
+        self.assertTrue(client.session["authenticated"] is True)
 
         response = client.get("/logout")
         self.assertEqual(response.status_code, 200)
@@ -562,6 +582,40 @@ class LogoutTestCase(TestCase):
                 b"the Central Authentication Service"
             ) in response.content
         )
+
+        self.assertFalse(client.session.get("username"))
+        self.assertFalse(client.session.get("authenticated"))
+        # client2 is still logged
+        self.assertTrue(client2.session["username"] == settings.CAS_TEST_USER)
+        self.assertTrue(client2.session["authenticated"] is True)
+
+        response = client.get("/login")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            (
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
+            ) in response.content
+        )
+
+    def test_logout_from_all_session(self):
+        """test logout from all my session"""
+        client = get_auth_client()
+        client2 = get_auth_client()
+
+        client.get("/logout?all=1")
+
+        # both client are logged out
+        self.assertFalse(client.session.get("username"))
+        self.assertFalse(client.session.get("authenticated"))
+        self.assertFalse(client2.session.get("username"))
+        self.assertFalse(client2.session.get("authenticated"))
+
+    def assert_redirect_to_service(self, client, response):
+        """assert logout redirect to parameter"""
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.has_header("Location"))
+        self.assertEqual(response["Location"], "https://www.example.com")
 
         response = client.get("/login")
         self.assertEqual(response.status_code, 200)
@@ -573,38 +627,84 @@ class LogoutTestCase(TestCase):
         )
 
     def test_logout_view_url(self):
+        """test logout redirect to url parameter"""
         client = get_auth_client()
 
         response = client.get('/logout?url=https://www.example.com')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.has_header("Location"))
-        self.assertEqual(response["Location"], "https://www.example.com")
-
-        response = client.get("/login")
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(
-            (
-                b"You have successfully logged into "
-                b"the Central Authentication Service"
-            ) in response.content
-        )
+        self.assert_redirect_to_service(client, response)
 
     def test_logout_view_service(self):
+        """test logout redirect to service parameter"""
         client = get_auth_client()
 
         response = client.get('/logout?service=https://www.example.com')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.has_header("Location"))
-        self.assertEqual(response["Location"], "https://www.example.com")
+        self.assert_redirect_to_service(client, response)
 
-        response = client.get("/login")
+    def test_ajax_logout(self):
+        """test ajax logout"""
+        client = get_auth_client()
+
+        response = client.get('/logout', HTTP_X_AJAX='on')
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(
-            (
-                b"You have successfully logged into "
-                b"the Central Authentication Service"
-            ) in response.content
-        )
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["detail"], "logout")
+        self.assertEqual(data['session_nb'], 1)
+
+    def test_ajax_logout_all_session(self):
+        """test ajax logout from a random number a sessions"""
+        nb_client = random.randint(2, 10)
+        clients = [get_auth_client() for i in range(nb_client)]
+        response = clients[0].get('/logout?all=1', HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["detail"], "logout")
+        self.assertEqual(data['session_nb'], nb_client)
+
+    def test_redirect_after_logout(self):
+        """Test redirect to login after logout parameter"""
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
+        client = get_auth_client()
+
+        response = client.get('/logout')
+        self.assertEqual(response.status_code, 302)
+        if django.VERSION < (1, 9):
+            self.assertEqual(response["Location"], "http://testserver/login")
+        else:
+            self.assertEqual(response["Location"], "/login")
+        self.assertFalse(client.session.get("username"))
+        self.assertFalse(client.session.get("authenticated"))
+
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
+
+    def test_redirect_after_logout_to_service(self):
+        """test prevalence of redirect url/service parameter over redirect to login after logout"""
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
+        client = get_auth_client()
+
+        response = client.get('/logout?url=https://www.example.com')
+        self.assert_redirect_to_service(client, response)
+
+        response = client.get('/logout?service=https://www.example.com')
+        self.assert_redirect_to_service(client, response)
+
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
+
+    def test_ajax_redirect_after_logout(self):
+        """Test ajax redirect to login after logout parameter"""
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
+        client = get_auth_client()
+
+        response = client.get('/logout', HTTP_X_AJAX='on')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content.decode("utf8"))
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["detail"], "logout")
+        self.assertEqual(data['session_nb'], 1)
+        self.assertEqual(data['url'], '/login')
+
+        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
 
 
 class AuthTestCase(TestCase):

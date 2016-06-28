@@ -19,6 +19,7 @@ import cas_server.models as models
 
 
 class WarnForm(forms.Form):
+    """Form used on warn page before emiting a ticket"""
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     gateway = forms.CharField(widget=forms.HiddenInput(), required=False)

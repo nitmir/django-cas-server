@@ -21,6 +21,7 @@ except ImportError:
 
 
 class AuthUser(object):
+    """Authentication base class"""
     def __init__(self, username):
         self.username = username
 

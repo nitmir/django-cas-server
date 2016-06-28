@@ -1,3 +1,4 @@
+"""Tests module"""
 from .default_settings import settings
 
 import django
@@ -83,7 +84,7 @@ class CheckPasswordCase(TestCase):
         """Generate random bytes string that will be used ass passwords"""
         self.password1 = utils.gen_saml_id()
         self.password2 = utils.gen_saml_id()
-        if not isinstance(self.password1, bytes):
+        if not isinstance(self.password1, bytes):  # pragma: no cover executed only in python3
             self.password1 = self.password1.encode("utf8")
             self.password2 = self.password2.encode("utf8")
 
@@ -403,7 +404,7 @@ class LoginTestCase(TestCase, BaseServicePattern):
         response = client.get("/login")
 
         self.assert_login_failed(client, response, code=302)
-        if django.VERSION < (1, 9):
+        if django.VERSION < (1, 9):  # pragma: no cover coverage is computed with dango 1.9
             self.assertEqual(response["Location"], "http://testserver/login")
         else:
             self.assertEqual(response["Location"], "/login?")
@@ -572,7 +573,7 @@ class LoginTestCase(TestCase, BaseServicePattern):
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class LogoutTestCase(TestCase):
-
+    """test fot the logout view"""
     def test_logout(self):
         """logout is idempotent"""
         client = Client()
@@ -693,7 +694,7 @@ class LogoutTestCase(TestCase):
 
         response = client.get('/logout')
         self.assertEqual(response.status_code, 302)
-        if django.VERSION < (1, 9):
+        if django.VERSION < (1, 9):  # pragma: no cover coverage is computed with dango 1.9
             self.assertEqual(response["Location"], "http://testserver/login")
         else:
             self.assertEqual(response["Location"], "/login")

@@ -30,11 +30,13 @@ from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def context(params):
+    """Function that add somes variable to the context before template rendering"""
     params["settings"] = settings
     return params
 
 
 def json_response(request, data):
+    """Wrapper dumping `data` to a json and sending it to the user with an HttpResponse"""
     data["messages"] = []
     for msg in messages.get_messages(request):
         data["messages"].append({'message': msg.message, 'level': msg.level_tag})
@@ -64,6 +66,7 @@ def redirect_params(url_name, params=None):
 
 
 def reverse_params(url_name, params=None, **kwargs):
+    """compule the reverse url or `url_name` and add GET parameters from `params` to it"""
     url = reverse(url_name, **kwargs)
     params = urlencode(params if params else {})
     return url + "?%s" % params
@@ -152,6 +155,7 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     PARAMS = {}
 
     def do_GET(self):
+        """Called on a GET request on the BaseHTTPServer"""
         self.send_response(200)
         self.send_header(b"Content-type", "text/plain")
         self.end_headers()
@@ -161,15 +165,18 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         PGTUrlHandler.PARAMS.update(params)
 
     def log_message(self, *args):
+        """silent any log message"""
         return
 
     @classmethod
     def run(cls):
+        """Run a BaseHTTPServer using this class as handler"""
         server_class = BaseHTTPServer.HTTPServer
         httpd = server_class(("127.0.0.1", 0), cls)
         (host, port) = httpd.socket.getsockname()
 
         def lauch():
+            """routine to lauch in a background thread"""
             httpd.handle_request()
             httpd.server_close()
 
@@ -182,6 +189,7 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class PGTUrlHandler404(PGTUrlHandler):
     """A simple http server that always return 404 not found. Used in unit tests"""
     def do_GET(self):
+        """Called on a GET request on the BaseHTTPServer"""
         self.send_response(404)
         self.send_header(b"Content-type", "text/plain")
         self.end_headers()

@@ -47,6 +47,7 @@ class User(models.Model):
 
     @classmethod
     def clean_old_entries(cls):
+        """Remove users inactive since more that SESSION_COOKIE_AGE"""
         users = cls.objects.filter(
             date__lt=(timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE))
         )
@@ -56,6 +57,7 @@ class User(models.Model):
 
     @classmethod
     def clean_deleted_sessions(cls):
+        """Remove user where the session do not exists anymore"""
         for user in cls.objects.all():
             if not SessionStore(session_key=user.session_key).get('authenticated'):
                 user.logout()
@@ -141,6 +143,7 @@ class User(models.Model):
 
 
 class ServicePatternException(Exception):
+    """Base exception of exceptions raised in the ServicePattern model"""
     pass
 
 

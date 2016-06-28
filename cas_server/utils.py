@@ -148,6 +148,7 @@ def gen_saml_id():
 
 
 class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    """A simple http server that return 200 on GET and store GET parameters. Used in unit tests"""
     PARAMS = {}
 
     def do_GET(self):
@@ -162,10 +163,10 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def log_message(self, *args):
         return
 
-    @staticmethod
-    def run():
+    @classmethod
+    def run(cls):
         server_class = BaseHTTPServer.HTTPServer
-        httpd = server_class(("127.0.0.1", 0), PGTUrlHandler)
+        httpd = server_class(("127.0.0.1", 0), cls)
         (host, port) = httpd.socket.getsockname()
 
         def lauch():
@@ -176,6 +177,15 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         httpd_thread.daemon = True
         httpd_thread.start()
         return (httpd_thread, host, port)
+
+
+class PGTUrlHandler404(PGTUrlHandler):
+    """A simple http server that always return 404 not found. Used in unit tests"""
+    def do_GET(self):
+        self.send_response(404)
+        self.send_header(b"Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"error 404 not found")
 
 
 class LdapHashUserPassword(object):

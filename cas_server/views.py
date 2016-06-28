@@ -596,7 +596,7 @@ class Validate(View):
                         ticket.service_pattern.user_field
                     )
                     if isinstance(username, list):
-                        # the list not empty because we wont generate a ticket with a user_field
+                        # the list is not empty because we wont generate a ticket with a user_field
                         # that evaluate to False
                         username = username[0]
                 else:
@@ -674,6 +674,10 @@ class ValidateService(View, AttributesMixin):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
+                    if isinstance(params['username'], list):
+                        # the list is not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        params['username'] = params['username'][0]
                 if self.pgt_url and (
                     self.pgt_url.startswith("https://") or
                     re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
@@ -775,9 +779,12 @@ class ValidateService(View, AttributesMixin):
                         params,
                         content_type="text/xml; charset=utf-8"
                     )
-                except requests.exceptions.SSLError as error:
+                except requests.exceptions.RequestException as error:
                     error = utils.unpack_nested_exception(error)
-                    raise ValidateError('INVALID_PROXY_CALLBACK', str(error))
+                    raise ValidateError(
+                        'INVALID_PROXY_CALLBACK',
+                        "%s: %s" % (type(error), str(error))
+                    )
             else:
                 raise ValidateError(
                     'INVALID_PROXY_CALLBACK',

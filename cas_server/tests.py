@@ -447,6 +447,27 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], service)
 
+    def test_renew(self):
+        service = "https://www.example.com"
+        client = get_auth_client()
+        response = client.get("/login", {'service': service, 'renew': 'on'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            (
+                b"Authentication renewal required by "
+                b"service example (https://www.example.com)"
+            ) in response.content
+        )
+        params = copy_form(response.context["form"])
+        params["username"] = settings.CAS_TEST_USER
+        params["password"] = settings.CAS_TEST_PASSWORD
+        self.assertEqual(params["renew"], True)
+        response = client.post("/login", params)
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        ticket = models.ServiceTicket.objects.get(value=ticket_value)
+        self.assertEqual(ticket.renew, True)
+
 
 class LogoutTestCase(TestCase):
 

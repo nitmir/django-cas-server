@@ -41,6 +41,7 @@ class FederateSelect(forms.Form):
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     remember = forms.BooleanField(label=_('Remember the identity provider'), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
+    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
 
 class UserCredential(forms.Form):
@@ -51,6 +52,7 @@ class UserCredential(forms.Form):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
+    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(UserCredential, self).__init__(*args, **kwargs)
@@ -74,6 +76,7 @@ class FederateUserCredential(UserCredential):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(widget=forms.HiddenInput(), required=False)
+    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
     def clean(self):
         cleaned_data = super(FederateUserCredential, self).clean()

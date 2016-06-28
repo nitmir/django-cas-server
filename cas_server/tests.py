@@ -1,8 +1,8 @@
 from .default_settings import settings
 
 import django
-from django.test import TestCase
-from django.test import Client
+from django.test import TestCase, Client
+from django.test.utils import override_settings
 
 import re
 import six
@@ -138,6 +138,7 @@ class CheckPasswordCase(TestCase):
         )
 
 
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class LoginTestCase(TestCase):
     """Tests for the login view"""
     def setUp(self):
@@ -147,7 +148,6 @@ class LoginTestCase(TestCase):
                 * create a service pattern for https://www.example.com/**
                 * Set the service pattern to return all user attributes
         """
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
 
         # For general purpose testing
         self.service_pattern = models.ServicePattern.objects.create(
@@ -559,11 +559,8 @@ class LoginTestCase(TestCase):
         self.assertEqual(data["detail"], "confirmation needed")
 
 
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class LogoutTestCase(TestCase):
-
-    def setUp(self):
-        """prepare logout test context"""
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
 
     def test_logout(self):
         """logout is idempotent"""
@@ -678,9 +675,9 @@ class LogoutTestCase(TestCase):
         self.assertEqual(data["detail"], "logout")
         self.assertEqual(data['session_nb'], nb_client)
 
+    @override_settings(CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT=True)
     def test_redirect_after_logout(self):
         """Test redirect to login after logout parameter"""
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
         client = get_auth_client()
 
         response = client.get('/logout')
@@ -692,11 +689,9 @@ class LogoutTestCase(TestCase):
         self.assertFalse(client.session.get("username"))
         self.assertFalse(client.session.get("authenticated"))
 
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
-
+    @override_settings(CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT=True)
     def test_redirect_after_logout_to_service(self):
         """test prevalence of redirect url/service parameter over redirect to login after logout"""
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
         client = get_auth_client()
 
         response = client.get('/logout?url=https://www.example.com')
@@ -705,11 +700,9 @@ class LogoutTestCase(TestCase):
         response = client.get('/logout?service=https://www.example.com')
         self.assert_redirect_to_service(client, response)
 
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
-
+    @override_settings(CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT=True)
     def test_ajax_redirect_after_logout(self):
         """Test ajax redirect to login after logout parameter"""
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = True
         client = get_auth_client()
 
         response = client.get('/logout', HTTP_X_AJAX='on')
@@ -720,9 +713,8 @@ class LogoutTestCase(TestCase):
         self.assertEqual(data['session_nb'], 1)
         self.assertEqual(data['url'], '/login')
 
-        settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
 
-
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class AuthTestCase(TestCase):
     """
         Test for the auth view, used for external services
@@ -730,16 +722,15 @@ class AuthTestCase(TestCase):
     """
     def setUp(self):
         """preparing test context"""
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'https://www.example.com'
         models.ServicePattern.objects.create(
             name="example",
             pattern="^https://www\.example\.com(/.*)?$"
         )
 
+    @override_settings(CAS_AUTH_SHARED_SECRET='test')
     def test_auth_view_goodpass(self):
         """successful request are awsered by yes"""
-        settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
             '/auth',
@@ -753,9 +744,9 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'yes\n')
 
+    @override_settings(CAS_AUTH_SHARED_SECRET='test')
     def test_auth_view_badpass(self):
         """ bag user password => no"""
-        settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
             '/auth',
@@ -769,9 +760,9 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'no\n')
 
+    @override_settings(CAS_AUTH_SHARED_SECRET='test')
     def test_auth_view_badservice(self):
         """bad service => no"""
-        settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
             '/auth',
@@ -785,9 +776,9 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'no\n')
 
+    @override_settings(CAS_AUTH_SHARED_SECRET='test')
     def test_auth_view_badsecret(self):
         """bad api key => no"""
-        settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         response = client.post(
             '/auth',
@@ -803,7 +794,6 @@ class AuthTestCase(TestCase):
 
     def test_auth_view_badsettings(self):
         """api not set => error"""
-        settings.CAS_AUTH_SHARED_SECRET = None
         client = Client()
         response = client.post(
             '/auth',
@@ -817,9 +807,9 @@ class AuthTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b"no\nplease set CAS_AUTH_SHARED_SECRET")
 
+    @override_settings(CAS_AUTH_SHARED_SECRET='test')
     def test_auth_view_missing_parameter(self):
         """missing parameter in request => no"""
-        settings.CAS_AUTH_SHARED_SECRET = 'test'
         client = Client()
         params = {
             'username': settings.CAS_TEST_USER,
@@ -835,11 +825,11 @@ class AuthTestCase(TestCase):
             self.assertEqual(response.content, b'no\n')
 
 
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class ValidateTestCase(TestCase):
     """tests for the validate view"""
     def setUp(self):
         """preparing test context"""
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'https://www.example.com'
         self.service_pattern = models.ServicePattern.objects.create(
             name="example",
@@ -914,11 +904,11 @@ class ValidateTestCase(TestCase):
             self.assertEqual(response.content, b'no\n')
 
 
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class ValidateServiceTestCase(TestCase):
     """tests for the serviceValidate view"""
     def setUp(self):
         """preparing test context"""
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
@@ -1245,10 +1235,10 @@ class ValidateServiceTestCase(TestCase):
             self.assertEqual(error[0].text, "you must specify a service and a ticket")
 
 
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class ProxyTestCase(TestCase):
 
     def setUp(self):
-        settings.CAS_AUTH_CLASS = 'cas_server.auth.TestAuthUser'
         self.service = 'http://127.0.0.1'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",

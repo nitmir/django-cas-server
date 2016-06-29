@@ -923,11 +923,15 @@ class SamlValidate(View, AttributesMixin):
                 'username': self.ticket.user.username,
                 'attributes': attributes
             }
-            if self.ticket.service_pattern.user_field and \
-                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
+            if (self.ticket.service_pattern.user_field and
+                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field)):
                 params['username'] = self.ticket.user.attributs.get(
                     self.ticket.service_pattern.user_field
                 )
+                if isinstance(params['username'], list):
+                    # the list is not empty because we wont generate a ticket with a user_field
+                    # that evaluate to False
+                    params['username'] = params['username'][0]
             logger.info(
                 "SamlValidate: ticket %s validated for user %s on service %s." % (
                     self.ticket.value,

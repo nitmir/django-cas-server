@@ -20,10 +20,14 @@ clean_tox:
 	rm -rf .tox
 clean_test_venv:
 	rm -rf test_venv
+clean_coverage:
+	rm -rf coverage.xml .coverage htmlcov
+clean_tild_backup:
+	find ./ -name '*~' -delete
 
-clean: clean_pyc clean_build
+clean: clean_pyc clean_build clean_coverage clean_tild_backup
 
-clean_all: clean_pyc clean_build clean_tox clean_test_venv
+clean_all: clean clean_tox clean_test_venv
 
 dist:
 	python setup.py sdist

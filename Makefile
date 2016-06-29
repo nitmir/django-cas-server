@@ -47,9 +47,6 @@ test_venv/cas/manage.py: test_venv
 	test_venv/bin/python test_venv/cas/manage.py migrate
 	test_venv/bin/python test_venv/cas/manage.py createsuperuser
 
-test_venv/bin/coverage: test_venv
-	test_venv/bin/pip install coverage
-
 test_venv: test_venv/bin/python
 
 test_project: test_venv/cas/manage.py
@@ -62,12 +59,11 @@ run_test_server: test_project
 tests: test_venv
 	test_venv/bin/py.test
 
-coverage: test_venv/bin/coverage
-	test_venv/bin/coverage run test_venv/bin/py.test
-	test_venv/bin/coverage html
-	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
+coverage: test_venv
+	test_venv/bin/py.test --cov=cas_server --cov-report xml --cov-report html
 
-coverage_codacy: coverage
-	test_venv/bin/coverage xml
+test_venv/bin/python-codacy-coverage:
 	test_venv/bin/pip install codacy-coverage
+
+coverage_codacy: coverage test_venv/bin/python-codacy-coverage
 	test_venv/bin/python-codacy-coverage -r coverage.xml

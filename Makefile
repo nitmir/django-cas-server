@@ -1,4 +1,4 @@
-.PHONY: clean build install dist test_venv test_project
+.PHONY: build dist
 VERSION=`python setup.py -V`
 
 build:
@@ -16,18 +16,19 @@ clean_tox:
 	rm -rf .tox
 clean_test_venv:
 	rm -rf test_venv
+
 clean: clean_pyc clean_build
+
 clean_all: clean_pyc clean_build clean_tox clean_test_venv
 
 dist:
 	python setup.py sdist
 
-test_venv:
-	mkdir -p test_venv
+test_venv/bin/python:
 	virtualenv test_venv
-	test_venv/bin/pip install -U --requirement requirements.txt
+	test_venv/bin/pip install -U --requirement requirements-dev.txt Django
 
-test_venv/cas/manage.py:
+test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
 	test_venv/bin/django-admin startproject cas test_venv/cas
 	ln -s ../../cas_server test_venv/cas/cas_server
@@ -38,16 +39,23 @@ test_venv/cas/manage.py:
 	test_venv/bin/python test_venv/cas/manage.py migrate
 	test_venv/bin/python test_venv/cas/manage.py createsuperuser
 
-test_project: test_venv test_venv/cas/manage.py
+test_venv/bin/coverage: test_venv
+	test_venv/bin/pip install coverage
+
+test_venv: test_venv/bin/python
+
+test_project: test_venv/cas/manage.py
 	@echo "##############################################################"
 	@echo "A test django project was created in $(realpath test_venv/cas)"
 
 run_test_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
 
-coverage: test_venv
-	test_venv/bin/pip install coverage
-	test_venv/bin/coverage run --source='cas_server' --omit='cas_server/migrations*' run_tests
+tests: test_venv
+	test_venv/bin/py.test
+
+coverage: test_venv/bin/coverage
+	test_venv/bin/coverage run test_venv/bin/py.test
 	test_venv/bin/coverage html
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 

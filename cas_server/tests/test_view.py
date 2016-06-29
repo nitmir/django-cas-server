@@ -1,5 +1,5 @@
 """Tests module"""
-from .default_settings import settings
+from cas_server.default_settings import settings
 
 import django
 from django.test import TestCase, Client

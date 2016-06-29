@@ -55,14 +55,14 @@ def get_user_ticket_request(service):
 
 def get_pgt():
     """return a dict contening a service, user and PGT ticket for this service"""
-    (host, port) = utils.PGTUrlHandler.run()[1:3]
+    (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
     service = "http://%s:%s" % (host, port)
 
-    (user, ticket) = get_user_ticket_request(service)
+    (user, ticket) = get_user_ticket_request(service)[:2]
 
     client = Client()
     client.get('/serviceValidate', {'ticket': ticket.value, 'service': service, 'pgtUrl': service})
-    params = utils.PGTUrlHandler.PARAMS.copy()
+    params = httpd.PARAMS
 
     params["service"] = service
     params["user"] = user

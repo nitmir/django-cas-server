@@ -23,6 +23,7 @@ import hashlib
 import crypt
 import base64
 import six
+import cgi
 from threading import Thread
 from importlib import import_module
 from six.moves import BaseHTTPServer
@@ -150,9 +151,11 @@ def gen_saml_id():
     return _gen_ticket('_')
 
 
-class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    """A simple http server that return 200 on GET and store GET parameters. Used in unit tests"""
-    PARAMS = {}
+class HttpParamsHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    """
+        A simple http server that return 200 on GET or POST
+        and store GET or POST parameters. Used in unit tests
+    """
 
     def do_GET(self):
         """Called on a GET request on the BaseHTTPServer"""
@@ -162,7 +165,19 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(b"ok")
         url = urlparse(self.path)
         params = dict(parse_qsl(url.query))
-        PGTUrlHandler.PARAMS.update(params)
+        self.server.PARAMS = params
+
+    def do_POST(self):
+        """Called on a POST request on the BaseHTTPServer"""
+        ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
+        if ctype == 'multipart/form-data':
+            postvars = cgi.parse_multipart(self.rfile, pdict)
+        elif ctype == 'application/x-www-form-urlencoded':
+            length = int(self.headers.get('content-length'))
+            postvars = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+        else:
+            postvars = {}
+        self.server.PARAMS = postvars
 
     def log_message(self, *args):
         """silent any log message"""
@@ -183,10 +198,10 @@ class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         httpd_thread = Thread(target=lauch)
         httpd_thread.daemon = True
         httpd_thread.start()
-        return (httpd_thread, host, port)
+        return (httpd, host, port)
 
 
-class PGTUrlHandler404(PGTUrlHandler):
+class Http404Handler(HttpParamsHandler):
     """A simple http server that always return 404 not found. Used in unit tests"""
     def do_GET(self):
         """Called on a GET request on the BaseHTTPServer"""
@@ -194,6 +209,10 @@ class PGTUrlHandler404(PGTUrlHandler):
         self.send_header(b"Content-type", "text/plain")
         self.end_headers()
         self.wfile.write(b"error 404 not found")
+
+    def do_POST(self):
+        """Called on a POST request on the BaseHTTPServer"""
+        return self.do_GET()
 
 
 class LdapHashUserPassword(object):

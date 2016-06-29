@@ -863,7 +863,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
 
     def test_validate_service_view_ok_pgturl(self):
         """test the retrieval of a ProxyGrantingTicket"""
-        (host, port) = utils.PGTUrlHandler.run()[1:3]
+        (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
         service = "http://%s:%s" % (host, port)
 
         ticket = get_user_ticket_request(service)[1]
@@ -873,7 +873,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
             '/serviceValidate',
             {'ticket': ticket.value, 'service': service, 'pgtUrl': service}
         )
-        pgt_params = utils.PGTUrlHandler.PARAMS.copy()
+        pgt_params = httpd.PARAMS
         self.assertEqual(response.status_code, 200)
 
         root = etree.fromstring(response.content)
@@ -887,7 +887,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
 
     def test_validate_service_pgturl_sslerror(self):
         """test the retrieval of a ProxyGrantingTicket with a SSL error on the pgtUrl"""
-        (host, port) = utils.PGTUrlHandler.run()[1:3]
+        (host, port) = utils.HttpParamsHandler.run()[1:3]
         service = "https://%s:%s" % (host, port)
 
         ticket = get_user_ticket_request(service)[1]
@@ -907,7 +907,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
             test the retrieval on a ProxyGrantingTicket then to pgtUrl return a http error.
             PGT creation should be aborted but the ticket still be valid
         """
-        (host, port) = utils.PGTUrlHandler404.run()[1:3]
+        (host, port) = utils.Http404Handler.run()[1:3]
         service = "http://%s:%s" % (host, port)
 
         ticket = get_user_ticket_request(service)[1]

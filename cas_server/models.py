@@ -81,7 +81,7 @@ class User(models.Model):
         for ticket_class in ticket_classes:
             queryset = ticket_class.objects.filter(user=self)
             for ticket in queryset:
-                ticket.logout(request, session, async_list)
+                ticket.logout(session, async_list)
             queryset.delete()
         for future in async_list:
             if future:
@@ -415,7 +415,7 @@ class Ticket(models.Model):
                         logger.warning("Error durring SLO %s" % error)
                         sys.stderr.write("%r\n" % error)
 
-    def logout(self, request, session, async_list=None):
+    def logout(self, session, async_list=None):
         """Send a SLO request to the ticket service"""
         # On logout invalidate the Ticket
         self.validate = True

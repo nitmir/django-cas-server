@@ -54,6 +54,7 @@ def get_user_ticket_request(service):
 
 
 def get_validated_ticket(service):
+    """Return a tick that has being already validated. Used to test SLO"""
     (ticket, auth_client) = get_user_ticket_request(service)[1:3]
 
     client = Client()

@@ -16,6 +16,7 @@ env:
 cache:
   directories:
     - $HOME/.pip-cache/
+    - $HOME/build/nitmir/django-cas-server/.tox/
 install:
   - "travis_retry pip install setuptools --upgrade"
   - "pip install tox"

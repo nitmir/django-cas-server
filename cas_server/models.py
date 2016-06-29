@@ -20,7 +20,6 @@ from django.utils import timezone
 from picklefield.fields import PickledObjectField
 
 import re
-import os
 import sys
 import logging
 from importlib import import_module
@@ -428,46 +427,27 @@ class Ticket(models.Model):
                     self.user.username
                 )
             )
-            try:
-                xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-     ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
-    <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
-    <samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
-  </samlp:LogoutRequest>""" % \
-                    {
-                        'id': os.urandom(20).encode("hex"),
-                        'datetime': timezone.now().isoformat(),
-                        'ticket':  self.value
-                    }
-                if self.service_pattern.single_log_out_callback:
-                    url = self.service_pattern.single_log_out_callback
-                else:
-                    url = self.service
-                async_list.append(
-                    session.post(
-                        url.encode('utf-8'),
-                        data={'logoutRequest': xml.encode('utf-8')},
-                        timeout=settings.CAS_SLO_TIMEOUT
-                    )
+            xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+ ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
+<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
+<samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
+</samlp:LogoutRequest>""" % \
+                {
+                    'id': utils.gen_saml_id(),
+                    'datetime': timezone.now().isoformat(),
+                    'ticket':  self.value
+                }
+            if self.service_pattern.single_log_out_callback:
+                url = self.service_pattern.single_log_out_callback
+            else:
+                url = self.service
+            async_list.append(
+                session.post(
+                    url.encode('utf-8'),
+                    data={'logoutRequest': xml.encode('utf-8')},
+                    timeout=settings.CAS_SLO_TIMEOUT
                 )
-            except Exception as error:
-                error = utils.unpack_nested_exception(error)
-                logger.warning(
-                    "Error durring SLO for user %s on service %s: %s" % (
-                        self.user.username,
-                        self.service,
-                        error
-                    )
-                )
-                if request is not None:
-                    messages.add_message(
-                        request,
-                        messages.WARNING,
-                        _(u'Error during service logout %(service)s:\n%(error)s') %
-                        {'service':  self.service, 'error': error}
-                    )
-                else:
-                    sys.stderr.write("%r\n" % error)
+            )
 
 
 class ServiceTicket(Ticket):

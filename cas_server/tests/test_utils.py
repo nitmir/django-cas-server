@@ -1,3 +1,4 @@
+"""Tests module for utils"""
 from django.test import TestCase
 
 import six

@@ -20,7 +20,8 @@ from cas_server.tests.utils import (
     get_auth_client,
     get_user_ticket_request,
     get_pgt,
-    get_proxy_ticket
+    get_proxy_ticket,
+    get_validated_ticket
 )
 from cas_server.tests.mixin import BaseServicePattern, XmlContent
 
@@ -386,6 +387,15 @@ class LoginTestCase(TestCase, BaseServicePattern):
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class LogoutTestCase(TestCase):
     """test fot the logout view"""
+    def setUp(self):
+        self.service = 'http://127.0.0.1:45678'
+        self.service_pattern = models.ServicePattern.objects.create(
+            name="localhost",
+            pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            single_log_out=True
+        )
+        models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
+
     def test_logout(self):
         """logout is idempotent"""
         client = Client()
@@ -476,6 +486,37 @@ class LogoutTestCase(TestCase):
 
         response = client.get('/logout?service=https://www.example.com')
         self.assert_redirect_to_service(client, response)
+
+    def test_logout_slo(self):
+        """test logout from a service with SLO support"""
+        (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
+        service = "http://%s:%s" % (host, port)
+
+        (client, ticket) = get_validated_ticket(service)[:2]
+
+        client.get('/logout')
+
+        params = httpd.PARAMS
+        self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
+
+        root = etree.fromstring(params[b'logoutRequest'][0])
+        self.assertTrue(
+            root.xpath(
+                "//samlp:LogoutRequest",
+                namespaces={"samlp": "urn:oasis:names:tc:SAML:2.0:protocol"}
+            )
+        )
+        session_index = root.xpath(
+            "//samlp:SessionIndex",
+            namespaces={"samlp": "urn:oasis:names:tc:SAML:2.0:protocol"}
+        )
+        self.assertEqual(len(session_index), 1)
+        self.assertEqual(session_index[0].text, ticket.value)
+
+        # SLO error are displayed on logout page
+        (client, ticket) = get_validated_ticket(self.service)[:2]
+        response = client.get('/logout')
+        self.assertTrue(b"Error during service logout" in response.content)
 
     def test_ajax_logout(self):
         """test ajax logout"""

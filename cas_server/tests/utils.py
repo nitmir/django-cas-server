@@ -50,7 +50,19 @@ def get_user_ticket_request(service):
         session_key=client.session.session_key
     )
     ticket = models.ServiceTicket.objects.get(value=ticket_value)
-    return (user, ticket)
+    return (user, ticket, client)
+
+
+def get_validated_ticket(service):
+    (ticket, auth_client) = get_user_ticket_request(service)[1:3]
+
+    client = Client()
+    response = client.get('/validate', {'ticket': ticket.value, 'service': service})
+    assert (response.status_code == 200)
+    assert (response.content == b'yes\ntest\n')
+
+    ticket = models.ServiceTicket.objects.get(value=ticket.value)
+    return (auth_client, ticket)
 
 
 def get_pgt():
@@ -71,6 +83,7 @@ def get_pgt():
 
 
 def get_proxy_ticket(service):
+    """Return a ProxyTicket waiting for validation"""
     params = get_pgt()
 
     # get a proxy ticket

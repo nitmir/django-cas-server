@@ -53,17 +53,9 @@ test_project: test_venv/cas/manage.py
 	@echo "##############################################################"
 	@echo "A test django project was created in $(realpath test_venv/cas)"
 
-run_test_server: test_project
+run_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
 
-tests: test_venv
-	test_venv/bin/py.test
-
-coverage: test_venv
-	test_venv/bin/py.test --cov=cas_server --cov-report xml --cov-report html
-
-test_venv/bin/python-codacy-coverage:
-	test_venv/bin/pip install codacy-coverage
-
-coverage_codacy: coverage test_venv/bin/python-codacy-coverage
-	test_venv/bin/python-codacy-coverage -r coverage.xml
+run_tests: test_venv
+	test_venv/bin/py.test --cov=cas_server --cov-report html
+	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts

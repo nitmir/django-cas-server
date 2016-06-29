@@ -4,8 +4,12 @@ VERSION=`python setup.py -V`
 build:
 	python setup.py build
 
-install:
-	python setup.py install
+install: dist
+	pip -V
+	pip install --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
+
+uninstall:
+	pip uninstall django-cas-server || true
 
 clean_pyc:
 	find ./ -name '*.pyc' -delete

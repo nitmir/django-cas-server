@@ -9,8 +9,7 @@ from datetime import timedelta
 from importlib import import_module
 
 from cas_server import models
-from cas_server import utils
-from cas_server.tests.utils import get_auth_client
+from cas_server.tests.utils import get_auth_client, HttpParamsHandler
 from cas_server.tests.mixin import UserModels, BaseServicePattern
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
@@ -125,22 +124,32 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
 
     def test_clean_old_service_ticket(self):
         """test tickets clean_old_entries"""
+        # ge an authenticated client
         client = get_auth_client()
+        # get the user associated to the client
         user = self.get_user(client)
+        # generate a ticket for that client, waiting for validation
         self.get_ticket(user, models.ServiceTicket, self.service, self.service_pattern)
+        # generate another ticket for those validation time has expired
         self.get_ticket(
             user, models.ServiceTicket,
             self.service, self.service_pattern, validity_expired=True
         )
-        (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
+        (httpd, host, port) = HttpParamsHandler.run()[0:3]
         service = "http://%s:%s" % (host, port)
+        # generate a ticket with SLO having timeout reach
         self.get_ticket(
             user, models.ServiceTicket,
             service, self.service_pattern, timeout_expired=True,
             validate=True, single_log_out=True
         )
+        # there should be 3 tickets in the db
         self.assertEqual(len(models.ServiceTicket.objects.all()), 3)
+        # we call the clean_old_entries method that should delete validated non SLO ticket and
+        # expired non validated ticket and send SLO for SLO expired ticket before deleting then
         models.ServiceTicket.clean_old_entries()
         params = httpd.PARAMS
+        # we successfully got a SLO request
         self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
+        # only 1 ticket remain in the db
         self.assertEqual(len(models.ServiceTicket.objects.all()), 1)

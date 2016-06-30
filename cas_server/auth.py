@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """Some authentication classes for the CAS"""
 from django.conf import settings
 from django.contrib.auth import get_user_model

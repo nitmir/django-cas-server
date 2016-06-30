@@ -86,9 +86,6 @@ def update_url(url, params):
     query = dict(parse_qsl(url_parts[4]))
     query.update(params)
     url_parts[4] = urlencode(query)
-    for i, url_part in enumerate(url_parts):
-        if not isinstance(url_part, bytes):
-            url_parts[i] = url_part.encode('utf-8')
     return urlunparse(url_parts).decode('utf-8')
 
 
@@ -239,7 +236,7 @@ class LdapHashUserPassword(object):
         if salt is None or salt == b"":
             salt = b""
             cls._test_scheme_nosalt(scheme)
-        elif salt is not None:
+        else:
             cls._test_scheme_salt(scheme)
         try:
             return scheme + base64.b64encode(
@@ -273,7 +270,7 @@ class LdapHashUserPassword(object):
         if scheme in cls.schemes_nosalt:
             return b""
         elif scheme == b'{CRYPT}':
-            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])
+            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
         else:
             hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
@@ -295,7 +292,7 @@ def check_password(method, password, hashed_password, charset):
     elif method == "crypt":
         if hashed_password.startswith(b'$'):
             salt = b'$'.join(hashed_password.split(b'$', 3)[:-1])
-        elif hashed_password.startswith(b'_'):
+        elif hashed_password.startswith(b'_'):  # pragma: no cover old BSD format not supported
             salt = hashed_password[:9]
         else:
             salt = hashed_password[:2]

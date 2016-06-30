@@ -97,7 +97,7 @@ class CheckPasswordCase(TestCase):
             utils.LdapHashUserPassword.hash(
                 b"{CRYPT}",
                 self.password1,
-                "$6$UVVAQvrMyXMF3FF3",
+                b"$6$UVVAQvrMyXMF3FF3",
                 charset="utf8"
             )
         )
@@ -122,7 +122,7 @@ class CheckPasswordCase(TestCase):
             with self.assertRaises(utils.LdapHashUserPassword.BadScheme):
                 utils.LdapHashUserPassword.hash(scheme, self.password1)
         with self.assertRaises(utils.LdapHashUserPassword.BadSalt):
-            utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, "$truc$toto")
+            utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, b"$truc$toto")
 
         # then try to check hash with bad hashes
         with self.assertRaises(utils.LdapHashUserPassword.BadHash):

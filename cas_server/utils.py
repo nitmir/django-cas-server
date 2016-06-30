@@ -85,7 +85,13 @@ def update_url(url, params):
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
     query.update(params)
-    url_parts[4] = urlencode(query)
+    # make the params order deterministic
+    query = list(query.items())
+    query.sort()
+    url_query = urlencode(query)
+    if not isinstance(url_query, bytes):
+        url_query = url_query.encode("utf-8")
+    url_parts[4] = url_query
     return urlunparse(url_parts).decode('utf-8')
 
 

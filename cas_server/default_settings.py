@@ -85,3 +85,5 @@ setting_default(
         'alias': ['demo1', 'demo2']
     }
 )
+
+setting_default('CAS_ENABLE_AJAX_AUTH', False)

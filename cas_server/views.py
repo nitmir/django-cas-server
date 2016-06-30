@@ -109,7 +109,7 @@ class LogoutView(View, LogoutMixin):
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -203,7 +203,7 @@ class LoginView(View, LogoutMixin):
         self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
         self.warn = request.POST.get('warn')
@@ -298,7 +298,7 @@ class LoginView(View, LogoutMixin):
         self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         self.warn = request.GET.get('warn')
 
     def get(self, request, *args, **kwargs):

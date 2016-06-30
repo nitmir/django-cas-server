@@ -1,10 +1,13 @@
 """Some mixin classes for tests"""
 from cas_server.default_settings import settings
+from django.utils import timezone
 
 import re
 from lxml import etree
+from datetime import timedelta
 
 from cas_server import models
+from cas_server.tests.utils import get_auth_client
 
 
 class BaseServicePattern(object):
@@ -51,6 +54,17 @@ class BaseServicePattern(object):
             attribut="right",
             pattern="^admin$",
             service_pattern=self.service_pattern_filter_fail
+        )
+        self.service_filter_fail_alt = "https://filter_fail_alt.example.com"
+        self.service_pattern_filter_fail_alt = models.ServicePattern.objects.create(
+            name="filter_fail_alt",
+            pattern="^https://filter_fail_alt\.example\.com(/.*)?$",
+            proxy=proxy,
+        )
+        models.FilterAttributValue.objects.create(
+            attribut="nom",
+            pattern="^toto$",
+            service_pattern=self.service_pattern_filter_fail_alt
         )
         self.service_filter_success = "https://filter_success.example.com"
         self.service_pattern_filter_success = models.ServicePattern.objects.create(
@@ -143,3 +157,24 @@ class XmlContent(object):
         self.assertEqual(attrs1, original)
 
         return root
+
+
+class UserModels(object):
+    """Mixin for test on CAS user models"""
+    def expire_user(self):
+        """return an expired user"""
+        client = get_auth_client()
+
+        new_date = timezone.now() - timedelta(seconds=(settings.SESSION_COOKIE_AGE + 600))
+        models.User.objects.filter(
+            username=settings.CAS_TEST_USER,
+            session_key=client.session.session_key
+        ).update(date=new_date)
+        return client
+
+    def get_user(self, client):
+        """return the user associated with an authenticated client"""
+        return models.User.objects.get(
+            username=settings.CAS_TEST_USER,
+            session_key=client.session.session_key
+        )

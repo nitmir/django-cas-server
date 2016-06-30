@@ -1,7 +1,9 @@
 [run]
 branch = True
 source = cas_server
-omit = cas_server/migrations*
+omit =
+    cas_server/migrations*
+    cas_server/management/*
 
 [report]
 exclude_lines =

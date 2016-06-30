@@ -84,7 +84,7 @@ class User(models.Model):
                 ticket.logout(session, async_list)
             queryset.delete()
         for future in async_list:
-            if future:
+            if future:  # pragma: no branch (should always be true)
                 try:
                     future.result()
                 except Exception as error:
@@ -112,13 +112,21 @@ class User(models.Model):
             (a.name, a.replace if a.replace else a.name) for a in service_pattern.attributs.all()
         )
         replacements = dict(
-            (a.name, (a.pattern, a.replace)) for a in service_pattern.replacements.all()
+            (a.attribut, (a.pattern, a.replace)) for a in service_pattern.replacements.all()
         )
         service_attributs = {}
         for (key, value) in self.attributs.items():
             if key in attributs or '*' in attributs:
                 if key in replacements:
-                    value = re.sub(replacements[key][0], replacements[key][1], value)
+                    if isinstance(value, list):
+                        for index, subval in enumerate(value):
+                            value[index] = re.sub(
+                                replacements[key][0],
+                                replacements[key][1],
+                                subval
+                            )
+                    else:
+                        value = re.sub(replacements[key][0], replacements[key][1], value)
                 service_attributs[attributs.get(key, key)] = value
         ticket = ticket_class.objects.create(
             user=self,
@@ -396,31 +404,30 @@ class Ticket(models.Model):
         ).delete()
 
         # sending SLO to timed-out validated tickets
-        if cls.TIMEOUT and cls.TIMEOUT > 0:
-            async_list = []
-            session = FuturesSession(
-                executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
-            )
-            queryset = cls.objects.filter(
-                creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
-            )
-            for ticket in queryset:
-                ticket.logout(None, session, async_list)
-            queryset.delete()
-            for future in async_list:
-                if future:
-                    try:
-                        future.result()
-                    except Exception as error:
-                        logger.warning("Error durring SLO %s" % error)
-                        sys.stderr.write("%r\n" % error)
+        async_list = []
+        session = FuturesSession(
+            executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
+        )
+        queryset = cls.objects.filter(
+            creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
+        )
+        for ticket in queryset:
+            ticket.logout(session, async_list)
+        queryset.delete()
+        for future in async_list:
+            if future:  # pragma: no branch (should always be true)
+                try:
+                    future.result()
+                except Exception as error:
+                    logger.warning("Error durring SLO %s" % error)
+                    sys.stderr.write("%r\n" % error)
 
     def logout(self, session, async_list=None):
         """Send a SLO request to the ticket service"""
         # On logout invalidate the Ticket
         self.validate = True
         self.save()
-        if self.validate and self.single_log_out:
+        if self.validate and self.single_log_out:  # pragma: no branch (should always be true)
             logger.info(
                 "Sending SLO requests to service %s for user %s" % (
                     self.service,

@@ -240,9 +240,10 @@ class LoginTestCase(TestCase, BaseServicePattern):
         """Test the filtering on user attributes"""
         client = get_auth_client()
 
-        response = client.get("/login", {'service': self.service_filter_fail})
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(b"User charateristics non allowed" in response.content)
+        for service in [self.service_filter_fail, self.service_filter_fail_alt]:
+            response = client.get("/login", {'service': service})
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(b"User charateristics non allowed" in response.content)
 
         response = client.get("/login", {'service': self.service_filter_success})
         self.assertEqual(response.status_code, 302)
@@ -388,6 +389,7 @@ class LoginTestCase(TestCase, BaseServicePattern):
 class LogoutTestCase(TestCase):
     """test fot the logout view"""
     def setUp(self):
+        """Prepare the test context"""
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
@@ -489,29 +491,39 @@ class LogoutTestCase(TestCase):
 
     def test_logout_slo(self):
         """test logout from a service with SLO support"""
+        parameters = []
+
+        # test normal SLO
         (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
         service = "http://%s:%s" % (host, port)
-
         (client, ticket) = get_validated_ticket(service)[:2]
-
         client.get('/logout')
+        parameters.append((httpd.PARAMS, ticket))
 
-        params = httpd.PARAMS
-        self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
+        # text SLO with a single_log_out_callback
+        (httpd, host, port) = utils.HttpParamsHandler.run()[0:3]
+        self.service_pattern.single_log_out_callback = "http://%s:%s" % (host, port)
+        self.service_pattern.save()
+        (client, ticket) = get_validated_ticket(self.service)[:2]
+        client.get('/logout')
+        parameters.append((httpd.PARAMS, ticket))
 
-        root = etree.fromstring(params[b'logoutRequest'][0])
-        self.assertTrue(
-            root.xpath(
-                "//samlp:LogoutRequest",
+        for (params, ticket) in parameters:
+            self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
+
+            root = etree.fromstring(params[b'logoutRequest'][0])
+            self.assertTrue(
+                root.xpath(
+                    "//samlp:LogoutRequest",
+                    namespaces={"samlp": "urn:oasis:names:tc:SAML:2.0:protocol"}
+                )
+            )
+            session_index = root.xpath(
+                "//samlp:SessionIndex",
                 namespaces={"samlp": "urn:oasis:names:tc:SAML:2.0:protocol"}
             )
-        )
-        session_index = root.xpath(
-            "//samlp:SessionIndex",
-            namespaces={"samlp": "urn:oasis:names:tc:SAML:2.0:protocol"}
-        )
-        self.assertEqual(len(session_index), 1)
-        self.assertEqual(session_index[0].text, ticket.value)
+            self.assertEqual(len(session_index), 1)
+            self.assertEqual(session_index[0].text, ticket.value)
 
         # SLO error are displayed on logout page
         (client, ticket) = get_validated_ticket(self.service)[:2]
@@ -831,6 +843,39 @@ class ValidateServiceTestCase(TestCase, XmlContent):
             service_pattern=self.service_pattern_one_attribute
         )
 
+        self.service_replace_attribute_list = "https://replace_attribute_list.example.com"
+        self.service_pattern_replace_attribute_list = models.ServicePattern.objects.create(
+            name="replace_attribute_list",
+            pattern="^https://replace_attribute_list\.example\.com(/.*)?$",
+        )
+        models.ReplaceAttributValue.objects.create(
+            attribut="alias",
+            pattern="^demo",
+            replace="truc",
+            service_pattern=self.service_pattern_replace_attribute_list
+        )
+        models.ReplaceAttributName.objects.create(
+            name="alias",
+            replace="ALIAS",
+            service_pattern=self.service_pattern_replace_attribute_list
+        )
+        self.service_replace_attribute = "https://replace_attribute.example.com"
+        self.service_pattern_replace_attribute = models.ServicePattern.objects.create(
+            name="replace_attribute",
+            pattern="^https://replace_attribute\.example\.com(/.*)?$",
+        )
+        models.ReplaceAttributValue.objects.create(
+            attribut="nom",
+            pattern="N",
+            replace="P",
+            service_pattern=self.service_pattern_replace_attribute
+        )
+        models.ReplaceAttributName.objects.create(
+            name="nom",
+            replace="NOM",
+            service_pattern=self.service_pattern_replace_attribute
+        )
+
     def test_validate_service_view_ok(self):
         """test with a valid (ticket, service), the username and all attributes are transmited"""
         ticket = get_user_ticket_request(self.service)[1]
@@ -855,6 +900,32 @@ class ValidateServiceTestCase(TestCase, XmlContent):
             response,
             settings.CAS_TEST_USER,
             {'nom': settings.CAS_TEST_ATTRIBUTES['nom']}
+        )
+
+    def test_validate_replace_attributes(self):
+        """test with a valid (ticket, service), attributes name and value replacement"""
+        ticket = get_user_ticket_request(self.service_replace_attribute)[1]
+        client = Client()
+        response = client.get(
+            '/serviceValidate',
+            {'ticket': ticket.value, 'service': self.service_replace_attribute}
+        )
+        self.assert_success(
+            response,
+            settings.CAS_TEST_USER,
+            {'NOM': 'Pymous'}
+        )
+
+        ticket = get_user_ticket_request(self.service_replace_attribute_list)[1]
+        client = Client()
+        response = client.get(
+            '/serviceValidate',
+            {'ticket': ticket.value, 'service': self.service_replace_attribute_list}
+        )
+        self.assert_success(
+            response,
+            settings.CAS_TEST_USER,
+            {'ALIAS': ['truc1', 'truc2']}
         )
 
     def test_validate_service_view_badservice(self):

@@ -37,6 +37,8 @@ def get_auth_client(**update):
     params.update(update)
 
     client.post('/login', params)
+    assert client.session.get("authenticated")
+
     return client
 
 

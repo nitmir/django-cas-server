@@ -161,7 +161,8 @@ class XmlContent(object):
 
 class UserModels(object):
     """Mixin for test on CAS user models"""
-    def expire_user(self):
+    @staticmethod
+    def expire_user():
         """return an expired user"""
         client = get_auth_client()
 
@@ -172,7 +173,8 @@ class UserModels(object):
         ).update(date=new_date)
         return client
 
-    def get_user(self, client):
+    @staticmethod
+    def get_user(client):
         """return the user associated with an authenticated client"""
         return models.User.objects.get(
             username=settings.CAS_TEST_USER,

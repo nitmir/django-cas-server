@@ -94,8 +94,8 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
 
+    @staticmethod
     def get_ticket(
-        self,
         user,
         ticket_class,
         service,

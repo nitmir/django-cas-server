@@ -89,7 +89,7 @@ def update_url(url, params):
     query = list(query.items())
     query.sort()
     url_query = urlencode(query)
-    if not isinstance(url_query, bytes):
+    if not isinstance(url_query, bytes):  # pragma: no cover in python3 urlencode return an unicode
         url_query = url_query.encode("utf-8")
     url_parts[4] = url_query
     return urlunparse(url_parts).decode('utf-8')
@@ -150,6 +150,27 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+
+def crypt_salt_is_valid(salt):
+    """Return True is salt is valid has a crypt salt, False otherwise"""
+    if len(salt) < 2:
+        return False
+    else:
+        if salt[0] == '$':
+            if salt[1] == '$':
+                return False
+            else:
+                if '$' not in salt[1:]:
+                    return False
+                else:
+                    hashed = crypt.crypt("", salt)
+                    if not hashed or '$' not in hashed[1:]:
+                        return False
+                    else:
+                        return True
+        else:
+            return True
 
 
 class LdapHashUserPassword(object):
@@ -252,9 +273,9 @@ class LdapHashUserPassword(object):
             if six.PY3:
                 password = password.decode(charset)
                 salt = salt.decode(charset)
-            hashed_password = crypt.crypt(password, salt)
-            if hashed_password is None:
+            if not crypt_salt_is_valid(salt):
                 raise cls.BadSalt("System crypt implementation do not support the salt %r" % salt)
+            hashed_password = crypt.crypt(password, salt)
             if six.PY3:
                 hashed_password = hashed_password.encode(charset)
             return scheme + hashed_password
@@ -306,9 +327,9 @@ def check_password(method, password, hashed_password, charset):
             password = password.decode(charset)
             salt = salt.decode(charset)
             hashed_password = hashed_password.decode(charset)
-        crypted_password = crypt.crypt(password, salt)
-        if crypted_password is None:
+        if not crypt_salt_is_valid(salt):
             raise ValueError("System crypt implementation do not support the salt %r" % salt)
+        crypted_password = crypt.crypt(password, salt)
         return crypted_password == hashed_password
     elif method == "ldap":
         scheme = LdapHashUserPassword.get_scheme(hashed_password)

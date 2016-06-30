@@ -181,3 +181,11 @@ class UtilsTestCase(TestCase):
 
         url3 = utils.update_url(u"https://www.example.com?toto=1", {u"toto": u"2"})
         self.assertEqual(url3, u"https://www.example.com?toto=2")
+
+    def test_crypt_salt_is_valid(self):
+        """test the function crypt_salt_is_valid who test if a crypt salt is valid"""
+        self.assertFalse(utils.crypt_salt_is_valid(""))  # len 0
+        self.assertFalse(utils.crypt_salt_is_valid("a"))  # len 1
+        self.assertFalse(utils.crypt_salt_is_valid("$$"))  # start with $ followed by $
+        self.assertFalse(utils.crypt_salt_is_valid("$toto"))  # start with $ but no secondary $
+        self.assertFalse(utils.crypt_salt_is_valid("$toto$toto"))  # algorithm toto not known

@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """models for the app"""
 from .default_settings import settings
 
@@ -20,7 +20,6 @@ from django.utils import timezone
 from picklefield.fields import PickledObjectField
 
 import re
-import os
 import sys
 import logging
 from importlib import import_module
@@ -47,6 +46,7 @@ class User(models.Model):
 
     @classmethod
     def clean_old_entries(cls):
+        """Remove users inactive since more that SESSION_COOKIE_AGE"""
         users = cls.objects.filter(
             date__lt=(timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE))
         )
@@ -56,6 +56,7 @@ class User(models.Model):
 
     @classmethod
     def clean_deleted_sessions(cls):
+        """Remove user where the session do not exists anymore"""
         for user in cls.objects.all():
             if not SessionStore(session_key=user.session_key).get('authenticated'):
                 user.logout()
@@ -80,10 +81,10 @@ class User(models.Model):
         for ticket_class in ticket_classes:
             queryset = ticket_class.objects.filter(user=self)
             for ticket in queryset:
-                ticket.logout(request, session, async_list)
+                ticket.logout(session, async_list)
             queryset.delete()
         for future in async_list:
-            if future:
+            if future:  # pragma: no branch (should always be true)
                 try:
                     future.result()
                 except Exception as error:
@@ -111,13 +112,21 @@ class User(models.Model):
             (a.name, a.replace if a.replace else a.name) for a in service_pattern.attributs.all()
         )
         replacements = dict(
-            (a.name, (a.pattern, a.replace)) for a in service_pattern.replacements.all()
+            (a.attribut, (a.pattern, a.replace)) for a in service_pattern.replacements.all()
         )
         service_attributs = {}
         for (key, value) in self.attributs.items():
             if key in attributs or '*' in attributs:
                 if key in replacements:
-                    value = re.sub(replacements[key][0], replacements[key][1], value)
+                    if isinstance(value, list):
+                        for index, subval in enumerate(value):
+                            value[index] = re.sub(
+                                replacements[key][0],
+                                replacements[key][1],
+                                subval
+                            )
+                    else:
+                        value = re.sub(replacements[key][0], replacements[key][1], value)
                 service_attributs[attributs.get(key, key)] = value
         ticket = ticket_class.objects.create(
             user=self,
@@ -141,6 +150,7 @@ class User(models.Model):
 
 
 class ServicePatternException(Exception):
+    """Base exception of exceptions raised in the ServicePattern model"""
     pass
 
 
@@ -394,77 +404,57 @@ class Ticket(models.Model):
         ).delete()
 
         # sending SLO to timed-out validated tickets
-        if cls.TIMEOUT and cls.TIMEOUT > 0:
-            async_list = []
-            session = FuturesSession(
-                executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
-            )
-            queryset = cls.objects.filter(
-                creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
-            )
-            for ticket in queryset:
-                ticket.logout(None, session, async_list)
-            queryset.delete()
-            for future in async_list:
-                if future:
-                    try:
-                        future.result()
-                    except Exception as error:
-                        logger.warning("Error durring SLO %s" % error)
-                        sys.stderr.write("%r\n" % error)
+        async_list = []
+        session = FuturesSession(
+            executor=ThreadPoolExecutor(max_workers=settings.CAS_SLO_MAX_PARALLEL_REQUESTS)
+        )
+        queryset = cls.objects.filter(
+            creation__lt=(timezone.now() - timedelta(seconds=cls.TIMEOUT))
+        )
+        for ticket in queryset:
+            ticket.logout(session, async_list)
+        queryset.delete()
+        for future in async_list:
+            if future:  # pragma: no branch (should always be true)
+                try:
+                    future.result()
+                except Exception as error:
+                    logger.warning("Error durring SLO %s" % error)
+                    sys.stderr.write("%r\n" % error)
 
-    def logout(self, request, session, async_list=None):
+    def logout(self, session, async_list=None):
         """Send a SLO request to the ticket service"""
         # On logout invalidate the Ticket
         self.validate = True
         self.save()
-        if self.validate and self.single_log_out:
+        if self.validate and self.single_log_out:  # pragma: no branch (should always be true)
             logger.info(
                 "Sending SLO requests to service %s for user %s" % (
                     self.service,
                     self.user.username
                 )
             )
-            try:
-                xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-     ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
-    <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
-    <samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
-  </samlp:LogoutRequest>""" % \
-                    {
-                        'id': os.urandom(20).encode("hex"),
-                        'datetime': timezone.now().isoformat(),
-                        'ticket':  self.value
-                    }
-                if self.service_pattern.single_log_out_callback:
-                    url = self.service_pattern.single_log_out_callback
-                else:
-                    url = self.service
-                async_list.append(
-                    session.post(
-                        url.encode('utf-8'),
-                        data={'logoutRequest': xml.encode('utf-8')},
-                        timeout=settings.CAS_SLO_TIMEOUT
-                    )
+            xml = u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+ ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
+<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
+<samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
+</samlp:LogoutRequest>""" % \
+                {
+                    'id': utils.gen_saml_id(),
+                    'datetime': timezone.now().isoformat(),
+                    'ticket':  self.value
+                }
+            if self.service_pattern.single_log_out_callback:
+                url = self.service_pattern.single_log_out_callback
+            else:
+                url = self.service
+            async_list.append(
+                session.post(
+                    url.encode('utf-8'),
+                    data={'logoutRequest': xml.encode('utf-8')},
+                    timeout=settings.CAS_SLO_TIMEOUT
                 )
-            except Exception as error:
-                error = utils.unpack_nested_exception(error)
-                logger.warning(
-                    "Error durring SLO for user %s on service %s: %s" % (
-                        self.user.username,
-                        self.service,
-                        error
-                    )
-                )
-                if request is not None:
-                    messages.add_message(
-                        request,
-                        messages.WARNING,
-                        _(u'Error during service logout %(service)s:\n%(error)s') %
-                        {'service':  self.service, 'error': error}
-                    )
-                else:
-                    sys.stderr.write("%r\n" % error)
+            )
 
 
 class ServiceTicket(Ticket):

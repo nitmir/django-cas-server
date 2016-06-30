@@ -7,7 +7,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """forms for the app"""
 from .default_settings import settings
 
@@ -19,6 +19,7 @@ import cas_server.models as models
 
 
 class WarnForm(forms.Form):
+    """Form used on warn page before emiting a ticket"""
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     gateway = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -35,6 +36,7 @@ class UserCredential(forms.Form):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     warn = forms.BooleanField(label=_('warn'), required=False)
+    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(UserCredential, self).__init__(*args, **kwargs)
@@ -46,6 +48,7 @@ class UserCredential(forms.Form):
             cleaned_data["username"] = auth.username
         else:
             raise forms.ValidationError(_(u"Bad user"))
+        return cleaned_data
 
 
 class TicketForm(forms.ModelForm):

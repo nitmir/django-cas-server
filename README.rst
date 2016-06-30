@@ -219,7 +219,8 @@ Test backend settings. Only usefull if you are using the test authentication bac
 * ``CAS_TEST_USER``: Username of the test user. The default is ``"test"``.
 * ``CAS_TEST_PASSWORD``: Password of the test user. The default is ``"test"``.
 * ``CAS_TEST_ATTRIBUTES``: Attributes of the test user. The default is
-  ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}``.
+  ``{'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net',
+  'alias': ['demo1', 'demo2']}``.
 
 
 Authentication backend

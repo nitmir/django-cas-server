@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """views for the app"""
 from .default_settings import settings
 
@@ -105,10 +105,11 @@ class LogoutView(View, LogoutMixin):
     service = None
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -196,24 +197,30 @@ class LoginView(View, LogoutMixin):
     USER_NOT_AUTHENTICATED = 6
 
     def init_post(self, request):
+        """Initialize POST received parameters"""
         self.request = request
         self.service = request.POST.get('service')
         self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
+        self.warn = request.POST.get('warn')
 
-    def check_lt(self):
-        # save LT for later check
-        lt_valid = self.request.session.get('lt', [])
-        lt_send = self.request.POST.get('lt')
-        # generate a new LT (by posting the LT has been consumed)
+    def gen_lt(self):
+        """Generate a new LoginTicket and add it to the list of valid LT for the user"""
         self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
         if len(self.request.session['lt']) > 100:
             self.request.session['lt'] = self.request.session['lt'][-100:]
 
+    def check_lt(self):
+        """Check is the POSTed LoginTicket is valid, if yes invalide it"""
+        # save LT for later check
+        lt_valid = self.request.session.get('lt', [])
+        lt_send = self.request.POST.get('lt')
+        # generate a new LT (by posting the LT has been consumed)
+        self.gen_lt()
         # check if send LT is valid
         if lt_valid is None or lt_send not in lt_valid:
             return False
@@ -238,7 +245,7 @@ class LoginView(View, LogoutMixin):
                     username=self.request.session['username'],
                     session_key=self.request.session.session_key
                 )
-                self.user.save()
+                self.user.save()  # pragma: no cover (should not happend)
             except models.User.DoesNotExist:
                 self.user = models.User.objects.create(
                     username=self.request.session['username'],
@@ -250,10 +257,15 @@ class LoginView(View, LogoutMixin):
         elif ret == self.USER_ALREADY_LOGGED:
             pass
         else:
-            raise EnvironmentError("invalid output for LoginView.process_post")
+            raise EnvironmentError("invalid output for LoginView.process_post")  # pragma: no cover
         return self.common()
 
     def process_post(self):
+        """
+            Analyse the POST request:
+                * check that the LoginTicket is valid
+                * check that the user sumited credentials are valid
+        """
         if not self.check_lt():
             values = self.request.POST.copy()
             # if not set a new LT and fail
@@ -280,12 +292,14 @@ class LoginView(View, LogoutMixin):
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
+        """Initialize GET received parameters"""
         self.request = request
         self.service = request.GET.get('service')
         self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
+        self.warn = request.GET.get('warn')
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -294,22 +308,24 @@ class LoginView(View, LogoutMixin):
         return self.common()
 
     def process_get(self):
-        # generate a new LT if none is present
-        self.request.session['lt'] = self.request.session.get('lt', []) + [utils.gen_lt()]
-
+        """Analyse the GET request"""
+        # generate a new LT
+        self.gen_lt()
         if not self.request.session.get("authenticated") or self.renew:
             self.init_form()
             return self.USER_NOT_AUTHENTICATED
         return self.USER_AUTHENTICATED
 
     def init_form(self, values=None):
+        """Initialization of the good form depending of POST and GET parameters"""
         self.form = forms.UserCredential(
             values,
             initial={
                 'service': self.service,
                 'method': self.method,
                 'warn': self.request.session.get("warn"),
-                'lt': self.request.session['lt'][-1]
+                'lt': self.request.session['lt'][-1],
+                'renew': self.renew
             }
         )
 
@@ -351,7 +367,7 @@ class LoginView(View, LogoutMixin):
                 redirect_url = self.user.get_service_url(
                     self.service,
                     service_pattern,
-                    renew=self.renew
+                    renew=self.renewed
                 )
                 if not self.ajax:
                     return HttpResponseRedirect(redirect_url)
@@ -580,12 +596,9 @@ class Validate(View):
                         ticket.service_pattern.user_field
                     )
                     if isinstance(username, list):
-                        try:
-                            username = username[0]
-                        except IndexError:
-                            username = None
-                    if not username:
-                        username = ""
+                        # the list is not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        username = username[0]
                 else:
                     username = ticket.user.username
                 return HttpResponse("yes\n%s\n" % username, content_type="text/plain")
@@ -661,6 +674,10 @@ class ValidateService(View, AttributesMixin):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
+                    if isinstance(params['username'], list):
+                        # the list is not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        params['username'] = params['username'][0]
                 if self.pgt_url and (
                     self.pgt_url.startswith("https://") or
                     re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
@@ -762,9 +779,12 @@ class ValidateService(View, AttributesMixin):
                         params,
                         content_type="text/xml; charset=utf-8"
                     )
-                except requests.exceptions.SSLError as error:
+                except requests.exceptions.RequestException as error:
                     error = utils.unpack_nested_exception(error)
-                    raise ValidateError('INVALID_PROXY_CALLBACK', str(error))
+                    raise ValidateError(
+                        'INVALID_PROXY_CALLBACK',
+                        "%s: %s" % (type(error), str(error))
+                    )
             else:
                 raise ValidateError(
                     'INVALID_PROXY_CALLBACK',
@@ -844,7 +864,7 @@ class Proxy(View):
         except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
             raise ValidateError(
                 'UNAUTHORIZED_USER',
-                '%s not allowed on %s' % (ticket.user, self.target_service)
+                'User %s not allowed on %s' % (ticket.user.username, self.target_service)
             )
 
 
@@ -903,11 +923,15 @@ class SamlValidate(View, AttributesMixin):
                 'username': self.ticket.user.username,
                 'attributes': attributes
             }
-            if self.ticket.service_pattern.user_field and \
-                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
+            if (self.ticket.service_pattern.user_field and
+                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field)):
                 params['username'] = self.ticket.user.attributs.get(
                     self.ticket.service_pattern.user_field
                 )
+                if isinstance(params['username'], list):
+                    # the list is not empty because we wont generate a ticket with a user_field
+                    # that evaluate to False
+                    params['username'] = params['username'][0]
             logger.info(
                 "SamlValidate: ticket %s validated for user %s on service %s." % (
                     self.ticket.value,

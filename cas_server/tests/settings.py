@@ -52,7 +52,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
-ROOT_URLCONF = 'cas_server.urls'
+ROOT_URLCONF = 'cas_server.tests.urls'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -60,6 +60,7 @@ ROOT_URLCONF = 'cas_server.urls'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
     }
 }
 

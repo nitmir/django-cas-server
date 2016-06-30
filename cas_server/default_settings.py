@@ -78,5 +78,12 @@ setting_default('CAS_TEST_USER', 'test')
 setting_default('CAS_TEST_PASSWORD', 'test')
 setting_default(
     'CAS_TEST_ATTRIBUTES',
-    {'nom': 'Nymous', 'prenom': 'Ano', 'email': 'anonymous@example.net'}
+    {
+        'nom': 'Nymous',
+        'prenom': 'Ano',
+        'email': 'anonymous@example.net',
+        'alias': ['demo1', 'demo2']
+    }
 )
+
+setting_default('CAS_ENABLE_AJAX_AUTH', False)

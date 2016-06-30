@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """Some util function for the app"""
 from .default_settings import settings
 
@@ -23,18 +23,19 @@ import hashlib
 import crypt
 import base64
 import six
-from threading import Thread
+
 from importlib import import_module
-from six.moves import BaseHTTPServer
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def context(params):
+    """Function that add somes variable to the context before template rendering"""
     params["settings"] = settings
     return params
 
 
 def json_response(request, data):
+    """Wrapper dumping `data` to a json and sending it to the user with an HttpResponse"""
     data["messages"] = []
     for msg in messages.get_messages(request):
         data["messages"].append({'message': msg.message, 'level': msg.level_tag})
@@ -64,6 +65,7 @@ def redirect_params(url_name, params=None):
 
 
 def reverse_params(url_name, params=None, **kwargs):
+    """compule the reverse url or `url_name` and add GET parameters from `params` to it"""
     url = reverse(url_name, **kwargs)
     params = urlencode(params if params else {})
     return url + "?%s" % params
@@ -83,10 +85,13 @@ def update_url(url, params):
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
     query.update(params)
-    url_parts[4] = urlencode(query)
-    for i, url_part in enumerate(url_parts):
-        if not isinstance(url_part, bytes):
-            url_parts[i] = url_part.encode('utf-8')
+    # make the params order deterministic
+    query = list(query.items())
+    query.sort()
+    url_query = urlencode(query)
+    if not isinstance(url_query, bytes):  # pragma: no cover in python3 urlencode return an unicode
+        url_query = url_query.encode("utf-8")
+    url_parts[4] = url_query
     return urlunparse(url_parts).decode('utf-8')
 
 
@@ -147,35 +152,25 @@ def gen_saml_id():
     return _gen_ticket('_')
 
 
-class PGTUrlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    PARAMS = {}
-
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header(b"Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(b"ok")
-        url = urlparse(self.path)
-        params = dict(parse_qsl(url.query))
-        PGTUrlHandler.PARAMS.update(params)
-
-    def log_message(self, *args):
-        return
-
-    @staticmethod
-    def run():
-        server_class = BaseHTTPServer.HTTPServer
-        httpd = server_class(("127.0.0.1", 0), PGTUrlHandler)
-        (host, port) = httpd.socket.getsockname()
-
-        def lauch():
-            httpd.handle_request()
-            httpd.server_close()
-
-        httpd_thread = Thread(target=lauch)
-        httpd_thread.daemon = True
-        httpd_thread.start()
-        return (httpd_thread, host, port)
+def crypt_salt_is_valid(salt):
+    """Return True is salt is valid has a crypt salt, False otherwise"""
+    if len(salt) < 2:
+        return False
+    else:
+        if salt[0] == '$':
+            if salt[1] == '$':
+                return False
+            else:
+                if '$' not in salt[1:]:
+                    return False
+                else:
+                    hashed = crypt.crypt("", salt)
+                    if not hashed or '$' not in hashed[1:]:
+                        return False
+                    else:
+                        return True
+        else:
+            return True
 
 
 class LdapHashUserPassword(object):
@@ -268,7 +263,7 @@ class LdapHashUserPassword(object):
         if salt is None or salt == b"":
             salt = b""
             cls._test_scheme_nosalt(scheme)
-        elif salt is not None:
+        else:
             cls._test_scheme_salt(scheme)
         try:
             return scheme + base64.b64encode(
@@ -278,9 +273,9 @@ class LdapHashUserPassword(object):
             if six.PY3:
                 password = password.decode(charset)
                 salt = salt.decode(charset)
-            hashed_password = crypt.crypt(password, salt)
-            if hashed_password is None:
+            if not crypt_salt_is_valid(salt):
                 raise cls.BadSalt("System crypt implementation do not support the salt %r" % salt)
+            hashed_password = crypt.crypt(password, salt)
             if six.PY3:
                 hashed_password = hashed_password.encode(charset)
             return scheme + hashed_password
@@ -302,7 +297,7 @@ class LdapHashUserPassword(object):
         if scheme in cls.schemes_nosalt:
             return b""
         elif scheme == b'{CRYPT}':
-            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])
+            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
         else:
             hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
@@ -324,7 +319,7 @@ def check_password(method, password, hashed_password, charset):
     elif method == "crypt":
         if hashed_password.startswith(b'$'):
             salt = b'$'.join(hashed_password.split(b'$', 3)[:-1])
-        elif hashed_password.startswith(b'_'):
+        elif hashed_password.startswith(b'_'):  # pragma: no cover old BSD format not supported
             salt = hashed_password[:9]
         else:
             salt = hashed_password[:2]
@@ -332,9 +327,9 @@ def check_password(method, password, hashed_password, charset):
             password = password.decode(charset)
             salt = salt.decode(charset)
             hashed_password = hashed_password.decode(charset)
-        crypted_password = crypt.crypt(password, salt)
-        if crypted_password is None:
+        if not crypt_salt_is_valid(salt):
             raise ValueError("System crypt implementation do not support the salt %r" % salt)
+        crypted_password = crypt.crypt(password, salt)
         return crypted_password == hashed_password
     elif method == "ldap":
         scheme = LdapHashUserPassword.get_scheme(hashed_password)

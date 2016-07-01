@@ -57,5 +57,6 @@ run_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
 
 run_tests: test_venv
+	python setup.py check --restructuredtext --stric
 	test_venv/bin/py.test --cov=cas_server --cov-report html
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts

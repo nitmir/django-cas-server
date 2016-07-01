@@ -7,7 +7,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """forms for the app"""
 from .default_settings import settings
 
@@ -19,6 +19,7 @@ import cas_server.models as models
 
 
 class WarnForm(forms.Form):
+    """Form used on warn page before emiting a ticket"""
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     gateway = forms.CharField(widget=forms.HiddenInput(), required=False)

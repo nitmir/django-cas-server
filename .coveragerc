@@ -1,3 +1,11 @@
+[run]
+branch = True
+source = cas_server
+omit =
+    cas_server/migrations*
+    cas_server/management/*
+    cas_server/tests/*
+
 [report]
 exclude_lines =
     pragma: no cover

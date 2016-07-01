@@ -34,7 +34,8 @@ setup(
     version='0.5.0',
     packages=[
         'cas_server', 'cas_server.migrations',
-        'cas_server.management', 'cas_server.management.commands'
+        'cas_server.management', 'cas_server.management.commands',
+        'cas_server.tests'
     ],
     include_package_data=True,
     license='GPLv3',

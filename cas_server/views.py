@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015 Valentin Samir
+# (c) 2015-2016 Valentin Samir
 """views for the app"""
 from .default_settings import settings
 
@@ -115,7 +115,7 @@ class LogoutView(View, LogoutMixin):
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
         """methode called on GET request on this view"""
@@ -299,7 +299,7 @@ class LoginView(View, LogoutMixin):
         self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
         self.gateway = request.POST.get('gateway')
         self.method = request.POST.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         if request.POST.get('warned') and request.POST['warned'] != "False":
             self.warned = True
         self.warn = request.POST.get('warn')
@@ -401,7 +401,7 @@ class LoginView(View, LogoutMixin):
         self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         self.gateway = request.GET.get('gateway')
         self.method = request.GET.get('method')
-        self.ajax = 'HTTP_X_AJAX' in request.META
+        self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         self.warn = request.GET.get('warn')
         if settings.CAS_FEDERATE:
             self.username = request.session.get("federate_username")
@@ -753,12 +753,9 @@ class Validate(View):
                         ticket.service_pattern.user_field
                     )
                     if isinstance(username, list):
-                        try:
-                            username = username[0]
-                        except IndexError:
-                            username = None
-                    if not username:
-                        username = ""
+                        # the list is not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        username = username[0]
                 else:
                     username = ticket.user.username
                 return HttpResponse("yes\n%s\n" % username, content_type="text/plain")
@@ -834,6 +831,10 @@ class ValidateService(View, AttributesMixin):
                     params['username'] = self.ticket.user.attributs.get(
                         self.ticket.service_pattern.user_field
                     )
+                    if isinstance(params['username'], list):
+                        # the list is not empty because we wont generate a ticket with a user_field
+                        # that evaluate to False
+                        params['username'] = params['username'][0]
                 if self.pgt_url and (
                     self.pgt_url.startswith("https://") or
                     re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
@@ -935,9 +936,12 @@ class ValidateService(View, AttributesMixin):
                         params,
                         content_type="text/xml; charset=utf-8"
                     )
-                except requests.exceptions.SSLError as error:
+                except requests.exceptions.RequestException as error:
                     error = utils.unpack_nested_exception(error)
-                    raise ValidateError('INVALID_PROXY_CALLBACK', str(error))
+                    raise ValidateError(
+                        'INVALID_PROXY_CALLBACK',
+                        "%s: %s" % (type(error), str(error))
+                    )
             else:
                 raise ValidateError(
                     'INVALID_PROXY_CALLBACK',
@@ -1017,7 +1021,7 @@ class Proxy(View):
         except (models.BadUsername, models.BadFilter, models.UserFieldNotDefined):
             raise ValidateError(
                 'UNAUTHORIZED_USER',
-                '%s not allowed on %s' % (ticket.user, self.target_service)
+                'User %s not allowed on %s' % (ticket.user.username, self.target_service)
             )
 
 
@@ -1076,11 +1080,15 @@ class SamlValidate(View, AttributesMixin):
                 'username': self.ticket.user.username,
                 'attributes': attributes
             }
-            if self.ticket.service_pattern.user_field and \
-                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field):
+            if (self.ticket.service_pattern.user_field and
+                    self.ticket.user.attributs.get(self.ticket.service_pattern.user_field)):
                 params['username'] = self.ticket.user.attributs.get(
                     self.ticket.service_pattern.user_field
                 )
+                if isinstance(params['username'], list):
+                    # the list is not empty because we wont generate a ticket with a user_field
+                    # that evaluate to False
+                    params['username'] = params['username'][0]
             logger.info(
                 "SamlValidate: ticket %s validated for user %s on service %s." % (
                     self.ticket.value,

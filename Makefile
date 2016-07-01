@@ -1,11 +1,15 @@
-.PHONY: clean build install dist test_venv test_project
+.PHONY: build dist
 VERSION=`python setup.py -V`
 
 build:
 	python setup.py build
 
-install:
-	python setup.py install
+install: dist
+	pip -V
+	pip install --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
+
+uninstall:
+	pip uninstall django-cas-server || true
 
 clean_pyc:
 	find ./ -name '*.pyc' -delete
@@ -16,18 +20,23 @@ clean_tox:
 	rm -rf .tox
 clean_test_venv:
 	rm -rf test_venv
-clean: clean_pyc clean_build
-clean_all: clean_pyc clean_build clean_tox clean_test_venv
+clean_coverage:
+	rm -rf coverage.xml .coverage htmlcov
+clean_tild_backup:
+	find ./ -name '*~' -delete
+
+clean: clean_pyc clean_build clean_coverage clean_tild_backup
+
+clean_all: clean clean_tox clean_test_venv
 
 dist:
 	python setup.py sdist
 
-test_venv:
-	mkdir -p test_venv
+test_venv/bin/python:
 	virtualenv test_venv
-	test_venv/bin/pip install -U --requirement requirements.txt
+	test_venv/bin/pip install -U --requirement requirements-dev.txt Django
 
-test_venv/cas/manage.py:
+test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
 	test_venv/bin/django-admin startproject cas test_venv/cas
 	ln -s ../../cas_server test_venv/cas/cas_server
@@ -38,20 +47,16 @@ test_venv/cas/manage.py:
 	test_venv/bin/python test_venv/cas/manage.py migrate
 	test_venv/bin/python test_venv/cas/manage.py createsuperuser
 
-test_project: test_venv test_venv/cas/manage.py
+test_venv: test_venv/bin/python
+
+test_project: test_venv/cas/manage.py
 	@echo "##############################################################"
 	@echo "A test django project was created in $(realpath test_venv/cas)"
 
-run_test_server: test_project
+run_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
 
-coverage: test_venv
-	test_venv/bin/pip install coverage
-	test_venv/bin/coverage run --source='cas_server' --omit='cas_server/migrations*' run_tests
-	test_venv/bin/coverage html
+run_tests: test_venv
+	python setup.py check --restructuredtext --stric
+	test_venv/bin/py.test --cov=cas_server --cov-report html
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
-
-coverage_codacy: coverage
-	test_venv/bin/coverage xml
-	test_venv/bin/pip install codacy-coverage
-	test_venv/bin/python-codacy-coverage -r coverage.xml

@@ -90,6 +90,8 @@ setting_default(
     }
 )
 
+setting_default('CAS_ENABLE_AJAX_AUTH', False)
+
 setting_default('CAS_FEDERATE', False)
 # A dict of "provider suffix" -> (provider CAS server url, CAS version, verbose name)
 setting_default('CAS_FEDERATE_PROVIDERS', {})

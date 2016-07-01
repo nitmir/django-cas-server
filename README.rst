@@ -22,11 +22,11 @@ CAS Server is a Django application implementing the `CAS Protocol 3.0 Specificat
 By defaut, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
 
-The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_
+The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__
 but you can use your own templates using settings variables.
 
 Note that for Django 1.7 compatibility, you need a version of
-`django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`_ < 7.0.0
+`django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__ < 7.0.0
 like the 6.2.2 version.
 
 Features
@@ -43,7 +43,7 @@ Features
 
 Quick start
 -----------
-0. If you want to make a virtualenv for ``django-cas-server``, you will need the following
+1. If you want to make a virtualenv for ``django-cas-server``, you will need the following
    dependencies on a bare debian like system::
 
     virtualenv build-essential python-dev libxml2-dev libxslt1-dev zlib1g-dev
@@ -53,7 +53,7 @@ Quick start
    If you intend to run the tox tests you will also need ``python3.4-dev`` depending of the current
    version of python3 on your system.
 
-1. Add "cas_server" to your INSTALLED_APPS setting like this::
+2. Add "cas_server" to your INSTALLED_APPS setting like this::
 
     INSTALLED_APPS = (
         'django.contrib.admin',
@@ -71,7 +71,7 @@ Quick start
         ...
     )
 
-2. Include the cas_server URLconf in your project urls.py like this::
+3. Include the cas_server URLconf in your project urls.py like this::
 
     urlpatterns = [
         url(r'^admin/', admin.site.urls),
@@ -79,22 +79,22 @@ Quick start
         url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
     ]
 
-3. Run `python manage.py migrate` to create the cas_server models.
+4. Run `python manage.py migrate` to create the cas_server models.
 
 
-4. You should add some management commands to a crontab: ``clearsessions``,
+5. You should add some management commands to a crontab: ``clearsessions``,
    ``cas_clean_tickets`` and ``cas_clean_sessions``.
 
- * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/stable/topics/http/sessions/#clearing-the-session-store>`_.
- * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purge from
-   the database automatically. They are just marked as invalid. ``cas_clean_tickets``
-   is a clean-up management command for this purpose. It send SingleLogOut request
-   to services with timed out tickets and delete them.
- * ``cas_clean_sessions``: Logout and purge users (sending SLO requests) that are
-   inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
-   seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
+   * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/stable/topics/http/sessions/#clearing-the-session-store>`_.
+   * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purge from
+     the database automatically. They are just marked as invalid. ``cas_clean_tickets``
+     is a clean-up management command for this purpose. It send SingleLogOut request
+     to services with timed out tickets and delete them.
+   * ``cas_clean_sessions``: Logout and purge users (sending SLO requests) that are
+     inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
+     seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
 
- You could for example do as bellow :
+   You could for example do as bellow :
 
    .. code-block::
 
@@ -102,11 +102,11 @@ Quick start
       */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
       5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
 
-5. Start the development server and visit http://127.0.0.1:8000/admin/
+6. Start the development server and visit http://127.0.0.1:8000/admin/
    to add a first service allowed to authenticate user agains the CAS
    (you'll need the Admin app enabled).
 
-6. Visit http://127.0.0.1:8000/cas/ to login with your django users.
+7. Visit http://127.0.0.1:8000/cas/ to login with your django users.
 
 
 
@@ -138,7 +138,7 @@ Template settings:
 Authentication settings:
 
 *  ``CAS_AUTH_CLASS``: A dotted path to a class or a class implementing
-  ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
+   ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
 
 *  ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
    which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
@@ -201,15 +201,15 @@ Mysql backend settings. Only usefull if you are using the mysql authentication b
   The default is ``"SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s"``
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
-    * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-      should begin this $
-    * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
-      the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-      {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
-    * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
-      The hashed password in the database is compare to the hexadecimal digest of the clear
-      password hashed with the corresponding algorithm.
-    * ``"plain"``, the password in the database must be in clear.
+  * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
+    should begin this $
+  * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
+    the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+  * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
+    The hashed password in the database is compare to the hexadecimal digest of the clear
+    password hashed with the corresponding algorithm.
+  * ``"plain"``, the password in the database must be in clear.
 
   The default is ``"crypt"``.
 

@@ -5,6 +5,7 @@ env:
   matrix:
     - TOX_ENV=coverage
     - TOX_ENV=flake8
+    - TOX_ENV=check_rst
     - TOX_ENV=py27-django17
     - TOX_ENV=py27-django18
     - TOX_ENV=py27-django19

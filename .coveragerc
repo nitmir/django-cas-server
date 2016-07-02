@@ -5,6 +5,7 @@ omit =
     cas_server/migrations*
     cas_server/management/*
     cas_server/tests/*
+    cas_server/cas.py
 
 [report]
 exclude_lines =

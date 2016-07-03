@@ -20,6 +20,7 @@
 
 # This file is originated from https://github.com/python-cas/python-cas
 # at commit ec1f2d4779625229398547b9234d0e9e874a2c9a
+# some modifications have been made to be unicode coherent between python2 and python2
 
 import six
 from six.moves.urllib import parse as urllib_parse

@@ -24,7 +24,9 @@
 <div class="row">
 <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
 <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+{% if auto_submit %}<noscript>{% endif %}
 {% bootstrap_messages %}
+{% if auto_submit %}</noscript>{% endif %}
 {% block content %}
 {% endblock %}
 </div>

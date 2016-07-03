@@ -40,6 +40,7 @@ Features
 * Fine control on which user's attributes are passed to which service
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
+* Federated mode between multiple CAS
 * Supports Django 1.7, 1.8 and 1.9
 * Supports Python 2.7, 3.x
 

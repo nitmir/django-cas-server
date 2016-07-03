@@ -17,7 +17,7 @@ clean_pyc:
 clean_build:
 	rm -rf build django_cas_server.egg-info dist
 clean_tox:
-	rm -rf .tox
+	rm -rf .tox tox_logs
 clean_test_venv:
 	rm -rf test_venv
 clean_coverage:

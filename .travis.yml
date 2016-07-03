@@ -14,12 +14,12 @@ env:
     - TOX_ENV=py34-django19
 cache:
   directories:
-    - $HOME/.cache/pip/
-    - $HOME/build/nitmir/django-cas-server/.tox/
+    - $HOME/.cache/pip/http/
+    - $HOME/build/nitmir/django-cas-server/.tox/$TOX_ENV/
 install:
   - "travis_retry pip install setuptools --upgrade"
   - "pip install tox"
 script:
   - tox -e $TOX_ENV
 after_script:
-  - cat .tox/$TOX_ENV/log/*.log
+  - cat tox_log/*.log

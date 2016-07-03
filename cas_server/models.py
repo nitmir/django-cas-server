@@ -46,6 +46,16 @@ class FederatedUser(models.Model):
     def __unicode__(self):
         return u"%s@%s" % (self.username, self.provider)
 
+    @classmethod
+    def clean_old_entries(cls):
+        federated_users = cls.objects.filter(
+            last_update__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT))
+        )
+        known_users = {user.username for user in User.objects.all()}
+        for user in federated_users:
+            if not ('%s@%s' % (user.username, user.provider)) in known_users:
+                user.delete()
+
 
 class FederateSLO(models.Model):
     class Meta:
@@ -53,11 +63,6 @@ class FederateSLO(models.Model):
     username = models.CharField(max_length=30)
     session_key = models.CharField(max_length=40, blank=True, null=True)
     ticket = models.CharField(max_length=255)
-
-    @property
-    def provider(self):
-        component = self.username.split("@")
-        return component[-1]
 
     @classmethod
     def clean_deleted_sessions(cls):
@@ -75,6 +80,14 @@ class User(models.Model):
     session_key = models.CharField(max_length=40, blank=True, null=True)
     username = models.CharField(max_length=30)
     date = models.DateTimeField(auto_now=True)
+
+    def delete(self, *args, **kwargs):
+        if settings.CAS_FEDERATE:
+            FederateSLO.objects.filter(
+                username=self.username,
+                session_key=self.session_key
+            ).delete()
+        super(User, self).delete(*args, **kwargs)
 
     @classmethod
     def clean_old_entries(cls):

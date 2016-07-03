@@ -15,6 +15,7 @@ from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
 
 from importlib import import_module
+from six.moves import urllib
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
@@ -27,7 +28,7 @@ class CASFederateValidateUser(object):
     def __init__(self, provider, service_url):
         self.provider = provider
 
-        if provider in settings.CAS_FEDERATE_PROVIDERS:
+        if provider in settings.CAS_FEDERATE_PROVIDERS:  # pragma: no branch (should always be True)
             (server_url, version) = settings.CAS_FEDERATE_PROVIDERS[provider][:2]
             self.client = CASClient(
                 service_url=service_url,
@@ -44,9 +45,12 @@ class CASFederateValidateUser(object):
 
     def verify_ticket(self, ticket):
         """test `password` agains the user"""
-        if self.client is None:
+        if self.client is None:  # pragma: no cover (should not happen)
             return False
-        username, attributs = self.client.verify_ticket(ticket)[:2]
+        try:
+            username, attributs = self.client.verify_ticket(ticket)[:2]
+        except urllib.error.URLError:
+            return False
         if username is not None:
             if attributs is None:
                 attributs = {}
@@ -83,23 +87,20 @@ class CASFederateValidateUser(object):
 
     def clean_sessions(self, logout_request):
         try:
-            slos = self.client.get_saml_slos(logout_request)
-        except NameError:
+            slos = self.client.get_saml_slos(logout_request) or []
+        except NameError:  # pragma: no cover (should not happen)
             slos = []
         for slo in slos:
-            try:
-                for federate_slo in FederateSLO.objects.filter(ticket=slo.text):
-                    session = SessionStore(session_key=federate_slo.session_key)
-                    session.flush()
-                    try:
-                        user = User.objects.get(
-                            username=federate_slo.username,
-                            session_key=federate_slo.session_key
-                        )
-                        user.logout()
-                        user.delete()
-                    except User.DoesNotExist:
-                        pass
-                    federate_slo.delete()
-            except FederateSLO.DoesNotExist:
-                pass
+            for federate_slo in FederateSLO.objects.filter(ticket=slo.text):
+                session = SessionStore(session_key=federate_slo.session_key)
+                session.flush()
+                try:
+                    user = User.objects.get(
+                        username=federate_slo.username,
+                        session_key=federate_slo.session_key
+                    )
+                    user.logout()
+                    user.delete()
+                except User.DoesNotExist:  # pragma: no cover (should not happen)
+                    pass
+                federate_slo.delete()

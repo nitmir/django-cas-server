@@ -31,6 +31,8 @@ class WarnForm(forms.Form):
 class FederateSelect(forms.Form):
     provider = forms.ChoiceField(
         label=_('Identity provider'),
+        # with use a lambda abstraction to delay the access to settings.CAS_FEDERATE_PROVIDERS
+        # this is usefull to use the override_settings decorator in tests
         choices=[
             (
                 p,
@@ -88,8 +90,12 @@ class FederateUserCredential(UserCredential):
             user = models.FederatedUser.objects.get(username=username, provider=provider)
             user.ticket = ""
             user.save()
-        except models.FederatedUser.DoesNotExist:
-            raise
+        # should not happed as is the FederatedUser do not exists, super should
+        # raise before a ValidationError("bad user")
+        except models.FederatedUser.DoesNotExist:  # pragma: no cover (should not happend)
+            raise forms.ValidationError(
+                _(u"User not found in the temporary database, please try to reconnect")
+            )
         return cleaned_data
 
 

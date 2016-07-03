@@ -10,7 +10,7 @@
 #
 # (c) 2016 Valentin Samir
 """Tests module for utils"""
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 import six
 
@@ -189,3 +189,22 @@ class UtilsTestCase(TestCase):
         self.assertFalse(utils.crypt_salt_is_valid("$$"))  # start with $ followed by $
         self.assertFalse(utils.crypt_salt_is_valid("$toto"))  # start with $ but no secondary $
         self.assertFalse(utils.crypt_salt_is_valid("$toto$toto"))  # algorithm toto not known
+
+    def test_get_current_url(self):
+        """test the function get_current_url"""
+        factory = RequestFactory()
+        request = factory.get('/truc/muche?test=1')
+        self.assertEqual(utils.get_current_url(request), 'http://testserver/truc/muche?test=1')
+        self.assertEqual(
+            utils.get_current_url(request, ignore_params={'test'}),
+            'http://testserver/truc/muche'
+        )
+
+    def test_get_tuple(self):
+        """test the function get_tuple"""
+        test_tuple = (1, 2, 3)
+        for index, value in enumerate(test_tuple):
+            self.assertEqual(utils.get_tuple(test_tuple, index), value)
+        self.assertEqual(utils.get_tuple(test_tuple, 3), None)
+        self.assertEqual(utils.get_tuple(test_tuple, 3, 'toto'), 'toto')
+        self.assertEqual(utils.get_tuple(None, 3), None)

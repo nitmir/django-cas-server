@@ -171,7 +171,7 @@ class CASFederateAuth(AuthUser):
 
     def attributs(self):
         """return a dict of user attributes"""
-        if not self.user:
+        if not self.user:  # pragma: no cover (should not happen)
             return {}
         else:
             return self.user.attributs

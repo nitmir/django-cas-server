@@ -14,7 +14,6 @@ from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
 import re
-import six
 
 
 def setting_default(name, default_value):
@@ -112,13 +111,10 @@ except AttributeError:
             key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
         else:
             key = key.lower()
-        if isinstance(key, six.string_types) or isinstance(key, six.text_type):
-            return tuple(
-                int(num) if num else alpha
-                for num, alpha in __cas_federate_providers_list_sort.tokenize(key)
-            )
-        else:
-            return key
+        return tuple(
+            int(num) if num else alpha
+            for num, alpha in __cas_federate_providers_list_sort.tokenize(key)
+        )
     __cas_federate_providers_list_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
     __CAS_FEDERATE_PROVIDERS_LIST.sort(key=__cas_federate_providers_list_sort)
 

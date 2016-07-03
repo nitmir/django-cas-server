@@ -191,3 +191,50 @@ class UserModels(object):
             username=settings.CAS_TEST_USER,
             session_key=client.session.session_key
         )
+
+
+class CanLogin(object):
+    """Assertion about login"""
+    def assert_logged(
+        self, client, response, warn=False,
+        code=200, username=settings.CAS_TEST_USER
+    ):
+        """Assertions testing that client is well authenticated"""
+        self.assertEqual(response.status_code, code)
+        # this message is displayed to the user upon successful authentication
+        self.assertIn(
+            (
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
+            ),
+            response.content
+        )
+        # these session variables a set if usccessfully authenticated
+        self.assertEqual(client.session["username"], username)
+        self.assertIs(client.session["warn"], warn)
+        self.assertIs(client.session["authenticated"], True)
+
+        # on successfull authentication, a corresponding user object is created
+        self.assertTrue(
+            models.User.objects.get(
+                username=username,
+                session_key=client.session.session_key
+            )
+        )
+
+    def assert_login_failed(self, client, response, code=200):
+        """Assertions testing a failed login attempt"""
+        self.assertEqual(response.status_code, code)
+        # this message is displayed to the user upon successful authentication, so it should not
+        # appear
+        self.assertFalse(
+            (
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
+            ) in response.content
+        )
+
+        # if authentication has failed, these session variables should not be set
+        self.assertTrue(client.session.get("username") is None)
+        self.assertTrue(client.session.get("warn") is None)
+        self.assertTrue(client.session.get("authenticated") is None)

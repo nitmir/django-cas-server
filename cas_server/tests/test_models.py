@@ -12,18 +12,79 @@
 """Tests module for models"""
 from cas_server.default_settings import settings
 
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
 
 from datetime import timedelta
 from importlib import import_module
 
-from cas_server import models
+from cas_server import models, utils
 from cas_server.tests.utils import get_auth_client, HttpParamsHandler
 from cas_server.tests.mixin import UserModels, BaseServicePattern
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
+
+class FederatedUserTestCase(TestCase, UserModels):
+    """test for the federated user model"""
+    def test_clean_old_entries(self):
+        """tests for clean_old_entries that should delete federated user no longer used"""
+        client = Client()
+        client.get("/login")
+        models.FederatedUser.objects.create(
+            username="test1", provider="example.com", attributs={}, ticket=""
+        )
+        models.FederatedUser.objects.create(
+            username="test2", provider="example.com", attributs={}, ticket=""
+        )
+        models.FederatedUser.objects.all().update(
+            last_update=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT + 10))
+        )
+        models.FederatedUser.objects.create(
+            username="test3", provider="example.com", attributs={}, ticket=""
+        )
+        models.User.objects.create(
+            username="test1@example.com", session_key=client.session.session_key
+        )
+        models.FederatedUser.clean_old_entries()
+        self.assertEqual(len(models.FederatedUser.objects.all()), 2)
+        with self.assertRaises(models.FederatedUser.DoesNotExist):
+            models.FederatedUser.objects.get(username="test2")
+
+
+class FederateSLOTestCase(TestCase, UserModels):
+    """test for the federated SLO model"""
+    def test_clean_deleted_sessions(self):
+        """
+            tests for clean_deleted_sessions that should delete object for which matching session
+            do not exists anymore
+        """
+        client1 = Client()
+        client2 = Client()
+        client1.get("/login")
+        client2.get("/login")
+        session = client2.session
+        session['authenticated'] = True
+        try:
+            session.save()
+        except AttributeError:
+            pass
+        models.FederateSLO.objects.create(
+            username="test1@example.com",
+            session_key=client1.session.session_key,
+            ticket=utils.gen_st()
+        )
+        models.FederateSLO.objects.create(
+            username="test2@example.com",
+            session_key=client2.session.session_key,
+            ticket=utils.gen_st()
+        )
+        self.assertEqual(len(models.FederateSLO.objects.all()), 2)
+        models.FederateSLO.clean_deleted_sessions()
+        self.assertEqual(len(models.FederateSLO.objects.all()), 1)
+        with self.assertRaises(models.FederateSLO.DoesNotExist):
+            models.FederateSLO.objects.get(username="test1@example.com")
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')

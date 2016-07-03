@@ -192,18 +192,21 @@ class LogoutView(View, LogoutMixin):
 
 
 class FederateAuth(View):
-
+    """view to authenticated user agains a backend CAS then CAS_FEDERATE is True"""
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """dispatch different http request to the methods of the same name"""
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
     @staticmethod
     def get_cas_client(request, provider):
+        """return a CAS client object matching provider"""
         if provider in settings.CAS_FEDERATE_PROVIDERS:  # pragma: no branch (should always be true)
             service_url = utils.get_current_url(request, {"ticket", "provider"})
             return CASFederateValidateUser(provider, service_url)
 
     def post(self, request, provider=None):
+        """method called on POST request"""
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
         # POST with a provider, this is probably an SLO request
@@ -245,6 +248,7 @@ class FederateAuth(View):
                 return redirect("cas_server:login")
 
     def get(self, request, provider=None):
+        """method called on GET request"""
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
         if provider not in settings.CAS_FEDERATE_PROVIDERS:

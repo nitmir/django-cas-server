@@ -144,6 +144,7 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
 
 
 class CASFederateAuth(AuthUser):
+    """Authentication class used then CAS_FEDERATE is True"""
     user = None
 
     def __init__(self, username):

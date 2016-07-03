@@ -76,6 +76,7 @@ def reverse_params(url_name, params=None, **kwargs):
 
 
 def copy_params(get_or_post_params, ignore=None):
+    """copy from a dictionnary like `get_or_post_params` ignoring keys in the set `ignore`"""
     if ignore is None:
         ignore = set()
     params = {}
@@ -86,6 +87,7 @@ def copy_params(get_or_post_params, ignore=None):
 
 
 def set_cookie(response, key, value, max_age):
+    """Set the cookie `key` on `response` with value `value` valid for `max_age` secondes"""
     expires = datetime.strftime(
         datetime.utcnow() + timedelta(seconds=max_age),
         "%a, %d-%b-%Y %H:%M:%S GMT"
@@ -101,6 +103,7 @@ def set_cookie(response, key, value, max_age):
 
 
 def get_current_url(request, ignore_params=None):
+    """Giving a django request, return the current http url, possibly ignoring some GET params"""
     if ignore_params is None:
         ignore_params = set()
     protocol = 'https' if request.is_secure() else "http"
@@ -194,6 +197,10 @@ def gen_saml_id():
 
 
 def get_tuple(nuplet, index, default=None):
+    """
+        return the value in index `index` of the tuple `nuplet` if it exists,
+        else return `default`
+    """
     if nuplet is None:
         return default
     try:

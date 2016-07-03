@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class FederatedUser(models.Model):
+    """A federated user as returner by a CAS provider (username and attributes)"""
     class Meta:
         unique_together = ("username", "provider")
     username = models.CharField(max_length=124)
@@ -48,6 +49,7 @@ class FederatedUser(models.Model):
 
     @classmethod
     def clean_old_entries(cls):
+        """remove old unused federated users"""
         federated_users = cls.objects.filter(
             last_update__lt=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT))
         )
@@ -58,6 +60,7 @@ class FederatedUser(models.Model):
 
 
 class FederateSLO(models.Model):
+    """An association between a CAS provider ticket and a (username, session) for processing SLO"""
     class Meta:
         unique_together = ("username", "session_key")
     username = models.CharField(max_length=30)
@@ -66,6 +69,7 @@ class FederateSLO(models.Model):
 
     @classmethod
     def clean_deleted_sessions(cls):
+        """remove old object for which the session do not exists anymore"""
         for federate_slo in cls.objects.all():
             if not SessionStore(session_key=federate_slo.session_key).get('authenticated'):
                 federate_slo.delete()
@@ -82,6 +86,7 @@ class User(models.Model):
     date = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
+        """remove the User"""
         if settings.CAS_FEDERATE:
             FederateSLO.objects.filter(
                 username=self.username,

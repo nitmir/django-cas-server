@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -9,6 +9,7 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # (c) 2015 Valentin Samir
+"""federated mode helper classes"""
 from .default_settings import settings
 
 from .cas import CASClient
@@ -21,6 +22,7 @@ SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 
 class CASFederateValidateUser(object):
+    """Class CAS client used to authenticate the user again a CAS provider"""
     username = None
     attributs = {}
     client = None
@@ -38,13 +40,15 @@ class CASFederateValidateUser(object):
             )
 
     def get_login_url(self):
+        """return the CAS provider login url"""
         return self.client.get_login_url() if self.client is not None else False
 
     def get_logout_url(self, redirect_url=None):
+        """return the CAS provider logout url"""
         return self.client.get_logout_url(redirect_url) if self.client is not None else False
 
     def verify_ticket(self, ticket):
-        """test `password` agains the user"""
+        """test `ticket` agains the CAS provider, if valid, create the local federated user"""
         if self.client is None:  # pragma: no cover (should not happen)
             return False
         try:
@@ -79,6 +83,7 @@ class CASFederateValidateUser(object):
 
     @staticmethod
     def register_slo(username, session_key, ticket):
+        """association a ticket with a (username, session) for processing later SLO request"""
         FederateSLO.objects.create(
             username=username,
             session_key=session_key,
@@ -86,6 +91,7 @@ class CASFederateValidateUser(object):
         )
 
     def clean_sessions(self, logout_request):
+        """process a SLO request"""
         try:
             slos = self.client.get_saml_slos(logout_request) or []
         except NameError:  # pragma: no cover (should not happen)

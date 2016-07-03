@@ -29,6 +29,10 @@ class WarnForm(forms.Form):
 
 
 class FederateSelect(forms.Form):
+    """
+        Form used on the login page when CAS_FEDERATE is True
+        allowing the user to choose a identity provider.
+    """
     provider = forms.ChoiceField(
         label=_('Identity provider'),
         # with use a lambda abstraction to delay the access to settings.CAS_FEDERATE_PROVIDERS

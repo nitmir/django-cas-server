@@ -29,6 +29,7 @@ from cas_server import utils
 
 
 def return_unicode(string, charset):
+    """make `string` a unicode if `string` is a unicode or bytes encoded with `charset`"""
     if not isinstance(string, six.text_type):
         return string.decode(charset)
     else:
@@ -36,6 +37,10 @@ def return_unicode(string, charset):
 
 
 def return_bytes(string, charset):
+    """
+        make `string` a bytes encoded with `charset` if `string` is a unicode
+        or bytes encoded with `charset`
+    """
     if isinstance(string, six.text_type):
         return string.encode(charset)
     else:
@@ -200,8 +205,9 @@ class Http404Handler(HttpParamsHandler):
 
 
 class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
-
+    """A dummy CAS that validate for only one (service, ticket) used in federated mode tests"""
     def test_params(self):
+        """check that internal and provided (service, ticket) matches"""
         if (
             self.server.ticket is not None and
             self.params.get("service").encode("ascii") == self.server.service and
@@ -213,11 +219,13 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
             return False
 
     def send_headers(self, code, content_type):
+        """send http headers"""
         self.send_response(code)
         self.send_header("Content-type", content_type)
         self.end_headers()
 
     def do_GET(self):
+        """Called on a GET request on the BaseHTTPServer"""
         url = urlparse(self.path)
         self.params = dict(parse_qsl(url.query))
         if url.path == "/validate":
@@ -250,6 +258,7 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
             self.return_404()
 
     def do_POST(self):
+        """Called on a POST request on the BaseHTTPServer"""
         url = urlparse(self.path)
         self.params = dict(parse_qsl(url.query))
         if url.path == "/samlValidate":
@@ -287,6 +296,7 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
             self.return_404()
 
     def return_404(self):
+        """return a 404 error"""
         self.send_headers(404, "text/plain; charset=utf-8")
         self.wfile.write("not found")
 
@@ -317,6 +327,7 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 def logout_request(ticket):
+    """build a SLO request XML, ready to be send"""
     return u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
  ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
 <saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>

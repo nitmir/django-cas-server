@@ -1,5 +1,5 @@
 CAS Server
-==========
+##########
 
 .. image:: https://travis-ci.org/nitmir/django-cas-server.svg?branch=master
     :target: https://travis-ci.org/nitmir/django-cas-server
@@ -29,8 +29,10 @@ Note that for Django 1.7 compatibility, you need a version of
 `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__ < 7.0.0
 like the 6.2.2 version.
 
+.. contents:: Table of Contents
+
 Features
---------
+========
 
 * Support CAS version 1.0, 2.0, 3.0
 * Support Single Sign Out
@@ -42,7 +44,7 @@ Features
 * Supports Python 2.7, 3.x
 
 Quick start
------------
+===========
 1. If you want to make a virtualenv for ``django-cas-server``, you will need the following
    dependencies on a bare debian like system::
 
@@ -112,12 +114,13 @@ Quick start
 
 
 Settings
---------
+========
 
 All settings are optional. Add them to ``settings.py`` to customize ``django-cas-server``:
 
 
-Template settings:
+Template settings
+-----------------
 
 * ``CAS_LOGO_URL``: Url to the logo showed in the up left corner on the default
   templates. Set it to ``False`` to disable it.
@@ -135,7 +138,8 @@ Template settings:
   logged out instead of displaying ``CAS_LOGOUT_TEMPLATE``. The default is ``False``.
 
 
-Authentication settings:
+Authentication settings
+-----------------------
 
 *  ``CAS_AUTH_CLASS``: A dotted path to a class or a class implementing
    ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
@@ -155,7 +159,8 @@ Authentication settings:
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
 
-Federation settings:
+Federation settings
+-------------------
 
 * ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
   The default is ``False``.
@@ -170,7 +175,8 @@ Federation settings:
   ``_remember_provider``.
 
 
-Tickets validity settings:
+Tickets validity settings
+-------------------------
 
 * ``CAS_TICKET_VALIDITY``: Number of seconds the service tickets and proxy tickets are valid.
   This is the maximal time between ticket issuance by the CAS and ticket validation by an
@@ -180,7 +186,8 @@ Tickets validity settings:
 * ``CAS_TICKET_TIMEOUT``: Number of seconds a ticket is kept in the database before sending
   Single Log Out request and being cleared. The default is ``86400`` (24 hours).
 
-Tickets miscellaneous settings:
+Tickets miscellaneous settings
+------------------------------
 
 * ``CAS_TICKET_LEN``: Default ticket length. All CAS implementation MUST support ST and PT
   up to 32 chars, PGT and PGTIOU up to 64 chars and it is RECOMMENDED that all tickets up
@@ -204,7 +211,9 @@ Tickets miscellaneous settings:
 * ``CAS_PROXY_GRANTING_TICKET_IOU_PREFIX``: Prefix of proxy granting ticket IOU. The default is ``"PGTIOU"``.
 
 
-Mysql backend settings. Only usefull if you are using the mysql authentication backend:
+Mysql backend settings
+----------------------
+Only usefull if you are using the mysql authentication backend:
 
 * ``CAS_SQL_HOST``: Host for the SQL server. The default is ``"localhost"``.
 * ``CAS_SQL_USERNAME``: Username for connecting to the SQL server.
@@ -230,7 +239,9 @@ Mysql backend settings. Only usefull if you are using the mysql authentication b
   The default is ``"crypt"``.
 
 
-Test backend settings. Only usefull if you are using the test authentication backend:
+Test backend settings
+---------------------
+Only usefull if you are using the test authentication backend:
 
 * ``CAS_TEST_USER``: Username of the test user. The default is ``"test"``.
 * ``CAS_TEST_PASSWORD``: Password of the test user. The default is ``"test"``.
@@ -240,7 +251,7 @@ Test backend settings. Only usefull if you are using the test authentication bac
 
 
 Authentication backend
-----------------------
+======================
 
 ``django-cas-server`` comes with some authentication backends:
 
@@ -255,7 +266,7 @@ Authentication backend
   You should not set it manually without setting ``CAS_FEDERATE`` to ``True``.
 
 Logs
-----
+====
 
 ``django-cas-server`` logs most of its actions. To enable login, you must set the ``LOGGING``
 (https://docs.djangoproject.com/en/stable/topics/logging) variable in ``settings.py``.
@@ -324,7 +335,7 @@ Or to log to a file:
 
 
 Federation mode
----------------
+===============
 
 ``django-cas-server`` comes with a federation mode. Then ``CAS_FEDERATE`` is ``True``,
 user are invited to choose an identity provider on the login page, then, they are redirected

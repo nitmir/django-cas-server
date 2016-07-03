@@ -208,20 +208,12 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
             self.params.get("ticket").encode("ascii") == self.server.ticket
         ):
             self.server.ticket = None
-            print("good")
             return True
         else:
-            print("bad (%r, %r) != (%r, %r)" % (
-                self.params.get("service").encode("ascii"),
-                self.params.get("ticket").encode("ascii"),
-                self.server.service,
-                self.server.ticket
-            ))
-
             return False
 
     def send_headers(self, code, content_type):
-        self.send_response(200)
+        self.send_response(code)
         self.send_header("Content-type", content_type)
         self.end_headers()
 
@@ -241,19 +233,19 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
         }:
             self.send_headers(200, "text/xml; charset=utf-8")
             if self.test_params():
-                t = loader.get_template('cas_server/serviceValidate.xml')
-                c = Context({
+                template = loader.get_template('cas_server/serviceValidate.xml')
+                context = Context({
                     'username': self.server.username,
                     'attributes': self.server.attributes
                 })
-                self.wfile.write(return_bytes(t.render(c), "utf8"))
+                self.wfile.write(return_bytes(template.render(context), "utf8"))
             else:
-                t = loader.get_template('cas_server/serviceValidateError.xml')
-                c = Context({
+                template = loader.get_template('cas_server/serviceValidateError.xml')
+                context = Context({
                     'code': 'BAD_SERVICE_TICKET',
                     'msg': 'Valids are (%r, %r)' % (self.server.service, self.server.ticket)
                 })
-                self.wfile.write(return_bytes(t.render(c), "utf8"))
+                self.wfile.write(return_bytes(template.render(context), "utf8"))
         else:
             self.return_404()
 
@@ -272,8 +264,8 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
                 ticket == self.server.ticket
             ):
                 self.server.ticket = None
-                t = loader.get_template('cas_server/samlValidate.xml')
-                c = Context({
+                template = loader.get_template('cas_server/samlValidate.xml')
+                context = Context({
                     'IssueInstant': timezone.now().isoformat(),
                     'expireInstant': (timezone.now() + timedelta(seconds=60)).isoformat(),
                     'Recipient': self.server.service,
@@ -281,24 +273,22 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
                     'username': self.server.username,
                     'attributes': self.server.attributes,
                 })
-                self.wfile.write(return_bytes(t.render(c), "utf8"))
+                self.wfile.write(return_bytes(template.render(context), "utf8"))
             else:
-                t = loader.get_template('cas_server/samlValidateError.xml')
-                c = Context({
+                template = loader.get_template('cas_server/samlValidateError.xml')
+                context = Context({
                     'IssueInstant': timezone.now().isoformat(),
                     'ResponseID': utils.gen_saml_id(),
                     'code': 'BAD_SERVICE_TICKET',
                     'msg': 'Valids are (%r, %r)' % (self.server.service, self.server.ticket)
                 })
-                self.wfile.write(return_bytes(t.render(c), "utf8"))
+                self.wfile.write(return_bytes(template.render(context), "utf8"))
         else:
             self.return_404()
 
     def return_404(self):
-            self.send_response(404)
-            self.send_header(b"Content-type", "text/plain")
-            self.end_headers()
-            self.wfile.write("not found")
+        self.send_headers(404, "text/plain; charset=utf-8")
+        self.wfile.write("not found")
 
     def log_message(self, *args):
         """silent any log message"""

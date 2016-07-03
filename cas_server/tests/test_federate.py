@@ -34,10 +34,6 @@ PROVIDERS_LIST = list(PROVIDERS.keys())
 PROVIDERS_LIST.sort()
 
 
-def getaddrinfo_mock(name, port, *args, **kwargs):
-    return [(2, 1, 6, '', ('127.0.0.1', 80))]
-
-
 @override_settings(
     CAS_FEDERATE=True,
     CAS_FEDERATE_PROVIDERS=PROVIDERS,
@@ -187,7 +183,6 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             try to fetch a new ticket if the provided ticket validation fail
             (network error or bad ticket)
         """
-        return
         good_provider = "example.com"
         bad_provider = "exemple.fr"
         client = Client()
@@ -285,7 +280,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             test the logout function: the user should be log out
             and redirected to his CAS logout page
         """
-        # get tickets and connected clients
+        # get tickets and connected clients, then follow normal logout
         tickets = self.test_login_post_provider()
         for (provider, _, client) in tickets:
             response = client.get("/logout")
@@ -296,6 +291,28 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             )
             response = client.get("/login")
             self.assert_login_failed(client, response)
+
+            # test if the user is already logged out
+            response = client.get("/logout")
+            # no redirection
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(
+                (
+                    b"You were already logged out from the Central Authentication Service."
+                ) in response.content
+            )
+
+        tickets = self.test_login_post_provider()
+        if django.VERSION >= (1, 8):
+            # assume the username session variable has been tempered (should not happend)
+            for (provider, _, client) in tickets:
+                session = client.session
+                session["username"] = settings.CAS_TEST_USER
+                session.save()
+                response = client.get("/logout")
+                self.assertEqual(response.status_code, 200)
+                response = client.get("/login")
+                self.assert_login_failed(client, response)
 
     def test_remember_provider(self):
         """
@@ -323,7 +340,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         session = client.session
         session["federate_username"] = '%s@%s' % (settings.CAS_TEST_USER, provider)
         session["federate_ticket"] = utils.gen_st()
-        try:
+        if django.VERSION >= (1, 8):
             session.save()
             response = client.get("/login")
             # we should get a page with a from with all widget hidden that auto POST to /login using
@@ -340,5 +357,3 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
                     utils.get_tuple(value, 2, key)
                 ) in response.content.decode("utf-8"))
             self.assertEqual(response.context['post_url'], '/federate')
-        except AttributeError:
-            pass

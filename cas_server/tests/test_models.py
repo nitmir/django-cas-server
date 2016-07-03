@@ -12,6 +12,7 @@
 """Tests module for models"""
 from cas_server.default_settings import settings
 
+import django
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -60,31 +61,29 @@ class FederateSLOTestCase(TestCase, UserModels):
             tests for clean_deleted_sessions that should delete object for which matching session
             do not exists anymore
         """
-        client1 = Client()
-        client2 = Client()
-        client1.get("/login")
-        client2.get("/login")
-        session = client2.session
-        session['authenticated'] = True
-        try:
+        if django.VERSION >= (1, 8):
+            client1 = Client()
+            client2 = Client()
+            client1.get("/login")
+            client2.get("/login")
+            session = client2.session
+            session['authenticated'] = True
             session.save()
-        except AttributeError:
-            pass
-        models.FederateSLO.objects.create(
-            username="test1@example.com",
-            session_key=client1.session.session_key,
-            ticket=utils.gen_st()
-        )
-        models.FederateSLO.objects.create(
-            username="test2@example.com",
-            session_key=client2.session.session_key,
-            ticket=utils.gen_st()
-        )
-        self.assertEqual(len(models.FederateSLO.objects.all()), 2)
-        models.FederateSLO.clean_deleted_sessions()
-        self.assertEqual(len(models.FederateSLO.objects.all()), 1)
-        with self.assertRaises(models.FederateSLO.DoesNotExist):
-            models.FederateSLO.objects.get(username="test1@example.com")
+            models.FederateSLO.objects.create(
+                username="test1@example.com",
+                session_key=client1.session.session_key,
+                ticket=utils.gen_st()
+            )
+            models.FederateSLO.objects.create(
+                username="test2@example.com",
+                session_key=client2.session.session_key,
+                ticket=utils.gen_st()
+            )
+            self.assertEqual(len(models.FederateSLO.objects.all()), 2)
+            models.FederateSLO.clean_deleted_sessions()
+            self.assertEqual(len(models.FederateSLO.objects.all()), 1)
+            with self.assertRaises(models.FederateSLO.DoesNotExist):
+                models.FederateSLO.objects.get(username="test1@example.com")
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')

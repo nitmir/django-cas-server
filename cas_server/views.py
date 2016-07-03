@@ -134,8 +134,9 @@ class LogoutView(View, LogoutMixin):
         if settings.CAS_FEDERATE:
             if auth is not None:
                 params = utils.copy_params(request.GET)
-                url = utils.update_url(auth.get_logout_url(), params)
-                return HttpResponseRedirect(url)
+                url = auth.get_logout_url()
+                if url:
+                    return HttpResponseRedirect(utils.update_url(url, params))
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app

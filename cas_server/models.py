@@ -75,6 +75,11 @@ class FederatedIendityProvider(models.Model):
             )
         )
     )
+    display = models.BooleanField(
+        default=True,
+        verbose_name=_(u"display"),
+        help_text=_("Display the provider on the login page")
+    )
 
     def __str__(self):
         return self.verbose_name

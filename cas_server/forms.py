@@ -34,7 +34,7 @@ class FederateSelect(forms.Form):
         allowing the user to choose a identity provider.
     """
     provider = forms.ModelChoiceField(
-        queryset=models.FederatedIendityProvider.objects.all().order_by(
+        queryset=models.FederatedIendityProvider.objects.filter(display=True).order_by(
             "pos",
             "verbose_name",
             "suffix"

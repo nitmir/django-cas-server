@@ -354,6 +354,9 @@ An identity provider comes with 5 fields:
 * `CAS protocol version`: the version of the CAS protocol to use to contact the identity provider.
   The default is version 3.
 * `Verbose name`: the name used on the login page to display the identity provider.
+* `Display`: a boolean controlling the display of the identity provider on the login page.
+  Beware that this do not disable the identity provider, it just hide it on the login page.
+  User will always be able to log in using this provider by fetching `/federate/provider_suffix`.
 
 
 In federation mode, ``django-cas-server`` build user's username as follow:

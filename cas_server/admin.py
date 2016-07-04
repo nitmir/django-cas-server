@@ -93,7 +93,8 @@ class ServicePatternAdmin(admin.ModelAdmin):
 
 
 class FederatedIendityProviderAdmin(admin.ModelAdmin):
-    fields = ('pos', 'suffix', 'server_url', 'cas_protocol_version', 'verbose_name')
+    fields = ('pos', 'suffix', 'server_url', 'cas_protocol_version', 'verbose_name', 'display')
+    list_display = ('verbose_name', 'suffix', 'display')
 
 
 admin.site.register(User, UserAdmin)

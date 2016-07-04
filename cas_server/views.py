@@ -208,6 +208,7 @@ class FederateAuth(View):
     def post(self, request, provider=None):
         """method called on POST request"""
         if not settings.CAS_FEDERATE:
+            logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
             return redirect("cas_server:login")
         # POST with a provider, this is probably an SLO request
         try:
@@ -251,15 +252,26 @@ class FederateAuth(View):
     def get(self, request, provider=None):
         """method called on GET request"""
         if not settings.CAS_FEDERATE:
+            logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
+            return redirect("cas_server:login")
+        if self.request.session.get("authenticated"):
+            logger.warning("User already authenticated, dropping federate authentication request")
             return redirect("cas_server:login")
         try:
             provider = FederatedIendityProvider.objects.get(suffix=provider)
             auth = self.get_cas_client(request, provider)
             if 'ticket' not in request.GET:
+                logger.info("Trying to authenticate again %s" % auth.provider.server_url)
                 return HttpResponseRedirect(auth.get_login_url())
             else:
                 ticket = request.GET['ticket']
                 if auth.verify_ticket(ticket):
+                    logger.info(
+                        "Got a valid ticket for %s from %s" % (
+                            auth.username,
+                            auth.provider.server_url
+                        )
+                    )
                     params = utils.copy_params(request.GET, ignore={"ticket"})
                     request.session["federate_username"] = auth.federated_username
                     request.session["federate_ticket"] = ticket
@@ -267,8 +279,15 @@ class FederateAuth(View):
                     url = utils.reverse_params("cas_server:login", params)
                     return HttpResponseRedirect(url)
                 else:
+                    logger.info(
+                        "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
+                            auth.username,
+                            auth.provider.server_url
+                        )
+                    )
                     return HttpResponseRedirect(auth.get_login_url())
         except FederatedIendityProvider.DoesNotExist:
+            logger.warning("Identity provider suffix %s not found" % provider)
             return redirect("cas_server:login")
 
 

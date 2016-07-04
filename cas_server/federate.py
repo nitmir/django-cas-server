@@ -16,10 +16,13 @@ from django.db import IntegrityError
 from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
 
+import logging
 from importlib import import_module
 from six.moves import urllib
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
+logger = logging.getLogger(__name__)
 
 
 class CASFederateValidateUser(object):
@@ -88,6 +91,12 @@ class CASFederateValidateUser(object):
             slos = []
         for slo in slos:
             for federate_slo in FederateSLO.objects.filter(ticket=slo.text):
+                logger.info(
+                    "Got an SLO requests for ticket %s, logging out user %s" % (
+                        federate_slo.username,
+                        federate_slo.ticket
+                    )
+                )
                 session = SessionStore(session_key=federate_slo.session_key)
                 session.flush()
                 try:

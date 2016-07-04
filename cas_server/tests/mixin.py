@@ -228,11 +228,12 @@ class CanLogin(object):
         self.assertEqual(response.status_code, code)
         # this message is displayed to the user upon successful authentication, so it should not
         # appear
-        self.assertFalse(
+        self.assertNotIn(
             (
                 b"You have successfully logged into "
                 b"the Central Authentication Service"
-            ) in response.content
+            ),
+            response.content
         )
 
         # if authentication has failed, these session variables should not be set

@@ -12,6 +12,7 @@ exclude_lines =
     pragma: no cover
     def __repr__
     def __unicode__
+    def __str__
     raise AssertionError
     raise NotImplementedError
     if six.PY3:

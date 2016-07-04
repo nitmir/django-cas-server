@@ -11,6 +11,7 @@
 # (c) 2016 Valentin Samir
 """federated mode helper classes"""
 from .default_settings import settings
+from django.db import IntegrityError
 
 from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
@@ -29,28 +30,23 @@ class CASFederateValidateUser(object):
 
     def __init__(self, provider, service_url):
         self.provider = provider
-
-        if provider in settings.CAS_FEDERATE_PROVIDERS:  # pragma: no branch (should always be True)
-            (server_url, version) = settings.CAS_FEDERATE_PROVIDERS[provider][:2]
-            self.client = CASClient(
-                service_url=service_url,
-                version=version,
-                server_url=server_url,
-                renew=False,
-            )
+        self.client = CASClient(
+            service_url=service_url,
+            version=provider.cas_protocol_version,
+            server_url=provider.server_url,
+            renew=False,
+        )
 
     def get_login_url(self):
         """return the CAS provider login url"""
-        return self.client.get_login_url() if self.client is not None else False
+        return self.client.get_login_url()
 
     def get_logout_url(self, redirect_url=None):
         """return the CAS provider logout url"""
-        return self.client.get_logout_url(redirect_url) if self.client is not None else False
+        return self.client.get_logout_url(redirect_url)
 
     def verify_ticket(self, ticket):
         """test `ticket` agains the CAS provider, if valid, create the local federated user"""
-        if self.client is None:  # pragma: no cover (should not happen)
-            return False
         try:
             username, attributs = self.client.verify_ticket(ticket)[:2]
         except urllib.error.URLError:
@@ -61,22 +57,13 @@ class CASFederateValidateUser(object):
             attributs["provider"] = self.provider
             self.username = username
             self.attributs = attributs
-            try:
-                user = FederatedUser.objects.get(
-                    username=username,
-                    provider=self.provider
-                )
-                user.attributs = attributs
-                user.ticket = ticket
-                user.save()
-            except FederatedUser.DoesNotExist:
-                user = FederatedUser.objects.create(
-                    username=username,
-                    provider=self.provider,
-                    attributs=attributs,
-                    ticket=ticket
-                )
-                user.save()
+            user = FederatedUser.objects.update_or_create(
+                username=username,
+                provider=self.provider,
+                defaults=dict(attributs=attributs, ticket=ticket)
+            )[0]
+            user.save()
+            self.federated_username = user.federated_username
             return True
         else:
             return False
@@ -84,11 +71,14 @@ class CASFederateValidateUser(object):
     @staticmethod
     def register_slo(username, session_key, ticket):
         """association a ticket with a (username, session) for processing later SLO request"""
-        FederateSLO.objects.create(
-            username=username,
-            session_key=session_key,
-            ticket=ticket
-        )
+        try:
+            FederateSLO.objects.create(
+                username=username,
+                session_key=session_key,
+                ticket=ticket
+            )
+        except IntegrityError:  # pragma: no cover (ignore if the FederateSLO already exists)
+            pass
 
     def clean_sessions(self, logout_request):
         """process a SLO request"""

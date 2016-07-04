@@ -33,16 +33,14 @@ class FederateSelect(forms.Form):
         Form used on the login page when CAS_FEDERATE is True
         allowing the user to choose a identity provider.
     """
-    provider = forms.ChoiceField(
+    provider = forms.ModelChoiceField(
+        queryset=models.FederatedIendityProvider.objects.all().order_by(
+            "pos",
+            "verbose_name",
+            "suffix"
+        ),
+        to_field_name="suffix",
         label=_('Identity provider'),
-        # with use a lambda abstraction to delay the access to settings.CAS_FEDERATE_PROVIDERS
-        # this is usefull to use the override_settings decorator in tests
-        choices=[
-            (
-                p,
-                utils.get_tuple(settings.CAS_FEDERATE_PROVIDERS[p], 2, p)
-            ) for p in settings.CAS_FEDERATE_PROVIDERS_LIST
-        ]
     )
     service = forms.CharField(label=_('service'), widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -88,13 +86,10 @@ class FederateUserCredential(UserCredential):
     def clean(self):
         cleaned_data = super(FederateUserCredential, self).clean()
         try:
-            component = cleaned_data["username"].split('@')
-            username = '@'.join(component[:-1])
-            provider = component[-1]
-            user = models.FederatedUser.objects.get(username=username, provider=provider)
+            user = models.FederatedUser.get_from_federated_username(cleaned_data["username"])
             user.ticket = ""
             user.save()
-        # should not happed as is the FederatedUser do not exists, super should
+        # should not happed as if the FederatedUser do not exists, super should
         # raise before a ValidationError("bad user")
         except models.FederatedUser.DoesNotExist:  # pragma: no cover (should not happend)
             raise forms.ValidationError(

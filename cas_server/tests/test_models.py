@@ -22,32 +22,39 @@ from importlib import import_module
 
 from cas_server import models, utils
 from cas_server.tests.utils import get_auth_client, HttpParamsHandler
-from cas_server.tests.mixin import UserModels, BaseServicePattern
+from cas_server.tests.mixin import UserModels, BaseServicePattern, FederatedIendityProviderModel
+from cas_server.tests.test_federate import PROVIDERS
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 
-class FederatedUserTestCase(TestCase, UserModels):
+class FederatedUserTestCase(TestCase, UserModels, FederatedIendityProviderModel):
     """test for the federated user model"""
+    def setUp(self):
+        """Prepare the test context"""
+        self.setup_federated_identity_provider(PROVIDERS)
+
     def test_clean_old_entries(self):
         """tests for clean_old_entries that should delete federated user no longer used"""
         client = Client()
         client.get("/login")
+        provider = models.FederatedIendityProvider.objects.get(suffix="example.com")
         models.FederatedUser.objects.create(
-            username="test1", provider="example.com", attributs={}, ticket=""
+            username="test1", provider=provider, attributs={}, ticket=""
         )
         models.FederatedUser.objects.create(
-            username="test2", provider="example.com", attributs={}, ticket=""
+            username="test2", provider=provider, attributs={}, ticket=""
         )
         models.FederatedUser.objects.all().update(
             last_update=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT + 10))
         )
         models.FederatedUser.objects.create(
-            username="test3", provider="example.com", attributs={}, ticket=""
+            username="test3", provider=provider, attributs={}, ticket=""
         )
         models.User.objects.create(
             username="test1@example.com", session_key=client.session.session_key
         )
+        self.assertEqual(len(models.FederatedUser.objects.all()), 3)
         models.FederatedUser.clean_old_entries()
         self.assertEqual(len(models.FederatedUser.objects.all()), 2)
         with self.assertRaises(models.FederatedUser.DoesNotExist):

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-21 00:14+0200\n"
-"PO-Revision-Date: 2016-06-21 00:15+0200\n"
+"POT-Creation-Date: 2016-07-04 17:15+0200\n"
+"PO-Revision-Date: 2016-07-04 17:21+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -18,88 +18,141 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 1.8.8\n"
 
-#: apps.py:7 templates/cas_server/base.html:3 templates/cas_server/base.html:21
+#: apps.py:19 templates/cas_server/base.html:3
+#: templates/cas_server/base.html:20
 msgid "Central Authentication Service"
 msgstr "Service Central d'Authentification"
 
-#: forms.py:32
+#: forms.py:43
 msgid "Identity provider"
 msgstr "fournisseur d'identité"
 
-#: forms.py:35 forms.py:44 forms.py:92
+#: forms.py:45 forms.py:55 forms.py:106
 msgid "service"
 msgstr "service"
 
-#: forms.py:37
+#: forms.py:47
 msgid "Remember the identity provider"
 msgstr "Se souvenir du fournisseur d'identité"
 
-#: forms.py:38 forms.py:48
+#: forms.py:48 forms.py:59
 msgid "warn"
 msgstr "Prévenez-moi avant d'accéder à d'autres services."
 
-#: forms.py:43
+#: forms.py:54
 msgid "login"
 msgstr "Identifiant"
 
-#: forms.py:45
+#: forms.py:56
 msgid "password"
 msgstr "mot de passe"
 
-#: forms.py:59
+#: forms.py:71
 msgid "Bad user"
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
-#: management/commands/cas_clean_federate.py:13
+#: forms.py:96
+msgid "User not found in the temporary database, please try to reconnect"
+msgstr ""
+"Utilisateur non trouvé dans la base de donnée temporaire, essayez de vous "
+"reconnecter"
+
+#: management/commands/cas_clean_federate.py:20
 msgid "Clean old federated users"
 msgstr "Nettoyer les anciens utilisateurs fédéré"
 
-#: management/commands/cas_clean_sessions.py:9
+#: management/commands/cas_clean_sessions.py:22
 msgid "Clean deleted sessions"
 msgstr "Nettoyer les sessions supprimées"
 
-#: management/commands/cas_clean_tickets.py:9
+#: management/commands/cas_clean_tickets.py:22
 msgid "Clean old trickets"
 msgstr "Nettoyer les vieux tickets"
 
-#: models.py:55
+#: models.py:42
+msgid "identity provider"
+msgstr "fournisseur d'identité"
+
+#: models.py:43
+msgid "identity providers"
+msgstr "fournisseurs d'identités"
+
+#: models.py:47
+msgid "suffix"
+msgstr "suffixe"
+
+#: models.py:48
+msgid ""
+"Suffix append to backend CAS returner username: `returned_username`@`suffix`"
+msgstr ""
+"Suffixe ajouté au nom d'utilisateur retourné par le CAS du fournisseur "
+"d'identité : `nom retourné`@`suffixe`"
+
+#: models.py:50
+msgid "server url"
+msgstr "url du serveur"
+
+#: models.py:59
+msgid "CAS protocol version"
+msgstr "Version du protocole CAS"
+
+#: models.py:60
+msgid ""
+"Version of the CAS protocol to use when sending requests the the backend CAS"
+msgstr ""
+"Version du protocole CAS à utiliser lorsque l'on envoie des requête au CAS "
+"du fournisseur d'identité"
+
+#: models.py:65
+msgid "verbose name"
+msgstr "Nom du fournisseur"
+
+#: models.py:66
+msgid "Name for this identity provider displayed on the login page"
+msgstr "Nom affiché pour ce fournisseur d'identité sur la page de connexion"
+
+#: models.py:70 models.py:312
+msgid "position"
+msgstr "position"
+
+#: models.py:159
 msgid "User"
 msgstr "Utilisateur"
 
-#: models.py:56
+#: models.py:160
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: models.py:114
+#: models.py:229
 #, python-format
 msgid "Error during service logout %s"
 msgstr "Une erreur est survenue durant la déconnexion du service %s"
 
-#: models.py:182
+#: models.py:307
 msgid "Service pattern"
 msgstr "Motif de service"
 
-#: models.py:183
+#: models.py:308
 msgid "Services patterns"
 msgstr "Motifs de services"
 
-#: models.py:187
-msgid "position"
-msgstr "position"
+#: models.py:313
+msgid "service patterns are sorted using the position attribute"
+msgstr "Les motifs de service sont trié selon l'attribut position"
 
-#: models.py:194 models.py:316
+#: models.py:320 models.py:444
 msgid "name"
 msgstr "nom"
 
-#: models.py:195
+#: models.py:321
 msgid "A name for the service"
 msgstr "Un nom pour le service"
 
-#: models.py:200 models.py:344 models.py:362
+#: models.py:326 models.py:473 models.py:492
 msgid "pattern"
 msgstr "motif"
 
-#: models.py:202
+#: models.py:328
 msgid ""
 "A regular expression matching services. Will usually looks like '^https://"
 "some\\.server\\.com/path/.*$'.As it is a regular expression, special "
@@ -110,55 +163,55 @@ msgstr ""
 "expression rationnelle, les caractères spéciaux doivent être échappés avec "
 "un '\\'."
 
-#: models.py:211
+#: models.py:337
 msgid "user field"
 msgstr "champ utilisateur"
 
-#: models.py:212
+#: models.py:338
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr ""
 "Nom de l'attribut devant être transmis comme nom d'utilisateur au service. "
 "vide = nom de connection"
 
-#: models.py:216
+#: models.py:342
 msgid "restrict username"
 msgstr "limiter les noms d'utilisateurs"
 
-#: models.py:217
+#: models.py:343
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
 "Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
 "ci-dessous"
 
-#: models.py:221
+#: models.py:347
 msgid "proxy"
 msgstr "proxy"
 
-#: models.py:222
+#: models.py:348
 msgid "Proxy tickets can be delivered to the service"
 msgstr "des proxy tickets peuvent être délivrés au service"
 
-#: models.py:226
+#: models.py:352
 msgid "proxy callback"
 msgstr ""
 
-#: models.py:227
+#: models.py:353
 msgid "can be used as a proxy callback to deliver PGT"
 msgstr "peut être utilisé comme un callback pour recevoir un PGT"
 
-#: models.py:231
+#: models.py:357
 msgid "single log out"
 msgstr ""
 
-#: models.py:232
+#: models.py:358
 msgid "Enable SLO for the service"
 msgstr "Active le SLO pour le service"
 
-#: models.py:239
+#: models.py:365
 msgid "single log out callback"
 msgstr ""
 
-#: models.py:240
+#: models.py:366
 msgid ""
 "URL where the SLO request will be POST. empty = service url\n"
 "This is usefull for non HTTP proxied services."
@@ -167,62 +220,53 @@ msgstr ""
 "service\n"
 "Ceci n'est utilise que pour des services non HTTP proxifiés"
 
-#: models.py:301
+#: models.py:428
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: models.py:302
+#: models.py:429
 msgid "username allowed to connect to the service"
 msgstr "noms d'utilisateurs autorisé à se connecter au service"
 
-#: models.py:317
+#: models.py:445
 msgid "name of an attribut to send to the service, use * for all attributes"
 msgstr ""
 "nom d'un attribut a envoyer au service, utiliser * pour tous les attributs"
 
-#: models.py:322 models.py:368
+#: models.py:450 models.py:498
 msgid "replace"
 msgstr "remplacement"
 
-#: models.py:323
+#: models.py:451
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 msgstr ""
 "nom sous lequel l'attribut sera rendu visible au service. vide = inchangé"
 
-#: models.py:339 models.py:357
+#: models.py:468 models.py:487
 msgid "attribut"
 msgstr "attribut"
 
-#: models.py:340
+#: models.py:469
 msgid "Name of the attribut which must verify pattern"
 msgstr "Nom de l'attribut devant vérifier un motif"
 
-#: models.py:345
+#: models.py:474
 msgid "a regular expression"
 msgstr "une expression régulière"
 
-#: models.py:358
+#: models.py:488
 msgid "Name of the attribut for which the value must be replace"
 msgstr "nom de l'attribue pour lequel la valeur doit être remplacé"
 
-#: models.py:363
+#: models.py:493
 msgid "An regular expression maching whats need to be replaced"
 msgstr "une expression régulière reconnaissant ce qui doit être remplacé"
 
-#: models.py:369
+#: models.py:499
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr "expression de remplacement, les groupe sont capturé par \\1, \\2"
-
-#: models.py:476
-#, python-format
-msgid ""
-"Error during service logout %(service)s:\n"
-"%(error)s"
-msgstr ""
-"Une erreur est survenue durant la déconnexion du service %(service)s:"
-"%(error)s"
 
 #: templates/cas_server/logged.html:6
 msgid "Logged"
@@ -252,7 +296,7 @@ msgstr "Connexion"
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: views.py:140
+#: views.py:152
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -261,7 +305,7 @@ msgstr ""
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
 "navigateur."
 
-#: views.py:146
+#: views.py:158
 #, python-format
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from %s sessions "
@@ -272,7 +316,7 @@ msgstr ""
 "Service Central d'Authentification. Pour des raisons de sécurité, veuillez "
 "fermer votre navigateur."
 
-#: views.py:153
+#: views.py:165
 msgid ""
 "<h3>Logout successful</h3>You were already logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -281,49 +325,56 @@ msgstr ""
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
 "navigateur."
 
-#: views.py:294
+#: views.py:349
 msgid "Invalid login ticket"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
-#: views.py:410
+#: views.py:470
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr ""
 "Une demande d'authentification a été émise pour le service %(name)s "
 "(%(url)s)."
 
-#: views.py:448
+#: views.py:508
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "le service %(url)s n'est pas autorisé."
 
-#: views.py:455
+#: views.py:515
 msgid "Username non allowed"
 msgstr "Nom d'utilisateur non authorisé"
 
-#: views.py:462
+#: views.py:522
 msgid "User charateristics non allowed"
 msgstr "Caractéristique utilisateur non autorisée"
 
-#: views.py:469
+#: views.py:529
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
 
-#: views.py:539
+#: views.py:599
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
 
-#: views.py:546
+#: views.py:606
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentification requise par le service %(name)s (%(url)s)."
 
-#: views.py:553
+#: views.py:613
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"
+
+#~ msgid ""
+#~ "Error during service logout %(service)s:\n"
+#~ "%(error)s"
+#~ msgstr ""
+#~ "Une erreur est survenue durant la déconnexion du service %(service)s:"
+#~ "%(error)s"
 
 #~ msgid "Successfully logout"
 #~ msgstr ""

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-21 00:14+0200\n"
-"PO-Revision-Date: 2016-06-21 00:16+0200\n"
+"POT-Creation-Date: 2016-07-04 17:15+0200\n"
+"PO-Revision-Date: 2016-07-04 17:15+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: en\n"
@@ -17,88 +17,135 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.8\n"
 
-#: apps.py:7 templates/cas_server/base.html:3 templates/cas_server/base.html:21
+#: apps.py:19 templates/cas_server/base.html:3
+#: templates/cas_server/base.html:20
 msgid "Central Authentication Service"
 msgstr "Central Authentication Service"
 
-#: forms.py:32
+#: forms.py:43
 msgid "Identity provider"
 msgstr "Identity provider"
 
-#: forms.py:35 forms.py:44 forms.py:92
+#: forms.py:45 forms.py:55 forms.py:106
 msgid "service"
 msgstr ""
 
-#: forms.py:37
+#: forms.py:47
 msgid "Remember the identity provider"
 msgstr "Remember the identity provider"
 
-#: forms.py:38 forms.py:48
+#: forms.py:48 forms.py:59
 msgid "warn"
 msgstr " Warn me before logging me into other sites."
 
-#: forms.py:43
+#: forms.py:54
 msgid "login"
 msgstr "username"
 
-#: forms.py:45
+#: forms.py:56
 msgid "password"
 msgstr "password"
 
-#: forms.py:59
+#: forms.py:71
 msgid "Bad user"
 msgstr "The credentials you provided cannot be determined to be authentic."
 
-#: management/commands/cas_clean_federate.py:13
+#: forms.py:96
+msgid "User not found in the temporary database, please try to reconnect"
+msgstr ""
+
+#: management/commands/cas_clean_federate.py:20
 msgid "Clean old federated users"
 msgstr "Clean old federated users"
 
-#: management/commands/cas_clean_sessions.py:9
+#: management/commands/cas_clean_sessions.py:22
 msgid "Clean deleted sessions"
 msgstr "Clean deleted sessions"
 
-#: management/commands/cas_clean_tickets.py:9
+#: management/commands/cas_clean_tickets.py:22
 msgid "Clean old trickets"
 msgstr "Clean old trickets"
 
-#: models.py:55
+#: models.py:42
+msgid "identity provider"
+msgstr "identity provider"
+
+#: models.py:43
+msgid "identity providers"
+msgstr "identity providers"
+
+#: models.py:47
+msgid "suffix"
+msgstr ""
+
+#: models.py:48
+msgid ""
+"Suffix append to backend CAS returner username: `returned_username`@`suffix`"
+msgstr ""
+
+#: models.py:50
+msgid "server url"
+msgstr ""
+
+#: models.py:59
+msgid "CAS protocol version"
+msgstr ""
+
+#: models.py:60
+msgid ""
+"Version of the CAS protocol to use when sending requests the the backend CAS"
+msgstr ""
+
+#: models.py:65
+msgid "verbose name"
+msgstr ""
+
+#: models.py:66
+msgid "Name for this identity provider displayed on the login page"
+msgstr ""
+
+#: models.py:70 models.py:312
+msgid "position"
+msgstr "position"
+
+#: models.py:159
 msgid "User"
 msgstr ""
 
-#: models.py:56
+#: models.py:160
 msgid "Users"
 msgstr ""
 
-#: models.py:114
+#: models.py:229
 #, python-format
 msgid "Error during service logout %s"
 msgstr "Error during service logout %s"
 
-#: models.py:182
+#: models.py:307
 msgid "Service pattern"
 msgstr "Service pattern"
 
-#: models.py:183
+#: models.py:308
 msgid "Services patterns"
 msgstr ""
 
-#: models.py:187
-msgid "position"
-msgstr "position"
+#: models.py:313
+msgid "service patterns are sorted using the position attribute"
+msgstr ""
 
-#: models.py:194 models.py:316
+#: models.py:320 models.py:444
 msgid "name"
 msgstr "name"
 
-#: models.py:195
+#: models.py:321
 msgid "A name for the service"
 msgstr "A name for the service"
 
-#: models.py:200 models.py:344 models.py:362
+#: models.py:326 models.py:473 models.py:492
 msgid "pattern"
 msgstr "pattern"
 
-#: models.py:202
+#: models.py:328
 msgid ""
 "A regular expression matching services. Will usually looks like '^https://"
 "some\\.server\\.com/path/.*$'.As it is a regular expression, special "
@@ -108,73 +155,73 @@ msgstr ""
 "some\\.server\\.com/path/.*$'.As it is a regular expression, special "
 "character must be escaped with a '\\'."
 
-#: models.py:211
+#: models.py:337
 msgid "user field"
 msgstr ""
 
-#: models.py:212
+#: models.py:338
 msgid "Name of the attribut to transmit as username, empty = login"
 msgstr "Name of the attribut to transmit as username, empty = login"
 
-#: models.py:216
+#: models.py:342
 msgid "restrict username"
 msgstr ""
 
-#: models.py:217
+#: models.py:343
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr "Limit username allowed to connect to the list provided bellow"
 
-#: models.py:221
+#: models.py:347
 msgid "proxy"
 msgstr "proxy"
 
-#: models.py:222
+#: models.py:348
 msgid "Proxy tickets can be delivered to the service"
 msgstr "Proxy tickets can be delivered to the service"
 
-#: models.py:226
+#: models.py:352
 msgid "proxy callback"
 msgstr "proxy callback"
 
-#: models.py:227
+#: models.py:353
 msgid "can be used as a proxy callback to deliver PGT"
 msgstr "can be used as a proxy callback to deliver PGT"
 
-#: models.py:231
+#: models.py:357
 msgid "single log out"
 msgstr ""
 
-#: models.py:232
+#: models.py:358
 msgid "Enable SLO for the service"
 msgstr "Enable SLO for the service"
 
-#: models.py:239
+#: models.py:365
 msgid "single log out callback"
 msgstr ""
 
-#: models.py:240
+#: models.py:366
 msgid ""
 "URL where the SLO request will be POST. empty = service url\n"
 "This is usefull for non HTTP proxied services."
 msgstr ""
 
-#: models.py:301
+#: models.py:428
 msgid "username"
 msgstr ""
 
-#: models.py:302
+#: models.py:429
 msgid "username allowed to connect to the service"
 msgstr "username allowed to connect to the service"
 
-#: models.py:317
+#: models.py:445
 msgid "name of an attribut to send to the service, use * for all attributes"
 msgstr "name of an attribut to send to the service, use * for all attributes"
 
-#: models.py:322 models.py:368
+#: models.py:450 models.py:498
 msgid "replace"
 msgstr "replace"
 
-#: models.py:323
+#: models.py:451
 msgid ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
@@ -182,38 +229,29 @@ msgstr ""
 "name under which the attribut will be showto the service. empty = default "
 "name of the attribut"
 
-#: models.py:339 models.py:357
+#: models.py:468 models.py:487
 msgid "attribut"
 msgstr "attribut"
 
-#: models.py:340
+#: models.py:469
 msgid "Name of the attribut which must verify pattern"
 msgstr "Name of the attribut which must verify pattern"
 
-#: models.py:345
+#: models.py:474
 msgid "a regular expression"
 msgstr "a regular expression"
 
-#: models.py:358
+#: models.py:488
 msgid "Name of the attribut for which the value must be replace"
 msgstr "Name of the attribut for which the value must be replace"
 
-#: models.py:363
+#: models.py:493
 msgid "An regular expression maching whats need to be replaced"
 msgstr "An regular expression maching whats need to be replaced"
 
-#: models.py:369
+#: models.py:499
 msgid "replace expression, groups are capture by \\1, \\2 …"
 msgstr "replace expression, groups are capture by \\1, \\2 …"
-
-#: models.py:476
-#, python-format
-msgid ""
-"Error during service logout %(service)s:\n"
-"%(error)s"
-msgstr ""
-"Error during service logout %(service)s:\n"
-"%(error)s"
 
 #: templates/cas_server/logged.html:6
 msgid "Logged"
@@ -243,7 +281,7 @@ msgstr "Login"
 msgid "Connect to the service"
 msgstr "Connect to the service"
 
-#: views.py:140
+#: views.py:152
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -251,7 +289,7 @@ msgstr ""
 "<h3>Logout successful</h3>You have successfully logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
 
-#: views.py:146
+#: views.py:158
 #, python-format
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from %s sessions "
@@ -262,7 +300,7 @@ msgstr ""
 "of the Central Authentication Service. For security reasons, exit your web "
 "browser."
 
-#: views.py:153
+#: views.py:165
 msgid ""
 "<h3>Logout successful</h3>You were already logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -270,47 +308,54 @@ msgstr ""
 "<h3>Logout successful</h3>You were already logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
 
-#: views.py:294
+#: views.py:349
 msgid "Invalid login ticket"
 msgstr "Invalid login ticket, please retry to login"
 
-#: views.py:410
+#: views.py:470
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr "Authentication has been required by service %(name)s (%(url)s)"
 
-#: views.py:448
+#: views.py:508
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "Service %(url)s non allowed."
 
-#: views.py:455
+#: views.py:515
 msgid "Username non allowed"
 msgstr "Username non allowed"
 
-#: views.py:462
+#: views.py:522
 msgid "User charateristics non allowed"
 msgstr "User charateristics non allowed"
 
-#: views.py:469
+#: views.py:529
 #, python-format
 msgid "The attribut %(field)s is needed to use that service"
 msgstr "The attribut %(field)s is needed to use that service"
 
-#: views.py:539
+#: views.py:599
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Authentication renewal required by service %(name)s (%(url)s)."
 
-#: views.py:546
+#: views.py:606
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentication required by service %(name)s (%(url)s)."
 
-#: views.py:553
+#: views.py:613
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Service %s non allowed"
+
+#~ msgid ""
+#~ "Error during service logout %(service)s:\n"
+#~ "%(error)s"
+#~ msgstr ""
+#~ "Error during service logout %(service)s:\n"
+#~ "%(error)s"
 
 #~ msgid "Successfully logout"
 #~ msgstr ""

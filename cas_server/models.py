@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from picklefield.fields import PickledObjectField
 
 import re
@@ -34,18 +35,93 @@ SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 logger = logging.getLogger(__name__)
 
 
+@python_2_unicode_compatible
+class FederatedIendityProvider(models.Model):
+    """An identity provider for the federated mode"""
+    class Meta:
+        verbose_name = _("identity provider")
+        verbose_name_plural = _("identity providers")
+    suffix = models.CharField(
+        max_length=30,
+        unique=True,
+        verbose_name=_(u"suffix"),
+        help_text=_("Suffix append to backend CAS returner username: `returned_username`@`suffix`")
+    )
+    server_url = models.CharField(max_length=255, verbose_name=_(u"server url"))
+    cas_protocol_version = models.CharField(
+        max_length=30,
+        choices=[
+            ("1", "CAS 1.0"),
+            ("2", "CAS 2.0"),
+            ("3", "CAS 3.0"),
+            ("CAS_2_SAML_1_0", "SAML 1.1")
+        ],
+        verbose_name=_(u"CAS protocol version"),
+        help_text=_("Version of the CAS protocol to use when sending requests the the backend CAS"),
+        default="3"
+    )
+    verbose_name = models.CharField(
+        max_length=255,
+        verbose_name=_(u"verbose name"),
+        help_text=_("Name for this identity provider displayed on the login page")
+    )
+    pos = models.IntegerField(
+        default=100,
+        verbose_name=_(u"position"),
+        help_text=_(
+            (
+                u"Identity provider are sorted using the "
+                u"(position, verbose name, suffix) attributes"
+            )
+        )
+    )
+
+    def __str__(self):
+        return self.verbose_name
+
+    @staticmethod
+    def build_username_from_suffix(username, suffix):
+        """Transform backend username into federated username using `suffix`"""
+        return u'%s@%s' % (username, suffix)
+
+    def build_username(self, username):
+        """Transform backend username into federated username"""
+        return u'%s@%s' % (username, self.suffix)
+
+
+@python_2_unicode_compatible
 class FederatedUser(models.Model):
     """A federated user as returner by a CAS provider (username and attributes)"""
     class Meta:
         unique_together = ("username", "provider")
     username = models.CharField(max_length=124)
-    provider = models.CharField(max_length=124)
+    provider = models.ForeignKey(FederatedIendityProvider, on_delete=models.CASCADE)
     attributs = PickledObjectField()
     ticket = models.CharField(max_length=255)
     last_update = models.DateTimeField(auto_now=True)
 
-    def __unicode__(self):
-        return u"%s@%s" % (self.username, self.provider)
+    def __str__(self):
+        return self.federated_username
+
+    @property
+    def federated_username(self):
+        """return the federated username with a suffix"""
+        return self.provider.build_username(self.username)
+
+    @classmethod
+    def get_from_federated_username(cls, username):
+        """return a FederatedUser object from a federated username"""
+        if username is None:
+            raise cls.DoesNotExist()
+        else:
+            component = username.split('@')
+            username = '@'.join(component[:-1])
+            suffix = component[-1]
+            try:
+                provider = FederatedIendityProvider.objects.get(suffix=suffix)
+                return cls.objects.get(username=username, provider=provider)
+            except FederatedIendityProvider.DoesNotExist:
+                raise cls.DoesNotExist()
 
     @classmethod
     def clean_old_entries(cls):
@@ -55,17 +131,17 @@ class FederatedUser(models.Model):
         )
         known_users = {user.username for user in User.objects.all()}
         for user in federated_users:
-            if not ('%s@%s' % (user.username, user.provider)) in known_users:
+            if user.federated_username not in known_users:
                 user.delete()
 
 
 class FederateSLO(models.Model):
     """An association between a CAS provider ticket and a (username, session) for processing SLO"""
     class Meta:
-        unique_together = ("username", "session_key")
+        unique_together = ("username", "session_key", "ticket")
     username = models.CharField(max_length=30)
     session_key = models.CharField(max_length=40, blank=True, null=True)
-    ticket = models.CharField(max_length=255)
+    ticket = models.CharField(max_length=255, db_index=True)
 
     @classmethod
     def clean_deleted_sessions(cls):
@@ -75,6 +151,7 @@ class FederateSLO(models.Model):
                 federate_slo.delete()
 
 
+@python_2_unicode_compatible
 class User(models.Model):
     """A user logged into the CAS"""
     class Meta:
@@ -117,7 +194,7 @@ class User(models.Model):
         """return a fresh dict for the user attributs"""
         return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s - %s" % (self.username, self.session_key)
 
     def logout(self, request=None):
@@ -222,6 +299,7 @@ class UserFieldNotDefined(ServicePatternException):
     pass
 
 
+@python_2_unicode_compatible
 class ServicePattern(models.Model):
     """Allowed services pattern agains services are tested to"""
     class Meta:
@@ -231,7 +309,8 @@ class ServicePattern(models.Model):
 
     pos = models.IntegerField(
         default=100,
-        verbose_name=_(u"position")
+        verbose_name=_(u"position"),
+        help_text=_(u"service patterns are sorted using the position attribute")
     )
     name = models.CharField(
         max_length=255,
@@ -288,7 +367,7 @@ class ServicePattern(models.Model):
                     u"This is usefull for non HTTP proxied services.")
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s: %s" % (self.pos, self.pattern)
 
     def check_user(self, user):
@@ -341,6 +420,7 @@ class ServicePattern(models.Model):
         raise cls.DoesNotExist()
 
 
+@python_2_unicode_compatible
 class Username(models.Model):
     """A list of allowed usernames on a service pattern"""
     value = models.CharField(
@@ -350,10 +430,11 @@ class Username(models.Model):
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="usernames")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.value
 
 
+@python_2_unicode_compatible
 class ReplaceAttributName(models.Model):
     """A list of replacement of attributs name for a service pattern"""
     class Meta:
@@ -372,13 +453,14 @@ class ReplaceAttributName(models.Model):
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="attributs")
 
-    def __unicode__(self):
+    def __str__(self):
         if not self.replace:
             return self.name
         else:
             return u"%s → %s" % (self.name, self.replace)
 
 
+@python_2_unicode_compatible
 class FilterAttributValue(models.Model):
     """A list of filter on attributs for a service pattern"""
     attribut = models.CharField(
@@ -393,10 +475,11 @@ class FilterAttributValue(models.Model):
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="filters")
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s %s" % (self.attribut, self.pattern)
 
 
+@python_2_unicode_compatible
 class ReplaceAttributValue(models.Model):
     """Replacement to apply on attributs values for a service pattern"""
     attribut = models.CharField(
@@ -417,10 +500,11 @@ class ReplaceAttributValue(models.Model):
     )
     service_pattern = models.ForeignKey(ServicePattern, related_name="replacements")
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s %s %s" % (self.attribut, self.pattern, self.replace)
 
 
+@python_2_unicode_compatible
 class Ticket(models.Model):
     """Generic class for a Ticket"""
     class Meta:
@@ -437,7 +521,7 @@ class Ticket(models.Model):
     VALIDITY = settings.CAS_TICKET_VALIDITY
     TIMEOUT = settings.CAS_TICKET_TIMEOUT
 
-    def __unicode__(self):
+    def __str__(self):
         return u"Ticket-%s" % self.pk
 
     @classmethod
@@ -507,34 +591,38 @@ class Ticket(models.Model):
             )
 
 
+@python_2_unicode_compatible
 class ServiceTicket(Ticket):
     """A Service Ticket"""
     PREFIX = settings.CAS_SERVICE_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_st, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"ServiceTicket-%s" % self.pk
 
 
+@python_2_unicode_compatible
 class ProxyTicket(Ticket):
     """A Proxy Ticket"""
     PREFIX = settings.CAS_PROXY_TICKET_PREFIX
     value = models.CharField(max_length=255, default=utils.gen_pt, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"ProxyTicket-%s" % self.pk
 
 
+@python_2_unicode_compatible
 class ProxyGrantingTicket(Ticket):
     """A Proxy Granting Ticket"""
     PREFIX = settings.CAS_PROXY_GRANTING_TICKET_PREFIX
     VALIDITY = settings.CAS_PGT_VALIDITY
     value = models.CharField(max_length=255, default=utils.gen_pgt, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"ProxyGrantingTicket-%s" % self.pk
 
 
+@python_2_unicode_compatible
 class Proxy(models.Model):
     """A list of proxies on `ProxyTicket`"""
     class Meta:
@@ -542,5 +630,5 @@ class Proxy(models.Model):
     url = models.CharField(max_length=255)
     proxy_ticket = models.ForeignKey(ProxyTicket, related_name="proxies")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.url

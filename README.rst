@@ -165,12 +165,6 @@ Federation settings
 
 * ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
   The default is ``False``.
-* ``CAS_FEDERATE_PROVIDERS``: A dictionnary for the allowed identity providers (see the federate
-  section below). The default is ``{}``.
-* ``CAS_FEDERATE_PROVIDERS_LIST``: A list in with the keys of ``CAS_FEDERATE_PROVIDERS`` are ordened
-  for beeing displayed on the login page. The default is the list of all the keys of
-  ``CAS_FEDERATE_PROVIDERS`` sorted in natural order (0 < 2 < 10 < 20 < a = A < … < z = Z and
-  lexicographical)
 * ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
   provider" expire. The default is ``604800``, one week. The cookie is called
   ``_remember_provider``.
@@ -344,26 +338,29 @@ to the provider CAS to authenticate. This provider transmit to ``django-cas-serv
 username and attributes. The user is now logged in on ``django-cas-server`` and can use
 services using ``django-cas-server`` as CAS.
 
-The list of allowed identity providers is defined using the ``CAS_FEDERATE_PROVIDERS`` parameter.
-For instance:
+The list of allowed identity providers is defined using the django admin application.
+With the development server started, visit http://127.0.0.1:8000/admin/ to add identity providers.
 
-.. code-block:: python
+An identity provider comes with 5 fields:
 
-    CAS_FEDERATE_PROVIDERS = {
-        "example.com": ("https://cas.example.com", 3, "Example dot com"),
-        "exemple.fr": ("https://cas.exemple.fr", 3, "Exemple point fr"),
-    }
+* `Position`: an integer used to tweak the order in which identity providers are displayed on
+  the login page. Identity providers are sorted using position first, then, on equal position,
+  using `verbose name` and then, on equal `verbose name`, using `suffix`.
+* `Suffix`: the suffix that will be append to the username returned by the identity provider.
+  It must be unique.
+* `Server url`: the url to the identity provider CAS. For instance, if you are using
+  `https://cas.example.org/login` to authenticate on the CAS, the `server url` is
+  `https://cas.example.org`
+* `CAS protocol version`: the version of the CAS protocol to use to contact the identity provider.
+  The default is version 3.
+* `Verbose name`: the name used on the login page to display the identity provider.
 
-
-``CAS_FEDERATE_PROVIDERS`` is a dictionnary using provider names as key and a tuple
-(cas address, cas version protocol, provider verbose name) as value.
 
 In federation mode, ``django-cas-server`` build user's username as follow:
-``provider_returned_username@provider_name``.
-You can choose the provider returned username for ``django-cas-server`` and the provider name
-in order to make sense.
-
-The "provider verbose name" is showed on the select menu of the login page.
+``provider_returned_username@provider_suffix``.
+Choose the provider returned username for ``django-cas-server`` and the provider suffix
+in order to make sense, as this built username is likely to be displayed to end users in
+applications.
 
 
 Then using federate mode, you should add one command to a daily crontab: ``cas_clean_federate``.

@@ -22,6 +22,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
+from django.utils.encoding import python_2_unicode_compatible
 
 import re
 import logging
@@ -37,7 +38,7 @@ import cas_server.models as models
 
 from .utils import json_response
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
-from .models import ServicePattern
+from .models import ServicePattern, FederatedIendityProvider, FederatedUser
 from .federate import CASFederateValidateUser
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
@@ -123,11 +124,12 @@ class LogoutView(View, LogoutMixin):
         self.init_get(request)
         # if CAS federation mode is enable, bakup the provider before flushing the sessions
         if settings.CAS_FEDERATE:
-            if "username" in self.request.session:
-                component = self.request.session["username"].split('@')
-                provider = component[-1]
-                auth = CASFederateValidateUser(provider, service_url="")
-            else:
+            try:
+                user = FederatedUser.get_from_federated_username(
+                    self.request.session.get("username")
+                )
+                auth = CASFederateValidateUser(user.provider, service_url="")
+            except FederatedUser.DoesNotExist:
                 auth = None
         session_nb = self.logout(self.request.GET.get("all"))
         # if CAS federation mode is enable, redirect to user CAS logout page
@@ -135,8 +137,7 @@ class LogoutView(View, LogoutMixin):
             if auth is not None:
                 params = utils.copy_params(request.GET)
                 url = auth.get_logout_url()
-                if url:
-                    return HttpResponseRedirect(utils.update_url(url, params))
+                return HttpResponseRedirect(utils.update_url(url, params))
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
@@ -201,16 +202,16 @@ class FederateAuth(View):
     @staticmethod
     def get_cas_client(request, provider):
         """return a CAS client object matching provider"""
-        if provider in settings.CAS_FEDERATE_PROVIDERS:  # pragma: no branch (should always be true)
-            service_url = utils.get_current_url(request, {"ticket", "provider"})
-            return CASFederateValidateUser(provider, service_url)
+        service_url = utils.get_current_url(request, {"ticket", "provider"})
+        return CASFederateValidateUser(provider, service_url)
 
     def post(self, request, provider=None):
         """method called on POST request"""
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
         # POST with a provider, this is probably an SLO request
-        if provider in settings.CAS_FEDERATE_PROVIDERS:
+        try:
+            provider = FederatedIendityProvider.objects.get(suffix=provider)
             auth = self.get_cas_client(request, provider)
             try:
                 auth.clean_sessions(request.POST['logoutRequest'])
@@ -218,7 +219,7 @@ class FederateAuth(View):
                 pass
             return HttpResponse("ok")
         # else, a User is trying to log in using an identity provider
-        else:
+        except FederatedIendityProvider.DoesNotExist:
             # Manually checking for csrf to protect the code below
             reason = CsrfViewMiddleware().process_view(request, None, (), {})
             if reason is not None:  # pragma: no cover (csrf checks are disabled during tests)
@@ -231,7 +232,7 @@ class FederateAuth(View):
                 )
                 url = utils.reverse_params(
                     "cas_server:federateAuth",
-                    kwargs=dict(provider=form.cleaned_data["provider"]),
+                    kwargs=dict(provider=form.cleaned_data["provider"].suffix),
                     params=params
                 )
                 response = HttpResponseRedirect(url)
@@ -240,7 +241,7 @@ class FederateAuth(View):
                     utils.set_cookie(
                         response,
                         "_remember_provider",
-                        request.POST["provider"],
+                        form.cleaned_data["provider"].suffix,
                         max_age
                     )
                 return response
@@ -251,23 +252,24 @@ class FederateAuth(View):
         """method called on GET request"""
         if not settings.CAS_FEDERATE:
             return redirect("cas_server:login")
-        if provider not in settings.CAS_FEDERATE_PROVIDERS:
-            return redirect("cas_server:login")
-        auth = self.get_cas_client(request, provider)
-        if 'ticket' not in request.GET:
-            return HttpResponseRedirect(auth.get_login_url())
-        else:
-            ticket = request.GET['ticket']
-            if auth.verify_ticket(ticket):
-                params = utils.copy_params(request.GET, ignore={"ticket"})
-                username = u"%s@%s" % (auth.username, auth.provider)
-                request.session["federate_username"] = username
-                request.session["federate_ticket"] = ticket
-                auth.register_slo(username, request.session.session_key, ticket)
-                url = utils.reverse_params("cas_server:login", params)
-                return HttpResponseRedirect(url)
-            else:
+        try:
+            provider = FederatedIendityProvider.objects.get(suffix=provider)
+            auth = self.get_cas_client(request, provider)
+            if 'ticket' not in request.GET:
                 return HttpResponseRedirect(auth.get_login_url())
+            else:
+                ticket = request.GET['ticket']
+                if auth.verify_ticket(ticket):
+                    params = utils.copy_params(request.GET, ignore={"ticket"})
+                    request.session["federate_username"] = auth.federated_username
+                    request.session["federate_ticket"] = ticket
+                    auth.register_slo(auth.federated_username, request.session.session_key, ticket)
+                    url = utils.reverse_params("cas_server:login", params)
+                    return HttpResponseRedirect(url)
+                else:
+                    return HttpResponseRedirect(auth.get_login_url())
+        except FederatedIendityProvider.DoesNotExist:
+            return redirect("cas_server:login")
 
 
 class LoginView(View, LogoutMixin):
@@ -347,18 +349,11 @@ class LoginView(View, LogoutMixin):
                 _(u"Invalid login ticket")
             )
         elif ret == self.USER_LOGIN_OK:
-            try:
-                self.user = models.User.objects.get(
-                    username=self.request.session['username'],
-                    session_key=self.request.session.session_key
-                )
-                self.user.save()  # pragma: no cover (should not happend)
-            except models.User.DoesNotExist:
-                self.user = models.User.objects.create(
-                    username=self.request.session['username'],
-                    session_key=self.request.session.session_key
-                )
-                self.user.save()
+            self.user = models.User.objects.get_or_create(
+                username=self.request.session['username'],
+                session_key=self.request.session.session_key
+            )[0]
+            self.user.save()
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
             if settings.CAS_FEDERATE:
                 self.ticket = None
@@ -639,8 +634,9 @@ class LoginView(View, LogoutMixin):
                 else:
                     if (
                         self.request.COOKIES.get('_remember_provider') and
-                        self.request.COOKIES['_remember_provider'] in
-                        settings.CAS_FEDERATE_PROVIDERS
+                        FederatedIendityProvider.objects.filter(
+                            suffix=self.request.COOKIES['_remember_provider']
+                        )
                     ):
                         params = utils.copy_params(self.request.GET)
                         url = utils.reverse_params(
@@ -708,16 +704,10 @@ class Auth(View):
         )
         if form.is_valid():
             try:
-                try:
-                    user = models.User.objects.get(
-                        username=form.cleaned_data['username'],
-                        session_key=request.session.session_key
-                    )
-                except models.User.DoesNotExist:
-                    user = models.User.objects.create(
-                        username=form.cleaned_data['username'],
-                        session_key=request.session.session_key
-                    )
+                user = models.User.objects.get_or_create(
+                    username=form.cleaned_data['username'],
+                    session_key=request.session.session_key
+                )[0]
                 user.save()
                 # is the service allowed
                 service_pattern = ServicePattern.validate(service)
@@ -789,6 +779,7 @@ class Validate(View):
             return HttpResponse(u"no\n", content_type="text/plain; charset=utf-8")
 
 
+@python_2_unicode_compatible
 class ValidateError(Exception):
     """handle service validation error"""
     def __init__(self, code, msg=""):
@@ -796,7 +787,7 @@ class ValidateError(Exception):
         self.msg = msg
         super(ValidateError, self).__init__(code)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.msg
 
     def render(self, request):
@@ -1039,6 +1030,7 @@ class Proxy(View):
             )
 
 
+@python_2_unicode_compatible
 class SamlValidateError(Exception):
     """handle saml validation error"""
     def __init__(self, code, msg=""):
@@ -1046,7 +1038,7 @@ class SamlValidateError(Exception):
         self.msg = msg
         super(SamlValidateError, self).__init__(code)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.msg
 
     def render(self, request):

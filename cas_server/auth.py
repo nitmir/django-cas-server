@@ -148,16 +148,13 @@ class CASFederateAuth(AuthUser):
     user = None
 
     def __init__(self, username):
-        component = username.split('@')
-        username = '@'.join(component[:-1])
-        provider = component[-1]
         try:
-            self.user = FederatedUser.objects.get(username=username, provider=provider)
+            self.user = FederatedUser.get_from_federated_username(username)
             super(CASFederateAuth, self).__init__(
-                "%s@%s" % (self.user.username, self.user.provider)
+                self.user.federated_username
             )
         except FederatedUser.DoesNotExist:
-            super(CASFederateAuth, self).__init__("%s@%s" % (username, provider))
+            super(CASFederateAuth, self).__init__(username)
 
     def test_password(self, ticket):
         """test `password` agains the user"""

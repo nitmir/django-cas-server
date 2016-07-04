@@ -19,43 +19,37 @@ from django.test.utils import override_settings
 
 from six.moves import reload_module
 
-from cas_server import utils, forms
-from cas_server.tests.mixin import BaseServicePattern, CanLogin
+from cas_server import utils, models
+from cas_server.tests.mixin import BaseServicePattern, CanLogin, FederatedIendityProviderModel
 from cas_server.tests import utils as tests_utils
 
 PROVIDERS = {
-    "example.com": ("http://127.0.0.1:8080", 1, "Example dot com"),
-    "example.org": ("http://127.0.0.1:8081", 2, "Example dot org"),
-    "example.net": ("http://127.0.0.1:8082", 3, "Example dot net"),
-    "example.test": ("http://127.0.0.1:8083", 'CAS_2_SAML_1_0'),
+    "example.com": ("http://127.0.0.1:8080", '1', "Example dot com"),
+    "example.org": ("http://127.0.0.1:8081", '2', "Example dot org"),
+    "example.net": ("http://127.0.0.1:8082", '3', "Example dot net"),
+    "example.test": ("http://127.0.0.1:8083", 'CAS_2_SAML_1_0', 'Example fot test'),
 }
-
-PROVIDERS_LIST = list(PROVIDERS.keys())
-PROVIDERS_LIST.sort()
 
 
 @override_settings(
     CAS_FEDERATE=True,
-    CAS_FEDERATE_PROVIDERS=PROVIDERS,
-    CAS_FEDERATE_PROVIDERS_LIST=PROVIDERS_LIST,
     CAS_AUTH_CLASS="cas_server.auth.CASFederateAuth",
     # test with a non ascii username
     CAS_TEST_USER=u"dédé"
 )
-class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
+class FederateAuthLoginLogoutTestCase(
+    TestCase, BaseServicePattern, CanLogin, FederatedIendityProviderModel
+):
     """tests for the views login logout and federate then the federated mode is enabled"""
     def setUp(self):
         """Prepare the test context"""
         self.setup_service_patterns()
-        reload_module(forms)
+        self.setup_federated_identity_provider(PROVIDERS)
 
     def test_default_settings(self):
         """default settings should populated some default variable then CAS_FEDERATE is True"""
-        provider_list = settings.CAS_FEDERATE_PROVIDERS_LIST
-        del settings.CAS_FEDERATE_PROVIDERS_LIST
         del settings.CAS_AUTH_CLASS
         reload_module(default_settings)
-        self.assertEqual(settings.CAS_FEDERATE_PROVIDERS_LIST, provider_list)
         self.assertEqual(settings.CAS_AUTH_CLASS, "cas_server.auth.CASFederateAuth")
 
     def test_login_get_provider(self):
@@ -63,10 +57,10 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         client = Client()
         response = client.get("/login")
         self.assertEqual(response.status_code, 200)
-        for key, value in settings.CAS_FEDERATE_PROVIDERS.items():
+        for provider in models.FederatedIendityProvider.objects.all():
             self.assertTrue('<option value="%s">%s</option>' % (
-                key,
-                utils.get_tuple(value, 2, key)
+                provider.suffix,
+                provider.verbose_name
             ) in response.content.decode("utf-8"))
         self.assertEqual(response.context['post_url'], '/federate')
 
@@ -74,10 +68,11 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         """test a successful login wrokflow"""
         tickets = []
         # choose the example.com provider
-        for (provider, cas_port) in [
+        for (suffix, cas_port) in [
             ("example.com", 8080), ("example.org", 8081),
             ("example.net", 8082), ("example.test", 8083)
         ]:
+            provider = models.FederatedIendityProvider.objects.get(suffix=suffix)
             # get a bare client
             client = Client()
             # fetch the login page
@@ -86,7 +81,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             self.assertEqual(response.context['post_url'], '/federate')
             # get current form parameter
             params = tests_utils.copy_form(response.context["form"])
-            params['provider'] = provider
+            params['provider'] = provider.suffix
             if remember:
                 params['remember'] = 'on'
             # post the choosed provider
@@ -96,22 +91,22 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             if remember:
                 self.assertEqual(response["Location"], '%s/federate/%s?remember=on' % (
                     'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider
+                    provider.suffix
                 ))
             else:
                 self.assertEqual(response["Location"], '%s/federate/%s' % (
                     'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider
+                    provider.suffix
                 ))
             # let's follow the redirect
-            response = client.get('/federate/%s' % provider)
+            response = client.get('/federate/%s' % provider.suffix)
             # we are redirected to the provider CAS for authentication
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response["Location"],
                 "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s" % (
-                    settings.CAS_FEDERATE_PROVIDERS[provider][0],
-                    provider
+                    provider.server_url,
+                    provider.suffix
                 )
             )
             # let's generate a ticket
@@ -119,7 +114,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             # we lauch a dummy CAS server that only validate once for the service
             # http://testserver/federate/example.com with `ticket`
             tests_utils.DummyCAS.run(
-                ("http://testserver/federate/%s" % provider).encode("ascii"),
+                ("http://testserver/federate/%s" % provider.suffix).encode("ascii"),
                 ticket.encode("ascii"),
                 settings.CAS_TEST_USER.encode("utf8"),
                 [],
@@ -127,7 +122,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             )
             # we normally provide a good ticket and should be redirected to /login as the ticket
             # get successfully validated again the dummy CAS
-            response = client.get('/federate/%s' % provider, {'ticket': ticket})
+            response = client.get('/federate/%s' % provider.suffix, {'ticket': ticket})
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response["Location"], "%s/login" % (
                 'http://testserver' if django.VERSION < (1, 9) else ""
@@ -143,7 +138,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             response = client.post("/login", params)
             # the user should now being authenticated using username test@`provider`
             self.assert_logged(
-                client, response, username='%s@%s' % (settings.CAS_TEST_USER, provider)
+                client, response, username=provider.build_username(settings.CAS_TEST_USER)
             )
             tickets.append((provider, ticket, client))
 
@@ -198,7 +193,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertEqual(
             response["Location"],
             "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s" % (
-                settings.CAS_FEDERATE_PROVIDERS[good_provider][0],
+                models.FederatedIendityProvider.objects.get(suffix=good_provider).server_url,
                 good_provider
             )
         )
@@ -216,7 +211,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertEqual(
             response["Location"],
             "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s" % (
-                settings.CAS_FEDERATE_PROVIDERS[good_provider][0],
+                models.FederatedIendityProvider.objects.get(suffix=good_provider).server_url,
                 good_provider
             )
         )
@@ -234,45 +229,45 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         for (provider, ticket, client) in tickets:
             # SLO for an unkown ticket should do nothing
             response = client.post(
-                "/federate/%s" % provider,
+                "/federate/%s" % provider.suffix,
                 {'logoutRequest': tests_utils.logout_request(utils.gen_st())}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")
             # Bad SLO format should do nothing
             response = client.post(
-                "/federate/%s" % provider,
+                "/federate/%s" % provider.suffix,
                 {'logoutRequest': ""}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")
             # Bad SLO format should do nothing
             response = client.post(
-                "/federate/%s" % provider,
+                "/federate/%s" % provider.suffix,
                 {'logoutRequest': "<root></root>"}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")
             response = client.get("/login")
             self.assert_logged(
-                client, response, username='%s@%s' % (settings.CAS_TEST_USER, provider)
+                client, response, username=provider.build_username(settings.CAS_TEST_USER)
             )
 
             # SLO for a previously logged ticket should log out the user if CAS version is
             # 3 or 'CAS_2_SAML_1_0'
             response = client.post(
-                "/federate/%s" % provider,
+                "/federate/%s" % provider.suffix,
                 {'logoutRequest': tests_utils.logout_request(ticket)}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")
 
             response = client.get("/login")
-            if settings.CAS_FEDERATE_PROVIDERS[provider][1] in {3, 'CAS_2_SAML_1_0'}:  # support SLO
+            if provider.cas_protocol_version in {'3', 'CAS_2_SAML_1_0'}:  # support SLO
                 self.assert_login_failed(client, response)
             else:
                 self.assert_logged(
-                    client, response, username='%s@%s' % (settings.CAS_TEST_USER, provider)
+                    client, response, username=provider.build_username(settings.CAS_TEST_USER)
                 )
 
     def test_federate_logout(self):
@@ -287,7 +282,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response["Location"],
-                "%s/logout" % settings.CAS_FEDERATE_PROVIDERS[provider][0]
+                "%s/logout" % provider.server_url,
             )
             response = client.get("/login")
             self.assert_login_failed(client, response)
@@ -326,7 +321,7 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response["Location"], "%s/federate/%s" % (
                 'http://testserver' if django.VERSION < (1, 9) else "",
-                provider
+                provider.suffix
             ))
 
     def test_login_bad_ticket(self):
@@ -338,7 +333,10 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
         # get a bare client
         client = Client()
         session = client.session
-        session["federate_username"] = '%s@%s' % (settings.CAS_TEST_USER, provider)
+        session["federate_username"] = models.FederatedIendityProvider.build_username_from_suffix(
+            settings.CAS_TEST_USER,
+            provider
+        )
         session["federate_ticket"] = utils.gen_st()
         if django.VERSION >= (1, 8):
             session.save()
@@ -351,9 +349,12 @@ class FederateAuthLoginLogoutTestCase(TestCase, BaseServicePattern, CanLogin):
             # POST, as (username, ticket) are not valid, we should get the federate login page
             response = client.post("/login", params)
             self.assertEqual(response.status_code, 200)
-            for key, value in settings.CAS_FEDERATE_PROVIDERS.items():
-                self.assertTrue('<option value="%s">%s</option>' % (
-                    key,
-                    utils.get_tuple(value, 2, key)
-                ) in response.content.decode("utf-8"))
+            for provider in models.FederatedIendityProvider.objects.all():
+                self.assertIn(
+                    '<option value="%s">%s</option>' % (
+                        provider.suffix,
+                        provider.verbose_name
+                    ),
+                    response.content.decode("utf-8")
+                )
             self.assertEqual(response.context['post_url'], '/federate')

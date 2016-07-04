@@ -13,8 +13,6 @@
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
-import re
-
 
 def setting_default(name, default_value):
     """if the config `name` is not set, set it the `default_value`"""
@@ -92,30 +90,7 @@ setting_default(
 setting_default('CAS_ENABLE_AJAX_AUTH', False)
 
 setting_default('CAS_FEDERATE', False)
-# A dict of "provider suffix" -> (provider CAS server url, CAS version, verbose name)
-setting_default('CAS_FEDERATE_PROVIDERS', {})
 setting_default('CAS_FEDERATE_REMEMBER_TIMEOUT', 604800)  # one week
 
 if settings.CAS_FEDERATE:
     settings.CAS_AUTH_CLASS = "cas_server.auth.CASFederateAuth"
-
-#  create CAS_FEDERATE_PROVIDERS_LIST default value if not set: list of
-#  the keys of CAS_FEDERATE_PROVIDERS in natural order: 2 < 10 < 20 < a = A < … < z = Z
-try:
-    getattr(settings, 'CAS_FEDERATE_PROVIDERS_LIST')
-except AttributeError:
-    __CAS_FEDERATE_PROVIDERS_LIST = list(settings.CAS_FEDERATE_PROVIDERS.keys())
-
-    def __cas_federate_providers_list_sort(key):
-        if len(settings.CAS_FEDERATE_PROVIDERS[key]) > 2:
-            key = settings.CAS_FEDERATE_PROVIDERS[key][2].lower()
-        else:
-            key = key.lower()
-        return tuple(
-            int(num) if num else alpha
-            for num, alpha in __cas_federate_providers_list_sort.tokenize(key)
-        )
-    __cas_federate_providers_list_sort.tokenize = re.compile(r'(\d+)|(\D+)').findall
-    __CAS_FEDERATE_PROVIDERS_LIST.sort(key=__cas_federate_providers_list_sort)
-
-    setting_default('CAS_FEDERATE_PROVIDERS_LIST', __CAS_FEDERATE_PROVIDERS_LIST)

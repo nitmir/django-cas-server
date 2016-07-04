@@ -93,6 +93,7 @@ class ServicePatternAdmin(admin.ModelAdmin):
 
 
 class FederatedIendityProviderAdmin(admin.ModelAdmin):
+    """`FederatedIendityProvider` in admin interface"""
     fields = ('pos', 'suffix', 'server_url', 'cas_protocol_version', 'verbose_name', 'display')
     list_display = ('verbose_name', 'suffix', 'display')
 

@@ -151,7 +151,14 @@ class FederateAuthLoginLogoutTestCase(
     def test_login_twice(self):
         """Test that user id db is used for the second login (cf coverage)"""
         self.test_login_post_provider()
-        self.test_login_post_provider()
+        tickets = self.test_login_post_provider()
+        # trying to authenticated while being already authenticated should redirect to /login
+        for (provider, _, client) in tickets:
+            response = client.get("/federate/%s" % provider.suffix)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response["Location"], "%s/login" % (
+                'http://testserver' if django.VERSION < (1, 9) else ""
+            ))
 
     @override_settings(CAS_FEDERATE=False)
     def test_auth_federate_false(self):

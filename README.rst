@@ -19,10 +19,10 @@ CAS Server
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
-By defaut, the authentication process use django internal users but you can easily
+By default, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
 
-The defaut login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__
+The default login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__
 but you can use your own templates using settings variables.
 
 Note that for Django 1.7 compatibility, you need a version of
@@ -44,19 +44,76 @@ Features
 * Supports Django 1.7, 1.8 and 1.9
 * Supports Python 2.7, 3.x
 
+Dependencies
+============
+
+``django-cas-server`` depends on the following python packages:
+
+* Django >= 1.7 < 1.10
+* requests >= 2.4
+* requests_futures >= 0.9.5
+* django-picklefield >= 0.3.1
+* django-bootstrap3 >= 5.4 (< 7.0.0 if using django 1.7)
+* lxml >= 3.4
+* six >= 1
+
+Installation
+============
+
+The recommended installation mode is to use a virtualenv with ``--system-site-packages``
+
+1. Make sure that python virtualenv is installed
+
+2. Install python packages available via the system package manager:
+
+   On debian like systems::
+
+    $ sudo apt-get install python-django python-requests python-django-picklefield python-six python-lxml
+
+   On debian jessie, you can use the version of python-django available in the
+   `backports <https://backports.debian.org/Instructions/>`_.
+
+   On centos like systems::
+
+    $ sudo yum install python-django python-requests python-six python-lxml
+
+3. Create a virtualenv::
+
+    $ virtualenv --system-site-packages cas_venv
+    Running virtualenv with interpreter /var/www/html/cas-server/bin/python2
+    Using real prefix '/usr'
+    New python executable in cas/bin/python2
+    Also creating executable in cas/bin/python
+    Installing setuptools, pip...done.
+    $ cd cas_venv/; . bin/activate
+
+4. Create a django project::
+
+   $ django-admin startproject cas_project
+   $ cd cas_project
+
+5. Install `django-cas-server`. To use the last published release, run::
+
+    $ pip install django-cas-server
+
+   Alternatively if you want to use the version of the git repository, you can clone it::
+
+    $ git clone https://github.com/nitmir/django-cas-server
+    $ cd django-cas-server
+    $ pip install -r requirements.txt
+
+   Then, either run ``make install`` to create a python package using the sources of the repository
+   and install it with pip, or place the `cas_server` directory into your
+   `PYTHONPATH <https://docs.python.org/2/using/cmdline.html#envvar-PYTHONPATH>`_
+   (for instance by symlinking `cas_server` to the root of your django project).
+
+6. Open ``cas_project/settings.py`` in you favourite editor and follow the quick start section.
+
+
 Quick start
 ===========
-1. If you want to make a virtualenv for ``django-cas-server``, you will need the following
-   dependencies on a bare debian like system::
 
-    virtualenv build-essential python-dev libxml2-dev libxslt1-dev zlib1g-dev
-
-   If you want to use python3 instead of python2, replace ``python-dev`` with ``python3-dev``.
-
-   If you intend to run the tox tests you will also need ``python3.4-dev`` depending of the current
-   version of python3 on your system.
-
-2. Add "cas_server" to your INSTALLED_APPS setting like this::
+1. Add "cas_server" to your INSTALLED_APPS setting like this::
 
     INSTALLED_APPS = (
         'django.contrib.admin',
@@ -65,7 +122,7 @@ Quick start
         'cas_server',
     )
 
-   For internatinalization support, add "django.middleware.locale.LocaleMiddleware"
+   For internationalization support, add "django.middleware.locale.LocaleMiddleware"
    to your MIDDLEWARE_CLASSES setting like this::
 
     MIDDLEWARE_CLASSES = (
@@ -74,7 +131,9 @@ Quick start
         ...
     )
 
-3. Include the cas_server URLconf in your project urls.py like this::
+2. Include the cas_server URLconf in your project urls.py like this::
+
+    from django.conf.urls import url, include
 
     urlpatterns = [
         url(r'^admin/', admin.site.urls),
@@ -82,10 +141,10 @@ Quick start
         url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
     ]
 
-4. Run `python manage.py migrate` to create the cas_server models.
+3. Run ``python manage.py migrate`` to create the cas_server models.
 
 
-5. You should add some management commands to a crontab: ``clearsessions``,
+4. You should add some management commands to a crontab: ``clearsessions``,
    ``cas_clean_tickets`` and ``cas_clean_sessions``.
 
    * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/stable/topics/http/sessions/#clearing-the-session-store>`_.
@@ -105,9 +164,11 @@ Quick start
       */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
       5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
 
+5. Run ``python manage.py createsuperuser`` to create an administrator user.
+
 6. Start the development server and visit http://127.0.0.1:8000/admin/
-   to add a first service allowed to authenticate user agains the CAS
-   (you'll need the Admin app enabled).
+   to add a first service allowed to authenticate user against the CAS
+   (you'll need the Admin app enabled). See the Service Patterns section bellow.
 
 7. Visit http://127.0.0.1:8000/cas/ to login with your django users.
 
@@ -123,13 +184,13 @@ All settings are optional. Add them to ``settings.py`` to customize ``django-cas
 Template settings
 -----------------
 
-* ``CAS_LOGO_URL``: Url to the logo showed in the up left corner on the default
+* ``CAS_LOGO_URL``: URL to the logo showed in the up left corner on the default
   templates. Set it to ``False`` to disable it.
 
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
 * ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then
-  the user is authenticated and has asked to be warned before beeing connected
+  the user is authenticated and has asked to be warned before being connected
   to a service. The default is ``"cas_server/warn.html"``.
 * ``CAS_LOGGED_TEMPLATE``: Path to the template showed on ``/login`` then to user is
   authenticated. The default is ``"cas_server/logged.html"``.
@@ -218,7 +279,7 @@ Only usefull if you are using the mysql authentication backend:
 * ``CAS_SQL_USER_QUERY``: The query performed upon user authentication.
   The username must be in field ``username``, the password in ``password``,
   additional fields are used as the user attributes.
-  The default is ``"SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s"``
+  The default is ``"SELECT user AS username, pass AS password, users.* FROM users WHERE user = %s"``
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
@@ -253,7 +314,7 @@ Authentication backend
 * dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempt fails.
 * test backend ``cas_server.auth.TestAuthUser``: username, password and returned attributes
   for the user are defined by the ``CAS_TEST_*`` settings.
-* django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated agains django users system.
+* django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated against django users system.
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
@@ -269,7 +330,7 @@ Logs
 Users successful actions (login, logout) are logged with the level ``INFO``, failures are logged
 with the level ``WARNING`` and user attributes transmitted to a service are logged with the level ``DEBUG``.
 
-For exemple to log to syslog you can use :
+For example to log to syslog you can use :
 
 .. code-block:: python
 
@@ -328,6 +389,59 @@ Or to log to a file:
         },
     }
 
+Service Patterns
+================
+
+In a CAS context, ``Service`` refers to the application the client is trying to access.
+By extension we use ``service`` for the URL of such an application.
+
+By default, ``django-cas-server`` do not allow any service to use the CAS to authenticate users.
+In order to allow services, you need to connect to the django admin interface using a django
+superuser, and add a first service pattern.
+
+A service pattern comes with 9 fields:
+
+* ``Position``: an integer used to change the order in which services are matched against
+  service patterns.
+* ``Name``: the name of the service pattern. It will be displayed to the users asking for a ticket
+  for a service matching this service pattern on the login page.
+* ``Pattern``: a regular expression used to match services.
+* ``User field``: the user attribute to use as username for services matching this service pattern.
+  Leave it empty to use the login name.
+* ``Restrict username``: if checked, only login name defined below are allowed to get tickets
+  for services matching this service pattern.
+* ``Proxy``: if checked, allow the creation of Proxy Ticket for services matching this
+  service pattern. Otherwise, only Service Ticket will be created.
+* ``Proxy callback``: if checked, services matching this service pattern are allowed to retrieve Proxy
+  Granting Ticket. A service with a Proxy Granting Ticket can get Proxy Ticket for other services.
+  Hence you must only check this for trusted services that need it. (For instance, a webmail needs
+  Proxy Ticket to authenticate himself as the user to the imap server).
+* ``Single log out``: Check it to send Single Log Out requests to authenticated services matching
+  this service pattern. SLO requests are send to all services the user is authenticated to then
+  the user disconnect.
+* ``Single log out callback``: The http(s) URL to POST the SLO requests. If empty, the service URL
+  is used. This field is useful to allow non http services (imap, smtp, ftp) to handle SLO requests.
+
+A service pattern has 4 associated models:
+
+* ``Usernames``: a list of username associated with the ``Restrict username`` field
+* ``Replace attribut names``: a list of user attributes to send to the service. Choose the name
+  used for sending the attribute by setting ``Remplacement`` or leave it empty to leave it unchanged.
+* ``Replace attribut values``: a list of sent user attributes for which value needs to be tweak.
+  Replace the attribute value by the string obtained by replacing the leftmost non-overlapping
+  occurrences of ``pattern`` in string by ``replace``. In ``replace`` backslash escapes are processed.
+  Matched groups are captures by \1, \2, etc.
+* ``Filter attribut values``: a list of user attributes for which value needs to match a regular
+  expression. For instance, service A may need an email address, and you only want user with
+  an email address to connect to it. To do so, put ``email`` in ``Attribute`` and ``.*`` in ``pattern``.
+
+Then a user ask a ticket for a service, the service URL is compare against each service patterns
+sorted by `position`. The first service pattern that matches the service URL is chosen.
+Hence, you should give low `position` to very specific patterns like
+``^https://www\.example\.com(/.*)?$`` and higher `position` to generic patterns like ``^https://.*``.
+So the service URL `https://www.examle.com` will use the service pattern for
+``^https://www\.example\.com(/.*)?$`` and not the one for ``^https://.*``.
+
 
 Federation mode
 ===============
@@ -343,20 +457,20 @@ With the development server started, visit http://127.0.0.1:8000/admin/ to add i
 
 An identity provider comes with 5 fields:
 
-* `Position`: an integer used to tweak the order in which identity providers are displayed on
+* ``Position``: an integer used to tweak the order in which identity providers are displayed on
   the login page. Identity providers are sorted using position first, then, on equal position,
-  using `verbose name` and then, on equal `verbose name`, using `suffix`.
-* `Suffix`: the suffix that will be append to the username returned by the identity provider.
+  using ``verbose name`` and then, on equal ``verbose name``, using ``suffix``.
+* ``Suffix``: the suffix that will be append to the username returned by the identity provider.
   It must be unique.
-* `Server url`: the url to the identity provider CAS. For instance, if you are using
-  `https://cas.example.org/login` to authenticate on the CAS, the `server url` is
-  `https://cas.example.org`
-* `CAS protocol version`: the version of the CAS protocol to use to contact the identity provider.
+* ``Server url``: the URL to the identity provider CAS. For instance, if you are using
+  ``https://cas.example.org/login`` to authenticate on the CAS, the `server url` is
+  ``https://cas.example.org``
+* ``CAS protocol version``: the version of the CAS protocol to use to contact the identity provider.
   The default is version 3.
-* `Verbose name`: the name used on the login page to display the identity provider.
-* `Display`: a boolean controlling the display of the identity provider on the login page.
+* ``Verbose name``: the name used on the login page to display the identity provider.
+* ``Display``: a boolean controlling the display of the identity provider on the login page.
   Beware that this do not disable the identity provider, it just hide it on the login page.
-  User will always be able to log in using this provider by fetching `/federate/provider_suffix`.
+  User will always be able to log in using this provider by fetching ``/federate/provider_suffix``.
 
 
 In federation mode, ``django-cas-server`` build user's username as follow:

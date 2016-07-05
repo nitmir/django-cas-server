@@ -25,6 +25,7 @@ import base64
 import six
 
 from importlib import import_module
+from datetime import datetime, timedelta
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
@@ -68,7 +69,50 @@ def reverse_params(url_name, params=None, **kwargs):
     """compule the reverse url or `url_name` and add GET parameters from `params` to it"""
     url = reverse(url_name, **kwargs)
     params = urlencode(params if params else {})
-    return url + "?%s" % params
+    if params:
+        return url + "?%s" % params
+    else:
+        return url
+
+
+def copy_params(get_or_post_params, ignore=None):
+    """copy from a dictionnary like `get_or_post_params` ignoring keys in the set `ignore`"""
+    if ignore is None:
+        ignore = set()
+    params = {}
+    for key in get_or_post_params:
+        if key not in ignore and get_or_post_params[key]:
+            params[key] = get_or_post_params[key]
+    return params
+
+
+def set_cookie(response, key, value, max_age):
+    """Set the cookie `key` on `response` with value `value` valid for `max_age` secondes"""
+    expires = datetime.strftime(
+        datetime.utcnow() + timedelta(seconds=max_age),
+        "%a, %d-%b-%Y %H:%M:%S GMT"
+    )
+    response.set_cookie(
+        key,
+        value,
+        max_age=max_age,
+        expires=expires,
+        domain=settings.SESSION_COOKIE_DOMAIN,
+        secure=settings.SESSION_COOKIE_SECURE or None
+    )
+
+
+def get_current_url(request, ignore_params=None):
+    """Giving a django request, return the current http url, possibly ignoring some GET params"""
+    if ignore_params is None:
+        ignore_params = set()
+    protocol = 'https' if request.is_secure() else "http"
+    service_url = "%s://%s%s" % (protocol, request.get_host(), request.path)
+    if request.GET:
+        params = copy_params(request.GET, ignore_params)
+        if params:
+            service_url += "?%s" % urlencode(params)
+    return service_url
 
 
 def update_url(url, params):
@@ -150,6 +194,19 @@ def gen_pgtiou():
 def gen_saml_id():
     """Generate an saml id"""
     return _gen_ticket('_')
+
+
+def get_tuple(nuplet, index, default=None):
+    """
+        return the value in index `index` of the tuple `nuplet` if it exists,
+        else return `default`
+    """
+    if nuplet is None:
+        return default
+    try:
+        return nuplet[index]
+    except IndexError:
+        return default
 
 
 def crypt_salt_is_valid(salt):

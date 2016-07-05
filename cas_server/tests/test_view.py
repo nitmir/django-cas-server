@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -36,56 +36,16 @@ from cas_server.tests.utils import (
     HttpParamsHandler,
     Http404Handler
 )
-from cas_server.tests.mixin import BaseServicePattern, XmlContent
+from cas_server.tests.mixin import BaseServicePattern, XmlContent, CanLogin
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
-class LoginTestCase(TestCase, BaseServicePattern):
+class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
     """Tests for the login view"""
     def setUp(self):
         """Prepare the test context:"""
         # we prepare a bunch a service url and service patterns for tests
         self.setup_service_patterns()
-
-    def assert_logged(self, client, response, warn=False, code=200):
-        """Assertions testing that client is well authenticated"""
-        self.assertEqual(response.status_code, code)
-        # this message is displayed to the user upon successful authentication
-        self.assertTrue(
-            (
-                b"You have successfully logged into "
-                b"the Central Authentication Service"
-            ) in response.content
-        )
-        # these session variables a set if usccessfully authenticated
-        self.assertTrue(client.session["username"] == settings.CAS_TEST_USER)
-        self.assertTrue(client.session["warn"] is warn)
-        self.assertTrue(client.session["authenticated"] is True)
-
-        # on successfull authentication, a corresponding user object is created
-        self.assertTrue(
-            models.User.objects.get(
-                username=settings.CAS_TEST_USER,
-                session_key=client.session.session_key
-            )
-        )
-
-    def assert_login_failed(self, client, response, code=200):
-        """Assertions testing a failed login attempt"""
-        self.assertEqual(response.status_code, code)
-        # this message is displayed to the user upon successful authentication, so it should not
-        # appear
-        self.assertFalse(
-            (
-                b"You have successfully logged into "
-                b"the Central Authentication Service"
-            ) in response.content
-        )
-
-        # if authentication has failed, these session variables should not be set
-        self.assertTrue(client.session.get("username") is None)
-        self.assertTrue(client.session.get("warn") is None)
-        self.assertTrue(client.session.get("authenticated") is None)
 
     def test_login_view_post_goodpass_goodlt(self):
         """Test a successul login"""
@@ -471,7 +431,7 @@ class LoginTestCase(TestCase, BaseServicePattern):
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "login required")
-        self.assertEqual(data["url"], "/login?")
+        self.assertEqual(data["url"], "/login")
 
     @override_settings(CAS_ENABLE_AJAX_AUTH=True)
     def test_ajax_logged_user_deleted(self):
@@ -491,7 +451,7 @@ class LoginTestCase(TestCase, BaseServicePattern):
         data = json.loads(response.content.decode("utf8"))
         self.assertEqual(data["status"], "error")
         self.assertEqual(data["detail"], "login required")
-        self.assertEqual(data["url"], "/login?")
+        self.assertEqual(data["url"], "/login")
 
     @override_settings(CAS_ENABLE_AJAX_AUTH=True)
     def test_ajax_logged(self):

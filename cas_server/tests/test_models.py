@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -12,18 +12,85 @@
 """Tests module for models"""
 from cas_server.default_settings import settings
 
-from django.test import TestCase
+import django
+from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
 
 from datetime import timedelta
 from importlib import import_module
 
-from cas_server import models
+from cas_server import models, utils
 from cas_server.tests.utils import get_auth_client, HttpParamsHandler
-from cas_server.tests.mixin import UserModels, BaseServicePattern
+from cas_server.tests.mixin import UserModels, BaseServicePattern, FederatedIendityProviderModel
+from cas_server.tests.test_federate import PROVIDERS
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+
+
+class FederatedUserTestCase(TestCase, UserModels, FederatedIendityProviderModel):
+    """test for the federated user model"""
+    def setUp(self):
+        """Prepare the test context"""
+        self.setup_federated_identity_provider(PROVIDERS)
+
+    def test_clean_old_entries(self):
+        """tests for clean_old_entries that should delete federated user no longer used"""
+        client = Client()
+        client.get("/login")
+        provider = models.FederatedIendityProvider.objects.get(suffix="example.com")
+        models.FederatedUser.objects.create(
+            username="test1", provider=provider, attributs={}, ticket=""
+        )
+        models.FederatedUser.objects.create(
+            username="test2", provider=provider, attributs={}, ticket=""
+        )
+        models.FederatedUser.objects.all().update(
+            last_update=(timezone.now() - timedelta(seconds=settings.CAS_TICKET_TIMEOUT + 10))
+        )
+        models.FederatedUser.objects.create(
+            username="test3", provider=provider, attributs={}, ticket=""
+        )
+        models.User.objects.create(
+            username="test1@example.com", session_key=client.session.session_key
+        )
+        self.assertEqual(len(models.FederatedUser.objects.all()), 3)
+        models.FederatedUser.clean_old_entries()
+        self.assertEqual(len(models.FederatedUser.objects.all()), 2)
+        with self.assertRaises(models.FederatedUser.DoesNotExist):
+            models.FederatedUser.objects.get(username="test2")
+
+
+class FederateSLOTestCase(TestCase, UserModels):
+    """test for the federated SLO model"""
+    def test_clean_deleted_sessions(self):
+        """
+            tests for clean_deleted_sessions that should delete object for which matching session
+            do not exists anymore
+        """
+        if django.VERSION >= (1, 8):
+            client1 = Client()
+            client2 = Client()
+            client1.get("/login")
+            client2.get("/login")
+            session = client2.session
+            session['authenticated'] = True
+            session.save()
+            models.FederateSLO.objects.create(
+                username="test1@example.com",
+                session_key=client1.session.session_key,
+                ticket=utils.gen_st()
+            )
+            models.FederateSLO.objects.create(
+                username="test2@example.com",
+                session_key=client2.session.session_key,
+                ticket=utils.gen_st()
+            )
+            self.assertEqual(len(models.FederateSLO.objects.all()), 2)
+            models.FederateSLO.clean_deleted_sessions()
+            self.assertEqual(len(models.FederateSLO.objects.all()), 1)
+            with self.assertRaises(models.FederateSLO.DoesNotExist):
+                models.FederateSLO.objects.get(username="test1@example.com")
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')

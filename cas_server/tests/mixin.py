@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -23,27 +23,28 @@ from cas_server.tests.utils import get_auth_client
 
 class BaseServicePattern(object):
     """Mixing for setting up service pattern for testing"""
-    def setup_service_patterns(self, proxy=False):
+    @classmethod
+    def setup_service_patterns(cls, proxy=False):
         """setting up service pattern"""
         # For general purpose testing
-        self.service = "https://www.example.com"
-        self.service_pattern = models.ServicePattern.objects.create(
+        cls.service = "https://www.example.com"
+        cls.service_pattern = models.ServicePattern.objects.create(
             name="example",
             pattern="^https://www\.example\.com(/.*)?$",
             proxy=proxy,
         )
-        models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
+        models.ReplaceAttributName.objects.create(name="*", service_pattern=cls.service_pattern)
 
         # For testing the restrict_users attributes
-        self.service_restrict_user_fail = "https://restrict_user_fail.example.com"
-        self.service_pattern_restrict_user_fail = models.ServicePattern.objects.create(
+        cls.service_restrict_user_fail = "https://restrict_user_fail.example.com"
+        cls.service_pattern_restrict_user_fail = models.ServicePattern.objects.create(
             name="restrict_user_fail",
             pattern="^https://restrict_user_fail\.example\.com(/.*)?$",
             restrict_users=True,
             proxy=proxy,
         )
-        self.service_restrict_user_success = "https://restrict_user_success.example.com"
-        self.service_pattern_restrict_user_success = models.ServicePattern.objects.create(
+        cls.service_restrict_user_success = "https://restrict_user_success.example.com"
+        cls.service_pattern_restrict_user_success = models.ServicePattern.objects.create(
             name="restrict_user_success",
             pattern="^https://restrict_user_success\.example\.com(/.*)?$",
             restrict_users=True,
@@ -51,12 +52,12 @@ class BaseServicePattern(object):
         )
         models.Username.objects.create(
             value=settings.CAS_TEST_USER,
-            service_pattern=self.service_pattern_restrict_user_success
+            service_pattern=cls.service_pattern_restrict_user_success
         )
 
         # For testing the user attributes filtering conditions
-        self.service_filter_fail = "https://filter_fail.example.com"
-        self.service_pattern_filter_fail = models.ServicePattern.objects.create(
+        cls.service_filter_fail = "https://filter_fail.example.com"
+        cls.service_pattern_filter_fail = models.ServicePattern.objects.create(
             name="filter_fail",
             pattern="^https://filter_fail\.example\.com(/.*)?$",
             proxy=proxy,
@@ -64,10 +65,10 @@ class BaseServicePattern(object):
         models.FilterAttributValue.objects.create(
             attribut="right",
             pattern="^admin$",
-            service_pattern=self.service_pattern_filter_fail
+            service_pattern=cls.service_pattern_filter_fail
         )
-        self.service_filter_fail_alt = "https://filter_fail_alt.example.com"
-        self.service_pattern_filter_fail_alt = models.ServicePattern.objects.create(
+        cls.service_filter_fail_alt = "https://filter_fail_alt.example.com"
+        cls.service_pattern_filter_fail_alt = models.ServicePattern.objects.create(
             name="filter_fail_alt",
             pattern="^https://filter_fail_alt\.example\.com(/.*)?$",
             proxy=proxy,
@@ -75,10 +76,10 @@ class BaseServicePattern(object):
         models.FilterAttributValue.objects.create(
             attribut="nom",
             pattern="^toto$",
-            service_pattern=self.service_pattern_filter_fail_alt
+            service_pattern=cls.service_pattern_filter_fail_alt
         )
-        self.service_filter_success = "https://filter_success.example.com"
-        self.service_pattern_filter_success = models.ServicePattern.objects.create(
+        cls.service_filter_success = "https://filter_success.example.com"
+        cls.service_pattern_filter_success = models.ServicePattern.objects.create(
             name="filter_success",
             pattern="^https://filter_success\.example\.com(/.*)?$",
             proxy=proxy,
@@ -86,26 +87,26 @@ class BaseServicePattern(object):
         models.FilterAttributValue.objects.create(
             attribut="email",
             pattern="^%s$" % re.escape(settings.CAS_TEST_ATTRIBUTES['email']),
-            service_pattern=self.service_pattern_filter_success
+            service_pattern=cls.service_pattern_filter_success
         )
 
         # For testing the user_field attributes
-        self.service_field_needed_fail = "https://field_needed_fail.example.com"
-        self.service_pattern_field_needed_fail = models.ServicePattern.objects.create(
+        cls.service_field_needed_fail = "https://field_needed_fail.example.com"
+        cls.service_pattern_field_needed_fail = models.ServicePattern.objects.create(
             name="field_needed_fail",
             pattern="^https://field_needed_fail\.example\.com(/.*)?$",
             user_field="uid",
             proxy=proxy,
         )
-        self.service_field_needed_success = "https://field_needed_success.example.com"
-        self.service_pattern_field_needed_success = models.ServicePattern.objects.create(
+        cls.service_field_needed_success = "https://field_needed_success.example.com"
+        cls.service_pattern_field_needed_success = models.ServicePattern.objects.create(
             name="field_needed_success",
             pattern="^https://field_needed_success\.example\.com(/.*)?$",
             user_field="alias",
             proxy=proxy,
         )
-        self.service_field_needed_success_alt = "https://field_needed_success_alt.example.com"
-        self.service_pattern_field_needed_success = models.ServicePattern.objects.create(
+        cls.service_field_needed_success_alt = "https://field_needed_success_alt.example.com"
+        cls.service_pattern_field_needed_success = models.ServicePattern.objects.create(
             name="field_needed_success_alt",
             pattern="^https://field_needed_success_alt\.example\.com(/.*)?$",
             user_field="nom",
@@ -191,3 +192,65 @@ class UserModels(object):
             username=settings.CAS_TEST_USER,
             session_key=client.session.session_key
         )
+
+
+class CanLogin(object):
+    """Assertion about login"""
+    def assert_logged(
+        self, client, response, warn=False,
+        code=200, username=settings.CAS_TEST_USER
+    ):
+        """Assertions testing that client is well authenticated"""
+        self.assertEqual(response.status_code, code)
+        # this message is displayed to the user upon successful authentication
+        self.assertIn(
+            (
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
+            ),
+            response.content
+        )
+        # these session variables a set if usccessfully authenticated
+        self.assertEqual(client.session["username"], username)
+        self.assertIs(client.session["warn"], warn)
+        self.assertIs(client.session["authenticated"], True)
+
+        # on successfull authentication, a corresponding user object is created
+        self.assertTrue(
+            models.User.objects.get(
+                username=username,
+                session_key=client.session.session_key
+            )
+        )
+
+    def assert_login_failed(self, client, response, code=200):
+        """Assertions testing a failed login attempt"""
+        self.assertEqual(response.status_code, code)
+        # this message is displayed to the user upon successful authentication, so it should not
+        # appear
+        self.assertNotIn(
+            (
+                b"You have successfully logged into "
+                b"the Central Authentication Service"
+            ),
+            response.content
+        )
+
+        # if authentication has failed, these session variables should not be set
+        self.assertTrue(client.session.get("username") is None)
+        self.assertTrue(client.session.get("warn") is None)
+        self.assertTrue(client.session.get("authenticated") is None)
+
+
+class FederatedIendityProviderModel(object):
+    """Mixin for test classes using  the FederatedIendityProvider model"""
+    @staticmethod
+    def setup_federated_identity_provider(providers):
+        """setting up federated identity providers"""
+        for suffix, (server_url, cas_protocol_version, verbose_name) in providers.items():
+            models.FederatedIendityProvider.objects.create(
+                suffix=suffix,
+                server_url=server_url,
+                cas_protocol_version=cas_protocol_version,
+                verbose_name=verbose_name
+            )

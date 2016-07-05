@@ -1,4 +1,4 @@
-# ⁻*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License version 3 for
@@ -12,12 +12,17 @@
 """Some authentication classes for the CAS"""
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from datetime import timedelta
 try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors
     from utils import check_password
 except ImportError:
     MySQLdb = None
+
+from .models import FederatedUser
 
 
 class AuthUser(object):
@@ -136,3 +141,35 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
             return attr
         else:
             return {}
+
+
+class CASFederateAuth(AuthUser):
+    """Authentication class used then CAS_FEDERATE is True"""
+    user = None
+
+    def __init__(self, username):
+        try:
+            self.user = FederatedUser.get_from_federated_username(username)
+            super(CASFederateAuth, self).__init__(
+                self.user.federated_username
+            )
+        except FederatedUser.DoesNotExist:
+            super(CASFederateAuth, self).__init__(username)
+
+    def test_password(self, ticket):
+        """test `password` agains the user"""
+        if not self.user or not self.user.ticket:
+            return False
+        else:
+            return (
+                ticket == self.user.ticket and
+                self.user.last_update >
+                (timezone.now() - timedelta(seconds=settings.CAS_TICKET_VALIDITY))
+            )
+
+    def attributs(self):
+        """return a dict of user attributes"""
+        if not self.user:  # pragma: no cover (should not happen)
+            return {}
+        else:
+            return self.user.attributs

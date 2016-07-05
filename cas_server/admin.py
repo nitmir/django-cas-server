@@ -12,6 +12,7 @@
 from django.contrib import admin
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket, User, ServicePattern
 from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterAttributValue
+from .models import FederatedIendityProvider
 from .forms import TicketForm
 
 TICKETS_READONLY_FIELDS = ('validate', 'service', 'service_pattern',
@@ -91,5 +92,12 @@ class ServicePatternAdmin(admin.ModelAdmin):
                     'single_log_out', 'proxy_callback', 'restrict_users')
 
 
+class FederatedIendityProviderAdmin(admin.ModelAdmin):
+    """`FederatedIendityProvider` in admin interface"""
+    fields = ('pos', 'suffix', 'server_url', 'cas_protocol_version', 'verbose_name', 'display')
+    list_display = ('verbose_name', 'suffix', 'display')
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(ServicePattern, ServicePatternAdmin)
+admin.site.register(FederatedIendityProvider, FederatedIendityProviderAdmin)

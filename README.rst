@@ -40,6 +40,7 @@ Features
 * Fine control on which user's attributes are passed to which service
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
+* Federated mode between multiple CAS
 * Supports Django 1.7, 1.8 and 1.9
 * Supports Python 2.7, 3.x
 
@@ -158,6 +159,17 @@ Authentication settings
   If more requests need to be send, there are queued. The default is ``10``.
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
+
+Federation settings
+-------------------
+
+* ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
+  The default is ``False``.
+* ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
+  provider" expire. The default is ``604800``, one week. The cookie is called
+  ``_remember_provider``.
+
+
 Tickets validity settings
 -------------------------
 
@@ -245,6 +257,8 @@ Authentication backend
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
+* federated backend ``cas_server.auth.CASFederateAuth``: It is automatically used then ``CAS_FEDERATE`` is ``True``.
+  You should not set it manually without setting ``CAS_FEDERATE`` to ``True``.
 
 Logs
 ====
@@ -313,3 +327,51 @@ Or to log to a file:
             },
         },
     }
+
+
+Federation mode
+===============
+
+``django-cas-server`` comes with a federation mode. Then ``CAS_FEDERATE`` is ``True``,
+user are invited to choose an identity provider on the login page, then, they are redirected
+to the provider CAS to authenticate. This provider transmit to ``django-cas-server`` the user
+username and attributes. The user is now logged in on ``django-cas-server`` and can use
+services using ``django-cas-server`` as CAS.
+
+The list of allowed identity providers is defined using the django admin application.
+With the development server started, visit http://127.0.0.1:8000/admin/ to add identity providers.
+
+An identity provider comes with 5 fields:
+
+* `Position`: an integer used to tweak the order in which identity providers are displayed on
+  the login page. Identity providers are sorted using position first, then, on equal position,
+  using `verbose name` and then, on equal `verbose name`, using `suffix`.
+* `Suffix`: the suffix that will be append to the username returned by the identity provider.
+  It must be unique.
+* `Server url`: the url to the identity provider CAS. For instance, if you are using
+  `https://cas.example.org/login` to authenticate on the CAS, the `server url` is
+  `https://cas.example.org`
+* `CAS protocol version`: the version of the CAS protocol to use to contact the identity provider.
+  The default is version 3.
+* `Verbose name`: the name used on the login page to display the identity provider.
+* `Display`: a boolean controlling the display of the identity provider on the login page.
+  Beware that this do not disable the identity provider, it just hide it on the login page.
+  User will always be able to log in using this provider by fetching `/federate/provider_suffix`.
+
+
+In federation mode, ``django-cas-server`` build user's username as follow:
+``provider_returned_username@provider_suffix``.
+Choose the provider returned username for ``django-cas-server`` and the provider suffix
+in order to make sense, as this built username is likely to be displayed to end users in
+applications.
+
+
+Then using federate mode, you should add one command to a daily crontab: ``cas_clean_federate``.
+This command clean the local cache of federated user from old unused users.
+
+
+You could for example do as bellow :
+
+.. code-block::
+
+    10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate

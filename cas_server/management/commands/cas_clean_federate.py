@@ -9,7 +9,6 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # (c) 2016 Valentin Samir
-"""Clean deleted sessions management command"""
 from django.core.management.base import BaseCommand
 from django.utils.translation import ugettext_lazy as _
 
@@ -17,9 +16,9 @@ from ... import models
 
 
 class Command(BaseCommand):
-    """Clean deleted sessions"""
     args = ''
-    help = _(u"Clean deleted sessions")
+    help = _(u"Clean old federated users")
 
     def handle(self, *args, **options):
-        models.User.clean_deleted_sessions()
+        models.FederatedUser.clean_old_entries()
+        models.FederateSLO.clean_deleted_sessions()

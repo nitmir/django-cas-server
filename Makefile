@@ -1,4 +1,4 @@
-.PHONY: build dist
+.PHONY: build dist docs
 VERSION=`python setup.py -V`
 
 build:
@@ -24,10 +24,13 @@ clean_coverage:
 	rm -rf coverage.xml .coverage htmlcov
 clean_tild_backup:
 	find ./ -name '*~' -delete
+clean_docs:
+	rm -rf docs/_build/
+	rm -rf docs/package/
 
 clean: clean_pyc clean_build clean_coverage clean_tild_backup
 
-clean_all: clean clean_tox clean_test_venv
+clean_all: clean clean_tox clean_test_venv clean_docs
 
 dist:
 	python setup.py sdist
@@ -60,3 +63,13 @@ run_tests: test_venv
 	python setup.py check --restructuredtext --stric
 	test_venv/bin/py.test --cov=cas_server --cov-report html
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
+
+test_venv/bin/sphinx-build: test_venv
+	test_venv/bin/pip install Sphinx sphinx_rtd_theme
+
+
+docs/package: test_venv/bin/sphinx-build
+	test_venv/bin/sphinx-apidoc -f -e cas_server -o docs/package/ cas_server/migrations/ cas_server/management/ cas_server/tests/ #cas_server/cas.py
+
+docs: docs/package test_venv/bin/sphinx-build
+	cd docs; export PATH=$(realpath test_venv/bin/):$$PATH; make coverage html

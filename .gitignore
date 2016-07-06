@@ -10,6 +10,7 @@ dist/
 db.sqlite3
 manage.py
 coverage.xml
+docs/_build/
 
 .tox
 test_venv

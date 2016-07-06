@@ -37,15 +37,20 @@ logger = logging.getLogger(__name__)
 
 @python_2_unicode_compatible
 class FederatedIendityProvider(models.Model):
-    """An identity provider for the federated mode"""
+    """
+        An identity provider for the federated mode
+    """
     class Meta:
-        verbose_name = _("identity provider")
-        verbose_name_plural = _("identity providers")
+        verbose_name = _(u"identity provider")
+        verbose_name_plural = _(u"identity providers")
     suffix = models.CharField(
         max_length=30,
         unique=True,
         verbose_name=_(u"suffix"),
-        help_text=_("Suffix append to backend CAS returner username: `returned_username`@`suffix`")
+        help_text=_(
+            u"Suffix append to backend CAS returner "
+            u"username: ``returned_username`` @ ``suffix``."
+        )
     )
     server_url = models.CharField(max_length=255, verbose_name=_(u"server url"))
     cas_protocol_version = models.CharField(
@@ -57,28 +62,31 @@ class FederatedIendityProvider(models.Model):
             ("CAS_2_SAML_1_0", "SAML 1.1")
         ],
         verbose_name=_(u"CAS protocol version"),
-        help_text=_("Version of the CAS protocol to use when sending requests the the backend CAS"),
+        help_text=_(
+            u"Version of the CAS protocol to use when sending requests the the backend CAS."
+        ),
         default="3"
     )
     verbose_name = models.CharField(
         max_length=255,
         verbose_name=_(u"verbose name"),
-        help_text=_("Name for this identity provider displayed on the login page")
+        help_text=_(u"Name for this identity provider displayed on the login page.")
     )
     pos = models.IntegerField(
         default=100,
         verbose_name=_(u"position"),
         help_text=_(
             (
+                u"Position of the identity provider on the login page. "
                 u"Identity provider are sorted using the "
-                u"(position, verbose name, suffix) attributes"
+                u"(position, verbose name, suffix) attributes."
             )
         )
     )
     display = models.BooleanField(
         default=True,
         verbose_name=_(u"display"),
-        help_text=_("Display the provider on the login page")
+        help_text=_("Display the provider on the login page.")
     )
 
     def __str__(self):
@@ -86,7 +94,12 @@ class FederatedIendityProvider(models.Model):
 
     @staticmethod
     def build_username_from_suffix(username, suffix):
-        """Transform backend username into federated username using `suffix`"""
+        """
+            Transform backend username into federated username using ``suffix``
+
+            :param unicode username: A CAS backend returned username
+            :param unicode suffix: A suffix identifying the CAS backend
+        """
         return u'%s@%s' % (username, suffix)
 
     def build_username(self, username):
@@ -238,7 +251,7 @@ class User(models.Model):
         """
            Generate a ticket using `ticket_class` for the service
            `service` matching `service_pattern` and asking or not for
-           authentication renewal with `renew
+           authentication renewal with `renew`
         """
         attributs = dict(
             (a.name, a.replace if a.replace else a.name) for a in service_pattern.attributs.all()
@@ -376,7 +389,12 @@ class ServicePattern(models.Model):
         return u"%s: %s" % (self.pos, self.pattern)
 
     def check_user(self, user):
-        """Check if `user` if allowed to use theses services"""
+        """
+            Check if ``user`` if allowed to use theses services. If ``user`` is not allowed,
+            raises one of :class:`BadFilter`, :class:`UserFieldNotDefined`, :class:`BadUsername`
+
+            :param user: a :class:`User` object
+        """
         if self.restrict_users and not self.usernames.filter(value=user.username):
             logger.warning("Username %s not allowed on service %s" % (user.username, self.name))
             raise BadUsername()

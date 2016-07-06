@@ -18,7 +18,6 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :doc:`coverage`
 .. * :ref:`modindex`
 .. * :ref:`search`
 

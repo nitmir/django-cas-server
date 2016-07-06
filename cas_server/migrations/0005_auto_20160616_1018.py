@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import picklefield.fields
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -13,12 +14,33 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='servicepattern',
+            name='pos',
+            field=models.IntegerField(default=100, help_text='service patterns are sorted using the position attribute', verbose_name='position'),
+        ),
+        migrations.CreateModel(
+            name='FederatedIendityProvider',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('suffix', models.CharField(help_text='Suffix append to backend CAS returner username: `returned_username`@`suffix`', max_length=30, unique=True, verbose_name='suffix')),
+                ('server_url', models.CharField(max_length=255, verbose_name='server url')),
+                ('cas_protocol_version', models.CharField(choices=[(b'1', b'CAS 1.0'), (b'2', b'CAS 2.0'), (b'3', b'CAS 3.0'), (b'CAS_2_SAML_1_0', b'SAML 1.1')], default=b'3', help_text='Version of the CAS protocol to use when sending requests the the backend CAS', max_length=30, verbose_name='CAS protocol version')),
+                ('verbose_name', models.CharField(help_text='Name for this identity provider displayed on the login page', max_length=255, verbose_name='verbose name')),
+                ('pos', models.IntegerField(default=100, help_text='Identity provider are sorted using the (position, verbose name, suffix) attributes', verbose_name='position')),
+                ('display', models.BooleanField(default=True, help_text='Display the provider on the login page', verbose_name='display')),
+            ],
+            options={
+                'verbose_name': 'identity provider',
+                'verbose_name_plural': 'identity providers',
+            },
+        ),
         migrations.CreateModel(
             name='FederatedUser',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('username', models.CharField(max_length=124)),
-                ('provider', models.CharField(max_length=124)),
+                ('provider', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cas_server.FederatedIendityProvider')),
                 ('attributs', picklefield.fields.PickledObjectField(editable=False)),
                 ('ticket', models.CharField(max_length=255)),
                 ('last_update', models.DateTimeField(auto_now=True)),
@@ -27,5 +49,18 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='federateduser',
             unique_together=set([('username', 'provider')]),
+        ),
+        migrations.CreateModel(
+            name='FederateSLO',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('username', models.CharField(max_length=30)),
+                ('session_key', models.CharField(blank=True, max_length=40, null=True)),
+                ('ticket', models.CharField(db_index=True, max_length=255)),
+            ],
+        ),
+        migrations.AlterUniqueTogether(
+            name='federateslo',
+            unique_together=set([('username', 'session_key', 'ticket')]),
         ),
     ]

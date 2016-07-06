@@ -28,7 +28,11 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'identity providers',
             },
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='federateduser',
+            name='provider'
+        ),
+        migrations.AddField(
             model_name='federateduser',
             name='provider',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cas_server.FederatedIendityProvider'),

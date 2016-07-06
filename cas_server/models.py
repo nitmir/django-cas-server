@@ -595,6 +595,12 @@ class Ticket(models.Model):
                 )
             )
 
+    @staticmethod
+    def get_class(ticket):
+        for ticket_class in [ServiceTicket, ProxyTicket, ProxyGrantingTicket]:
+            if ticket.startswith(ticket_class.PREFIX):
+                return ticket_class
+
 
 @python_2_unicode_compatible
 class ServiceTicket(Ticket):

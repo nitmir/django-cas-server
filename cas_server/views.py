@@ -751,13 +751,16 @@ class Validate(View):
         renew = True if request.GET.get('renew') else False
         if service and ticket:
             try:
-                ticket = ServiceTicket.objects.get(
+                ticket_queryset = ServiceTicket.objects.filter(
                     value=ticket,
                     service=service,
                     validate=False,
-                    renew=renew,
                     creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
                 )
+                if renew:
+                    ticket = ticket_queryset.get(renew=True)
+                else:
+                    ticket = ticket_queryset.get()
                 ticket.validate = True
                 ticket.save()
                 logger.info(
@@ -893,22 +896,20 @@ class ValidateService(View, AttributesMixin):
         """fetch the ticket angains the database and check its validity"""
         try:
             proxies = []
-            if self.ticket.startswith(ServiceTicket.PREFIX):
-                ticket = ServiceTicket.objects.get(
+            ticket_class = models.Ticket.get_class(self.ticket)
+            if ticket_class:
+                ticket_queryset = ticket_class.objects.filter(
                     value=self.ticket,
                     validate=False,
-                    renew=self.renew,
                     creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
                 )
-            elif self.allow_proxy_ticket and self.ticket.startswith(ProxyTicket.PREFIX):
-                ticket = ProxyTicket.objects.get(
-                    value=self.ticket,
-                    validate=False,
-                    renew=self.renew,
-                    creation__gt=(timezone.now() - timedelta(seconds=ProxyTicket.VALIDITY))
-                )
-                for prox in ticket.proxies.all():
-                    proxies.append(prox.url)
+                if self.renew:
+                    ticket = ticket_queryset.get(renew=True)
+                else:
+                    ticket = ticket_queryset.get()
+                if ticket_class == models.ProxyTicket:
+                    for prox in ticket.proxies.all():
+                        proxies.append(prox.url)
             else:
                 raise ValidateError(u'INVALID_TICKET', self.ticket)
             ticket.validate = True
@@ -1140,17 +1141,12 @@ class SamlValidate(View, AttributesMixin):
         try:
             auth_req = self.root.getchildren()[1].getchildren()[0]
             ticket = auth_req.getchildren()[0].text
-            if ticket.startswith(ServiceTicket.PREFIX):
-                ticket = ServiceTicket.objects.get(
+            ticket_class = models.Ticket.get_class(ticket)
+            if ticket_class:
+                ticket = ticket_class.objects.get(
                     value=ticket,
                     validate=False,
                     creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
-                )
-            elif ticket.startswith(ProxyTicket.PREFIX):
-                ticket = ProxyTicket.objects.get(
-                    value=ticket,
-                    validate=False,
-                    creation__gt=(timezone.now() - timedelta(seconds=ProxyTicket.VALIDITY))
                 )
             else:
                 raise SamlValidateError(

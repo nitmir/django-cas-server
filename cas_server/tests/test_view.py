@@ -990,6 +990,52 @@ class ValidateTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'yes\ntest\n')
 
+    def test_validate_service_renew(self):
+        """test with a valid (ticket, service) asking for auth renewal"""
+        # case 1 client is renewing and service ask for renew
+        (client1, response) = get_auth_client(renew="True", service=self.service)
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        # get a bare client
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/validate',
+            {'ticket': ticket_value, 'service': self.service, 'renew': 'True'}
+        )
+        # the validation should succes with username settings.CAS_TEST_USER and transmit
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'yes\ntest\n')
+
+        # cas2 client is renewing and service do not ask for renew
+        (client2, response) = get_auth_client(renew="True", service=self.service)
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        # get a bare client
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/validate',
+            {'ticket': ticket_value, 'service': self.service}
+        )
+        # the validation should succes with username settings.CAS_TEST_USER and transmit
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'yes\ntest\n')
+
+        # case 3, client is not renewing and service ask for renew (client is authenticated)
+        response = client2.get("/login", {"service": self.service})
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/validate',
+            {'ticket': ticket_value, 'service': self.service, 'renew': 'True'}
+        )
+        # the validation should fail
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'no\n')
+
     def test_validate_view_badservice(self):
         """test for a valid ticket but bad service"""
         ticket = get_user_ticket_request(self.service)[1]
@@ -1143,6 +1189,55 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         # the validation should succes with username settings.CAS_TEST_USER and transmit
         # the attributes settings.CAS_TEST_ATTRIBUTES
         self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
+
+    def test_validate_service_renew(self):
+        """test with a valid (ticket, service) asking for auth renewal"""
+        # case 1 client is renewing and service ask for renew
+        (client1, response) = get_auth_client(renew="True", service=self.service)
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        # get a bare client
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/serviceValidate',
+            {'ticket': ticket_value, 'service': self.service, 'renew': 'True'}
+        )
+        # the validation should succes with username settings.CAS_TEST_USER and transmit
+        # the attributes settings.CAS_TEST_ATTRIBUTES
+        self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
+
+        # cas2 client is renewing and service do not ask for renew
+        (client2, response) = get_auth_client(renew="True", service=self.service)
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        # get a bare client
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/serviceValidate',
+            {'ticket': ticket_value, 'service': self.service}
+        )
+        # the validation should succes with username settings.CAS_TEST_USER and transmit
+        # the attributes settings.CAS_TEST_ATTRIBUTES
+        self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
+
+        # case 3, client is not renewing and service ask for renew (client is authenticated)
+        response = client2.get("/login", {"service": self.service})
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get(
+            '/serviceValidate',
+            {'ticket': ticket_value, 'service': self.service, 'renew': 'True'}
+        )
+        # the validation should fail
+        self.assert_error(
+            response,
+            "INVALID_TICKET",
+            'ticket not found'
+        )
 
     def test_validate_service_view_ok_one_attribute(self):
         """

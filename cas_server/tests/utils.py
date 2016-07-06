@@ -74,10 +74,13 @@ def get_auth_client(**update):
     params["password"] = settings.CAS_TEST_PASSWORD
     params.update(update)
 
-    client.post('/login', params)
+    response = client.post('/login', params)
     assert client.session.get("authenticated")
 
-    return client
+    if params.get("service"):
+        return (client, response)
+    else:
+        return client
 
 
 def get_user_ticket_request(service):

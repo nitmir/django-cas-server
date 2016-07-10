@@ -73,5 +73,7 @@ setup(
     ],
     url="https://github.com/nitmir/django-cas-server",
     download_url="https://github.com/nitmir/django-cas-server/releases",
-    zip_safe=False
+    zip_safe=False,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest-django', 'pytest-pythonpath'],
 )

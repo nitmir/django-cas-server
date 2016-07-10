@@ -27,10 +27,12 @@ clean_tild_backup:
 clean_docs:
 	rm -rf docs/_build/
 	rm -rf docs/package/
+clean_eggs:
+	rm -rf .eggs/
 
 clean: clean_pyc clean_build clean_coverage clean_tild_backup
 
-clean_all: clean clean_tox clean_test_venv clean_docs
+clean_all: clean clean_tox clean_test_venv clean_docs clean_eggs
 
 dist:
 	python setup.py sdist

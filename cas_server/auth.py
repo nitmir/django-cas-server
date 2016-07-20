@@ -112,7 +112,7 @@ class TestAuthUser(AuthUser):
         """
         if self.username == settings.CAS_TEST_USER:
             return settings.CAS_TEST_ATTRIBUTES
-        else:
+        else:  # pragma: no cover (should not happen)
             return {}
 
 

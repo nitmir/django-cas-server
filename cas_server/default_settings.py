@@ -132,8 +132,8 @@ CAS_FEDERATE = False
 #: Time after witch the cookie use for “remember my identity provider” expire (one week).
 CAS_FEDERATE_REMEMBER_TIMEOUT = 604800
 
-current_global = globals().copy()
-for name, default_value in current_global.items():
+GLOBALS = globals().copy()
+for name, default_value in GLOBALS.items():
     # get the current setting value, falling back to default_value
     value = getattr(settings, name, default_value)
     # set the setting value to its value if defined, ellse to the default_value.

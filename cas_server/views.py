@@ -10,7 +10,7 @@
 #
 # (c) 2015-2016 Valentin Samir
 """views for the app"""
-from .default_settings import settings
+from .default_settings import settings, SessionStore
 
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
@@ -30,7 +30,6 @@ import pprint
 import requests
 from lxml import etree
 from datetime import timedelta
-from importlib import import_module
 
 import cas_server.utils as utils
 import cas_server.forms as forms
@@ -40,8 +39,6 @@ from .utils import json_response
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern, FederatedIendityProvider, FederatedUser
 from .federate import CASFederateValidateUser
-
-SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 logger = logging.getLogger(__name__)
 

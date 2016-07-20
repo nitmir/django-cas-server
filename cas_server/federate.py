@@ -10,25 +10,32 @@
 #
 # (c) 2016 Valentin Samir
 """federated mode helper classes"""
-from .default_settings import settings
+from .default_settings import SessionStore
 from django.db import IntegrityError
 
 from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
 
 import logging
-from importlib import import_module
 from six.moves import urllib
 
-SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
-
+#: logger facility
 logger = logging.getLogger(__name__)
 
 
 class CASFederateValidateUser(object):
-    """Class CAS client used to authenticate the user again a CAS provider"""
+    """
+        Class CAS client used to authenticate the user again a CAS provider
+
+        :param cas_server.models.FederatedIendityProvider provider: The provider to use for
+            authenticate the user.
+        :param unicode service_url: The service url to transmit to the ``provider``.
+    """
+    #: the provider returned username
     username = None
+    #: the provider returned attributes
     attributs = {}
+    #: the CAS client instance
     client = None
 
     def __init__(self, provider, service_url):
@@ -41,15 +48,31 @@ class CASFederateValidateUser(object):
         )
 
     def get_login_url(self):
-        """return the CAS provider login url"""
+        """
+            :return: the CAS provider login url
+            :rtype: unicode
+        """
         return self.client.get_login_url()
 
     def get_logout_url(self, redirect_url=None):
-        """return the CAS provider logout url"""
+        """
+            :param redirect_url: The url to redirect to after logout from the provider, if provided.
+            :type redirect_url: :obj:`unicode` or :obj:`NoneType<types.NoneType>`
+            :return: the CAS provider logout url
+            :rtype: unicode
+        """
         return self.client.get_logout_url(redirect_url)
 
     def verify_ticket(self, ticket):
-        """test `ticket` agains the CAS provider, if valid, create the local federated user"""
+        """
+            test ``ticket`` agains the CAS provider, if valid, create a
+            :class:`FederatedUser<cas_server.models.FederatedUser>` matching provider returned
+            username and attributes.
+
+            :param unicode ticket: The ticket to validate against the provider CAS
+            :return: ``True`` if the validation succeed, else ``False``.
+            :rtype: bool
+        """
         try:
             username, attributs = self.client.verify_ticket(ticket)[:2]
         except urllib.error.URLError:
@@ -73,7 +96,15 @@ class CASFederateValidateUser(object):
 
     @staticmethod
     def register_slo(username, session_key, ticket):
-        """association a ticket with a (username, session) for processing later SLO request"""
+        """
+            association a ``ticket`` with a (``username``, ``session_key``) for processing later SLO
+            request by creating a :class:`cas_server.models.FederateSLO` object.
+
+            :param unicode username: A logged user username, with the ``@`` component.
+            :param unicode session_key: A logged user session_key matching ``username``.
+            :param unicode ticket: A ticket used to authentication ``username`` for the session
+                ``session_key``.
+        """
         try:
             FederateSLO.objects.create(
                 username=username,
@@ -84,7 +115,14 @@ class CASFederateValidateUser(object):
             pass
 
     def clean_sessions(self, logout_request):
-        """process a SLO request"""
+        """
+            process a SLO request: Search for ticket values in ``logout_request``. For each
+            ticket value matching a :class:`cas_server.models.FederateSLO`, disconnect the
+            corresponding user.
+
+            :param unicode logout_request: An XML document contening one or more Single Log Out
+                requests.
+        """
         try:
             slos = self.client.get_saml_slos(logout_request) or []
         except NameError:  # pragma: no cover (should not happen)

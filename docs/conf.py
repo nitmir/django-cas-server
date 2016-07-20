@@ -20,6 +20,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
 
 SETUP = os.path.abspath('../setup.py')
 
@@ -37,6 +38,7 @@ django.setup()
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'djangodocs',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
@@ -346,11 +348,11 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    "python": ('https://docs.python.org/', None),
+    "django": ('https://docs.djangoproject.com/en/1.9/', 'django.inv'),
+}
 
 autodoc_member_order = 'bysource'
 
-def setup(app):
-    from django_sphinx import process_docstring
-    # Register the docstring processor with sphinx
-    app.connect('autodoc-process-docstring', process_docstring) 
+locale_dirs = ['../test_venv/lib/python2.7/site-packages/django/conf/locale/']

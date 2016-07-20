@@ -25,8 +25,7 @@ clean_coverage:
 clean_tild_backup:
 	find ./ -name '*~' -delete
 clean_docs:
-	rm -rf docs/_build/
-	rm -rf docs/package/
+	rm -rf docs/_build/ docs/django.inv
 clean_eggs:
 	rm -rf .eggs/
 
@@ -74,4 +73,4 @@ docs/package: test_venv/bin/sphinx-build
 	test_venv/bin/sphinx-apidoc -f -e cas_server -o docs/package/ cas_server/migrations/ cas_server/management/ cas_server/tests/ #cas_server/cas.py
 
 docs: docs/package test_venv/bin/sphinx-build
-	cd docs; export PATH=$(realpath test_venv/bin/):$$PATH; make coverage html
+	bash -c "source test_venv/bin/activate; cd docs; make html"

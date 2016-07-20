@@ -11,6 +11,7 @@ db.sqlite3
 manage.py
 coverage.xml
 docs/_build/
+docs/django.inv
 
 .tox
 test_venv

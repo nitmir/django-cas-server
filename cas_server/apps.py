@@ -14,6 +14,12 @@ from django.apps import AppConfig
 
 
 class CasAppConfig(AppConfig):
-    """django CAS application config class"""
+    """
+        Bases: :class:`django.apps.AppConfig`
+
+        django CAS application config class
+    """
+    #: Full Python path to the application. It must be unique across a Django project.
     name = 'cas_server'
+    #: Human-readable name for the application.
     verbose_name = _('Central Authentication Service')

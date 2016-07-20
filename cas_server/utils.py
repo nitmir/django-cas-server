@@ -30,13 +30,27 @@ from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
 def context(params):
-    """Function that add somes variable to the context before template rendering"""
+    """
+        Function that add somes variable to the context before template rendering
+
+        :param dict params: The context dictionary used to render templates.
+        :return: The ``params`` dictionary with the key ``settings`` set to
+            :obj:`django.conf.settings`.
+        :rtype: dict
+    """
     params["settings"] = settings
     return params
 
 
 def json_response(request, data):
-    """Wrapper dumping `data` to a json and sending it to the user with an HttpResponse"""
+    """
+        Wrapper dumping `data` to a json and sending it to the user with an HttpResponse
+
+        :param django.http.HttpRequest request: The request object used to generate this response.
+        :param dict data: The python dictionnary to return as a json
+        :return: The content of ``data`` serialized in json
+        :rtype: django.http.HttpResponse
+    """
     data["messages"] = []
     for msg in messages.get_messages(request):
         data["messages"].append({'message': msg.message, 'level': msg.level_tag})
@@ -44,7 +58,13 @@ def json_response(request, data):
 
 
 def import_attr(path):
-    """transform a python module.attr path to the attr"""
+    """
+        transform a python dotted path to the attr
+
+        :param path: A dotted path to a python object or a python object
+        :type path: :obj:`unicode` or anything
+        :return: The python object pointed by the dotted path or the python object unchanged
+    """
     if not isinstance(path, str):
         return path
     if "." not in path:
@@ -59,24 +79,50 @@ def import_attr(path):
 
 
 def redirect_params(url_name, params=None):
-    """Redirect to `url_name` with `params` as querystring"""
+    """
+        Redirect to ``url_name`` with ``params`` as querystring
+
+        :param unicode url_name: a URL pattern name
+        :param params: Some parameter to append to the reversed URL
+        :type params: :obj:`dict` or :obj:`NoneType<types.NoneType>`
+        :return: A redirection to the URL with name ``url_name`` with ``params`` as querystring.
+        :rtype: django.http.HttpResponseRedirect
+    """
     url = reverse(url_name)
     params = urlencode(params if params else {})
     return HttpResponseRedirect(url + "?%s" % params)
 
 
 def reverse_params(url_name, params=None, **kwargs):
-    """compule the reverse url or `url_name` and add GET parameters from `params` to it"""
+    """
+        compute the reverse url of ``url_name`` and add to it parameters from ``params``
+        as querystring
+
+        :param unicode url_name: a URL pattern name
+        :param params: Some parameter to append to the reversed URL
+        :type params: :obj:`dict` or :obj:`NoneType<types.NoneType>`
+        :param **kwargs: additional parameters needed to compure the reverse URL
+        :return: The computed reverse URL of ``url_name`` with possible querystring from ``params``
+        :rtype: unicode
+    """
     url = reverse(url_name, **kwargs)
     params = urlencode(params if params else {})
     if params:
-        return url + "?%s" % params
+        return u"%s?%s" % (url, params)
     else:
         return url
 
 
 def copy_params(get_or_post_params, ignore=None):
-    """copy from a dictionnary like `get_or_post_params` ignoring keys in the set `ignore`"""
+    """
+        copy a :class:`django.http.QueryDict` in a :obj:`dict` ignoring keys in the set ``ignore``
+
+        :param django.http.QueryDict get_or_post_params: A GET or POST
+            :class:`QueryDict<django.http.QueryDict>`
+        :param set ignore: An optinal set of keys to ignore during the copy
+        :return: A copy of get_or_post_params
+        :rtype: dict
+    """
     if ignore is None:
         ignore = set()
     params = {}
@@ -87,7 +133,14 @@ def copy_params(get_or_post_params, ignore=None):
 
 
 def set_cookie(response, key, value, max_age):
-    """Set the cookie `key` on `response` with value `value` valid for `max_age` secondes"""
+    """
+        Set the cookie ``key`` on ``response`` with value ``value`` valid for ``max_age`` secondes
+
+        :param django.http.HttpResponse response: a django response where to set the cookie
+        :param unicode key: the cookie key
+        :param unicode value: the cookie value
+        :param int max_age: the maximum validity age of the cookie
+    """
     expires = datetime.strftime(
         datetime.utcnow() + timedelta(seconds=max_age),
         "%a, %d-%b-%Y %H:%M:%S GMT"
@@ -103,20 +156,36 @@ def set_cookie(response, key, value, max_age):
 
 
 def get_current_url(request, ignore_params=None):
-    """Giving a django request, return the current http url, possibly ignoring some GET params"""
+    """
+        Giving a django request, return the current http url, possibly ignoring some GET parameters
+
+        :param django.http.HttpRequest request: The current request object.
+        :param set ignore_params: An optional set of GET parameters to ignore
+        :return: The URL of the current page, possibly omitting some parameters from
+            ``ignore_params`` in the querystring.
+        :rtype: unicode
+    """
     if ignore_params is None:
         ignore_params = set()
-    protocol = 'https' if request.is_secure() else "http"
-    service_url = "%s://%s%s" % (protocol, request.get_host(), request.path)
+    protocol = u'https' if request.is_secure() else u"http"
+    service_url = u"%s://%s%s" % (protocol, request.get_host(), request.path)
     if request.GET:
         params = copy_params(request.GET, ignore_params)
         if params:
-            service_url += "?%s" % urlencode(params)
+            service_url += u"?%s" % urlencode(params)
     return service_url
 
 
 def update_url(url, params):
-    """update params in the `url` query string"""
+    """
+        update parameters using ``params`` in the ``url`` query string
+
+        :param url: An URL possibily with a querystring
+        :type url: :obj:`unicode` or :obj:`str`
+        :param dict params: A dictionary of parameters for updating the url querystring
+        :return: The URL with an updated querystring
+        :rtype: unicode
+    """
     if not isinstance(url, bytes):
         url = url.encode('utf-8')
     for key, value in list(params.items()):
@@ -140,7 +209,12 @@ def update_url(url, params):
 
 
 def unpack_nested_exception(error):
-    """If exception are stacked, return the first one"""
+    """
+        If exception are stacked, return the first one
+
+        :param error: A python exception with possible exception embeded within
+        :return: A python exception with no exception embeded within
+    """
     i = 0
     while True:
         if error.args[i:]:
@@ -154,52 +228,97 @@ def unpack_nested_exception(error):
     return error
 
 
-def _gen_ticket(prefix, lg=settings.CAS_TICKET_LEN):
-    """Generate a ticket with prefix `prefix`"""
-    return '%s-%s' % (
-        prefix,
-        ''.join(
-            random.choice(
-                string.ascii_letters + string.digits
-            ) for _ in range(lg - len(prefix) - 1)
-        )
+def _gen_ticket(prefix=None, lg=settings.CAS_TICKET_LEN):
+    """
+        Generate a ticket with prefix ``prefix`` and length ``lg``
+
+        :param unicode prefix: An optional prefix (probably ST, PT, PGT or PGTIOU)
+        :param int lg: The length of the generated ticket (with the prefix)
+        :return: A randomlly generated ticket of length ``lg``
+        :rtype: unicode
+    """
+    random_part = u''.join(
+        random.choice(
+            string.ascii_letters + string.digits
+        ) for _ in range(lg - len(prefix or "") - 1)
     )
+    if prefix is not None:
+        return u'%s-%s' % (prefix, random_part)
+    else:
+        return random_part
 
 
 def gen_lt():
-    """Generate a Service Ticket"""
+    """
+        Generate a Login Ticket
+
+        :return: A ticket with prefix ``settings.CAS_LOGIN_TICKET_PREFIX`` and length
+            ``settings.CAS_LT_LEN``
+        :rtype: unicode
+    """
     return _gen_ticket(settings.CAS_LOGIN_TICKET_PREFIX, settings.CAS_LT_LEN)
 
 
 def gen_st():
-    """Generate a Service Ticket"""
+    """
+        Generate a Service Ticket
+
+        :return: A ticket with prefix ``settings.CAS_SERVICE_TICKET_PREFIX`` and length
+            ``settings.CAS_ST_LEN``
+        :rtype: unicode
+    """
     return _gen_ticket(settings.CAS_SERVICE_TICKET_PREFIX, settings.CAS_ST_LEN)
 
 
 def gen_pt():
-    """Generate a Proxy Ticket"""
+    """
+        Generate a Proxy Ticket
+
+        :return: A ticket with prefix ``settings.CAS_PROXY_TICKET_PREFIX`` and length
+            ``settings.CAS_PT_LEN``
+        :rtype: unicode
+    """
     return _gen_ticket(settings.CAS_PROXY_TICKET_PREFIX, settings.CAS_PT_LEN)
 
 
 def gen_pgt():
-    """Generate a Proxy Granting Ticket"""
+    """
+        Generate a Proxy Granting Ticket
+
+        :return: A ticket with prefix ``settings.CAS_PROXY_GRANTING_TICKET_PREFIX`` and length
+            ``settings.CAS_PGT_LEN``
+        :rtype: unicode
+    """
     return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_PREFIX, settings.CAS_PGT_LEN)
 
 
 def gen_pgtiou():
-    """Generate a Proxy Granting Ticket IOU"""
+    """
+        Generate a Proxy Granting Ticket IOU
+
+        :return: A ticket with prefix ``settings.CAS_PROXY_GRANTING_TICKET_IOU_PREFIX`` and length
+            ``settings.CAS_PGTIOU_LEN``
+        :rtype: unicode
+    """
     return _gen_ticket(settings.CAS_PROXY_GRANTING_TICKET_IOU_PREFIX, settings.CAS_PGTIOU_LEN)
 
 
 def gen_saml_id():
-    """Generate an saml id"""
-    return _gen_ticket('_')
+    """
+        Generate an saml id
+
+        :return: A random id of length ``settings.CAS_TICKET_LEN``
+        :rtype: unicode
+    """
+    return _gen_ticket()
 
 
 def get_tuple(nuplet, index, default=None):
     """
-        return the value in index `index` of the tuple `nuplet` if it exists,
-        else return `default`
+        :param tuple nuplet: A tuple
+        :param int index: An index
+        :param default: An optional default value
+        :return: ``nuplet[index]`` if defined, else ``default`` (possibly ``None``)
     """
     if nuplet is None:
         return default
@@ -210,7 +329,13 @@ def get_tuple(nuplet, index, default=None):
 
 
 def crypt_salt_is_valid(salt):
-    """Return True is salt is valid has a crypt salt, False otherwise"""
+    """
+        Validate a salt as crypt salt
+
+        :param str salt: a password salt
+        :return: ``True`` if ``salt`` is a valid crypt salt on this system, ``False`` otherwise
+        :rtype: bool
+    """
     if len(salt) < 2:
         return False
     else:
@@ -231,11 +356,17 @@ def crypt_salt_is_valid(salt):
 
 
 class LdapHashUserPassword(object):
-    """Please see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html"""
+    """
+        Class to deal with hashed password as defined at
+        https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html
+    """
 
+    #: valide schemes that require a salt
     schemes_salt = {b"{SMD5}", b"{SSHA}", b"{SSHA256}", b"{SSHA384}", b"{SSHA512}", b"{CRYPT}"}
+    #: valide sschemes that require no slat
     schemes_nosalt = {b"{MD5}", b"{SHA}", b"{SHA256}", b"{SHA384}", b"{SHA512}"}
 
+    #: map beetween scheme and hash function
     _schemes_to_hash = {
         b"{SMD5}": hashlib.md5,
         b"{MD5}": hashlib.md5,
@@ -249,6 +380,7 @@ class LdapHashUserPassword(object):
         b"{SHA512}": hashlib.sha512
     }
 
+    #: map between scheme and hash length
     _schemes_to_len = {
         b"{SMD5}": 16,
         b"{SSHA}": 20,
@@ -258,7 +390,10 @@ class LdapHashUserPassword(object):
     }
 
     class BadScheme(ValueError):
-        """Error raised then the hash scheme is not in schemes_salt + schemes_nosalt"""
+        """
+            Error raised then the hash scheme is not in
+            :attr:`LdapHashUserPassword.schemes_salt` + :attr:`LdapHashUserPassword.schemes_nosalt`
+        """
         pass
 
     class BadHash(ValueError):
@@ -266,14 +401,19 @@ class LdapHashUserPassword(object):
         pass
 
     class BadSalt(ValueError):
-        """Error raised then with the scheme {CRYPT} the salt is invalid"""
+        """Error raised then, with the scheme ``{CRYPT}``, the salt is invalid"""
         pass
 
     @classmethod
     def _raise_bad_scheme(cls, scheme, valid, msg):
         """
-            Raise BadScheme error for `scheme`, possible valid scheme are
-            in `valid`, the error message is `msg`
+            Raise :attr:`BadScheme` error for ``scheme``, possible valid scheme are
+            in ``valid``, the error message is ``msg``
+
+            :param bytes scheme: A bad scheme
+            :param list valid: A list a valid scheme
+            :param str msg: The error template message
+            :raises LdapHashUserPassword.BadScheme: always
         """
         valid_schemes = [s.decode() for s in valid]
         valid_schemes.sort()
@@ -281,7 +421,12 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _test_scheme(cls, scheme):
-        """Test if a scheme is valide or raise BadScheme"""
+        """
+            Test if a scheme is valide or raise BadScheme
+
+            :param bytes scheme: A scheme
+            :raises BadScheme: if ``scheme`` is not a valid scheme
+        """
         if scheme not in cls.schemes_salt and scheme not in cls.schemes_nosalt:
             cls._raise_bad_scheme(
                 scheme,
@@ -291,7 +436,12 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _test_scheme_salt(cls, scheme):
-        """Test if the scheme need a salt or raise BadScheme"""
+        """
+            Test if the scheme need a salt or raise BadScheme
+
+            :param bytes scheme: A scheme
+            :raises BadScheme: if ``scheme` require no salt
+        """
         if scheme not in cls.schemes_salt:
             cls._raise_bad_scheme(
                 scheme,
@@ -301,7 +451,12 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def _test_scheme_nosalt(cls, scheme):
-        """Test if the scheme need no salt or raise BadScheme"""
+        """
+            Test if the scheme need no salt or raise BadScheme
+
+            :param bytes scheme: A scheme
+            :raises BadScheme: if ``scheme` require a salt
+        """
         if scheme not in cls.schemes_nosalt:
             cls._raise_bad_scheme(
                 scheme,
@@ -312,8 +467,15 @@ class LdapHashUserPassword(object):
     @classmethod
     def hash(cls, scheme, password, salt=None, charset="utf8"):
         """
-           Hash `password` with `scheme` using `salt`.
-           This three variable beeing encoded in `charset`.
+           Hash ``password`` with ``scheme`` using ``salt``.
+           This three variable beeing encoded in ``charset``.
+
+           :param bytes scheme: A valid scheme
+           :param bytes password: A byte string to hash using ``scheme``
+           :param bytes salt: An optional salt to use if ``scheme`` requires any
+           :param str charset: The encoding of ``scheme``, ``password`` and ``salt``
+           :return: The hashed password encoded with ``charset``
+           :rtype: bytes
         """
         scheme = scheme.upper()
         cls._test_scheme(scheme)
@@ -339,7 +501,14 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def get_scheme(cls, hashed_passord):
-        """Return the scheme of `hashed_passord` or raise BadHash"""
+        """
+            Return the scheme of ``hashed_passord`` or raise :attr:`BadHash`
+
+            :param bytes hashed_passord: A hashed password
+            :return: The scheme used by the hashed password
+            :rtype: bytes
+            :raises BadHash: if no valid scheme is found within ``hashed_passord``
+        """
         if not hashed_passord[0] == b'{'[0] or b'}' not in hashed_passord:
             raise cls.BadHash("%r should start with the scheme enclosed with { }" % hashed_passord)
         scheme = hashed_passord.split(b'}', 1)[0]
@@ -348,7 +517,15 @@ class LdapHashUserPassword(object):
 
     @classmethod
     def get_salt(cls, hashed_passord):
-        """Return the salt of `hashed_passord` possibly empty"""
+        """
+            Return the salt of ``hashed_passord`` possibly empty
+
+            :param bytes hashed_passord: A hashed password
+            :return: The salt used by the hashed password (empty if no salt is used)
+            :rtype: bytes
+            :raises BadHash: if no valid scheme is found within ``hashed_passord`` or if the
+                hashed password is too short for the scheme found.
+        """
         scheme = cls.get_scheme(hashed_passord)
         cls._test_scheme(scheme)
         if scheme in cls.schemes_nosalt:
@@ -364,8 +541,20 @@ class LdapHashUserPassword(object):
 
 def check_password(method, password, hashed_password, charset):
     """
-        Check that `password` match `hashed_password` using `method`,
-        assuming the encoding is `charset`.
+        Check that ``password`` match `hashed_password` using ``method``,
+        assuming the encoding is ``charset``.
+
+        :param str method: on of ``"crypt"``, ``"ldap"``, ``"hex_md5"``, ``"hex_sha1"``,
+            ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``, ``"hex_sha512"``, ``"plain"``
+        :param password: The user inputed password
+        :type password: :obj:`str` or :obj:`unicode`
+        :param hashed_password: The hashed password as stored in the database
+        :type hashed_password: :obj:`str` or :obj:`unicode`
+        :param str charset: The used char encoding (also used internally, so it must be valid for
+            the charset used by ``password`` even if it is inputed as an :obj:`unicode`)
+        :return: True if ``password`` match ``hashed_password`` using ``method``,
+            ``False`` otherwise
+        :rtype: bool
     """
     if not isinstance(password, six.binary_type):
         password = password.encode(charset)

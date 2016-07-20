@@ -1193,7 +1193,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
     def test_validate_service_renew(self):
         """test with a valid (ticket, service) asking for auth renewal"""
         # case 1 client is renewing and service ask for renew
-        (client1, response) = get_auth_client(renew="True", service=self.service)
+        response = get_auth_client(renew="True", service=self.service)[1]
         self.assertEqual(response.status_code, 302)
         ticket_value = response['Location'].split('ticket=')[-1]
         # get a bare client

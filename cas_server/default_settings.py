@@ -104,8 +104,9 @@ CAS_SQL_DBNAME = ''
 CAS_SQL_DBCHARSET = 'utf8'
 #: The query performed upon user authentication.
 CAS_SQL_USER_QUERY = 'SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s'
-#: The method used to check the user password. Must be one of ``crypt``, ``ldap``,  ``hex_md5``,
-#: ``hex_sha1``, ``hex_sha224``, ``hex_sha256``, ``hex_sha384``, ``hex_sha512``, ``plain``.
+#: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
+#: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
+#: ``"hex_sha512"``, ``"plain"``.
 CAS_SQL_PASSWORD_CHECK = 'crypt'  # crypt or plain
 
 
@@ -131,8 +132,8 @@ CAS_FEDERATE = False
 #: Time after witch the cookie use for “remember my identity provider” expire (one week).
 CAS_FEDERATE_REMEMBER_TIMEOUT = 604800
 
-
-for name, default_value in globals().items():
+current_global = globals().copy()
+for name, default_value in current_global.items():
     # get the current setting value, falling back to default_value
     value = getattr(settings, name, default_value)
     # set the setting value to its value if defined, ellse to the default_value.

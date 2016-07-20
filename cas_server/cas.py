@@ -36,7 +36,7 @@ class CASError(ValueError):
 
 class ReturnUnicode(object):
     @staticmethod
-    def unicode(string, charset):
+    def u(string, charset):
         if not isinstance(string, six.text_type):
             return string.decode(charset)
         else:
@@ -157,7 +157,7 @@ class CASClientV1(CASClientBase, ReturnUnicode):
                     charset = content_type.split("charset=")[-1]
                 else:
                     charset = "ascii"
-                user = self.unicode(page.readline().strip(), charset)
+                user = self.u(page.readline().strip(), charset)
                 return user, None, None
             else:
                 return None, None, None
@@ -202,18 +202,18 @@ class CASClientV2(CASClientBase, ReturnUnicode):
     def parse_attributes_xml_element(cls, element, charset):
         attributes = dict()
         for attribute in element:
-            tag = cls.self.unicode(attribute.tag, charset).split(u"}").pop()
+            tag = cls.self.u(attribute.tag, charset).split(u"}").pop()
             if tag in attributes:
                 if isinstance(attributes[tag], list):
-                    attributes[tag].append(cls.unicode(attribute.text, charset))
+                    attributes[tag].append(cls.u(attribute.text, charset))
                 else:
                     attributes[tag] = [attributes[tag]]
-                    attributes[tag].append(cls.unicode(attribute.text, charset))
+                    attributes[tag].append(cls.u(attribute.text, charset))
             else:
                 if tag == u'attraStyle':
                     pass
                 else:
-                    attributes[tag] = cls.unicode(attribute.text, charset)
+                    attributes[tag] = cls.u(attribute.text, charset)
         return attributes
 
     @classmethod
@@ -238,9 +238,9 @@ class CASClientV2(CASClientBase, ReturnUnicode):
         if tree[0].tag.endswith('authenticationSuccess'):
             for element in tree[0]:
                 if element.tag.endswith('user'):
-                    user = cls.unicode(element.text, charset)
+                    user = cls.u(element.text, charset)
                 elif element.tag.endswith('proxyGrantingTicket'):
-                    pgtiou = cls.unicode(element.text, charset)
+                    pgtiou = cls.u(element.text, charset)
                 elif element.tag.endswith('attributes'):
                     attributes = cls.parse_attributes_xml_element(element, charset)
         return user, attributes, pgtiou
@@ -255,15 +255,15 @@ class CASClientV3(CASClientV2, SingleLogoutMixin):
     def parse_attributes_xml_element(cls, element, charset):
         attributes = dict()
         for attribute in element:
-            tag = cls.unicode(attribute.tag, charset).split(u"}").pop()
+            tag = cls.u(attribute.tag, charset).split(u"}").pop()
             if tag in attributes:
                 if isinstance(attributes[tag], list):
-                    attributes[tag].append(cls.unicode(attribute.text, charset))
+                    attributes[tag].append(cls.u(attribute.text, charset))
                 else:
                     attributes[tag] = [attributes[tag]]
-                    attributes[tag].append(cls.unicode(attribute.text, charset))
+                    attributes[tag].append(cls.u(attribute.text, charset))
             else:
-                attributes[tag] = cls.unicode(attribute.text, charset)
+                attributes[tag] = cls.u(attribute.text, charset)
         return attributes
 
     @classmethod
@@ -323,25 +323,25 @@ class CASClientWithSAMLV1(CASClientV2, SingleLogoutMixin):
                 # User is validated
                 name_identifier = tree.find('.//' + SAML_1_0_ASSERTION_NS + 'NameIdentifier')
                 if name_identifier is not None:
-                    user = self.unicode(name_identifier.text, charset)
+                    user = self.u(name_identifier.text, charset)
                 attrs = tree.findall('.//' + SAML_1_0_ASSERTION_NS + 'Attribute')
                 for at in attrs:
                     if self.username_attribute in list(at.attrib.values()):
-                        user = self.unicode(
+                        user = self.u(
                             at.find(SAML_1_0_ASSERTION_NS + 'AttributeValue').text,
                             charset
                         )
                         attributes[u'uid'] = user
 
                     values = at.findall(SAML_1_0_ASSERTION_NS + 'AttributeValue')
-                    key = self.unicode(at.attrib['AttributeName'], charset)
+                    key = self.u(at.attrib['AttributeName'], charset)
                     if len(values) > 1:
                         values_array = []
                         for v in values:
-                            values_array.append(self.unicode(v.text, charset))
+                            values_array.append(self.u(v.text, charset))
                             attributes[key] = values_array
                     else:
-                        attributes[key] = self.unicode(values[0].text, charset)
+                        attributes[key] = self.u(values[0].text, charset)
             return user, attributes, None
         finally:
             page.close()

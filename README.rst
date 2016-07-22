@@ -1,19 +1,19 @@
 CAS Server
 ##########
 
-.. image:: https://travis-ci.org/nitmir/django-cas-server.svg?branch=master
+.. image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
     :target: https://travis-ci.org/nitmir/django-cas-server
 
-.. image:: https://img.shields.io/pypi/v/django-cas-server.svg
+.. image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.python.org/pypi/django-cas-server
 
-.. image:: https://img.shields.io/pypi/l/django-cas-server.svg
+.. image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
-.. image:: https://api.codacy.com/project/badge/Grade/255c21623d6946ef8802fa7995b61366
+.. image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
     :target: https://www.codacy.com/app/valentin-samir/django-cas-server
 
-.. image:: https://api.codacy.com/project/badge/Coverage/255c21623d6946ef8802fa7995b61366
+.. image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
     :target: https://www.codacy.com/app/valentin-samir/django-cas-server
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification

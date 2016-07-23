@@ -1,20 +1,7 @@
 CAS Server
 ##########
 
-.. image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
-    :target: https://travis-ci.org/nitmir/django-cas-server
-
-.. image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
-    :target: https://pypi.python.org/pypi/django-cas-server
-
-.. image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
-    :target: https://www.gnu.org/licenses/gpl-3.0.html
-
-.. image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
-
-.. image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+|travis| |version| |lisence| |codacy| |coverage|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
@@ -489,3 +476,20 @@ You could for example do as bellow :
 .. code-block::
 
     10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+
+
+
+.. |travis| image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
+    :target: https://travis-ci.org/nitmir/django-cas-server
+
+.. |version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
+    :target: https://pypi.python.org/pypi/django-cas-server
+
+.. |lisence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
+    :target: https://www.gnu.org/licenses/gpl-3.0.html
+
+.. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+
+.. |coverage| image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server

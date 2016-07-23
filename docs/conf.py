@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
 
-SETUP = os.path.abspath('../setup.py')
+import setup as mysetup
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'cas_server.tests.settings'
 
@@ -72,7 +72,7 @@ author = u'Valentin Samir'
 # built documents.
 #
 # The short X.Y version.
-version = os.popen("python %s -V" % SETUP).read().strip().decode("ascii")
+version = mysetup.VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -356,3 +356,14 @@ intersphinx_mapping = {
 autodoc_member_order = 'bysource'
 
 locale_dirs = ['../test_venv/lib/python2.7/site-packages/django/conf/locale/']
+
+
+def _download_django_inv():
+    import requests
+    with open(_download_django_inv.path, 'w') as f:
+        r = requests.get("https://docs.djangoproject.com/en/1.9/_objects")
+        f.write(r.content)
+_download_django_inv.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "django.inv"))
+
+if not os.path.isfile(_download_django_inv.path):
+    _download_django_inv()

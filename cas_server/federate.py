@@ -37,6 +37,10 @@ class CASFederateValidateUser(object):
     attributs = {}
     #: the CAS client instance
     client = None
+    #: the provider returned username this the provider suffix appended
+    federated_username = None
+    #: the identity provider
+    provider = None
 
     def __init__(self, provider, service_url):
         self.provider = provider

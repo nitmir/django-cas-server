@@ -50,7 +50,6 @@ clean:
 
 .PHONY: html
 html:
-	wget https://docs.djangoproject.com/en/1.9/_objects -O django.inv
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

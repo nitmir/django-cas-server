@@ -63,8 +63,17 @@ class AttributesMixin(object):
 class LogoutMixin(object):
     """destroy CAS session utils"""
     def logout(self, all_session=False):
-        """effectively destroy CAS session"""
+        """
+            effectively destroy a CAS session
+
+            :param boolean all_session: If ``True`` destroy all the user sessions, otherwise
+                destroy the current user session.
+            :return: The number of destroyed sessions
+            :rtype: int
+        """
+        # initialize the counter of the number of destroyed sesisons
         session_nb = 0
+        # save the current user username before flushing the session
         username = self.request.session.get("username")
         if username:
             if all_session:
@@ -77,14 +86,13 @@ class LogoutMixin(object):
                 username=username,
                 session_key=self.request.session.session_key
             )
-            if settings.CAS_FEDERATE:
-                models.FederateSLO.objects.filter(
-                    username=username,
-                    session_key=self.request.session.session_key
-                ).delete()
+            # flush the session
             self.request.session.flush()
+            # send SLO requests
             user.logout(self.request)
+            # delete the user
             user.delete()
+            # increment the destroyed session counter
             session_nb += 1
         except models.User.DoesNotExist:
             # if user not found in database, flush the session anyway
@@ -92,32 +100,55 @@ class LogoutMixin(object):
 
         # If all_session is set logout user from alternative sessions
         if all_session:
+            # Iterate over all user sessions
             for user in models.User.objects.filter(username=username):
+                # get the user session
                 session = SessionStore(session_key=user.session_key)
+                # flush the session
                 session.flush()
+                # send SLO requests
                 user.logout(self.request)
+                # delete the user
                 user.delete()
+                # increment the destroyed session counter
                 session_nb += 1
-        logger.info("User %s logged out" % username)
+        if username:
+            logger.info("User %s logged out" % username)
         return session_nb
 
 
 class LogoutView(View, LogoutMixin):
     """destroy CAS session (logout) view"""
 
+    #: current :class:`django.http.HttpRequest` object
     request = None
+    #: service GET parameter
     service = None
+    #: url GET paramet
+    url = None
+    #: ``True`` if the HTTP_X_AJAX http header is sent and ``settings.CAS_ENABLE_AJAX_AUTH``
+    #: is ``True``, ``False`` otherwise.
+    ajax = None
 
     def init_get(self, request):
-        """Initialize GET received parameters"""
+        """
+            Initialize the :class:`LogoutView` attributes on GET request
+
+            :param django.http.HttpRequest request: The current request object
+        """
         self.request = request
         self.service = request.GET.get('service')
         self.url = request.GET.get('url')
         self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
 
     def get(self, request, *args, **kwargs):
-        """methode called on GET request on this view"""
+        """
+            methode called on GET request on this view
+
+            :param django.http.HttpRequest request: The current request object
+        """
         logger.info("logout requested")
+        # initialize the class attributes
         self.init_get(request)
         # if CAS federation mode is enable, bakup the provider before flushing the sessions
         if settings.CAS_FEDERATE:
@@ -129,7 +160,8 @@ class LogoutView(View, LogoutMixin):
             except FederatedUser.DoesNotExist:
                 auth = None
         session_nb = self.logout(self.request.GET.get("all"))
-        # if CAS federation mode is enable, redirect to user CAS logout page
+        # if CAS federation mode is enable, redirect to user CAS logout page, appending the
+        # current querystring
         if settings.CAS_FEDERATE:
             if auth is not None:
                 params = utils.copy_params(request.GET)
@@ -139,11 +171,12 @@ class LogoutView(View, LogoutMixin):
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
             return HttpResponseRedirect(self.service)
+        # if service is not set but url is set, redirect to url after logout
         elif self.url:
             list(messages.get_messages(request))  # clean messages before leaving the django app
             return HttpResponseRedirect(self.url)
-        # else redirect to login page
         else:
+            # build logout message depending of the number of sessions the user logs out
             if session_nb == 1:
                 logout_msg = _(
                     "<h3>Logout successful</h3>"
@@ -164,6 +197,8 @@ class LogoutView(View, LogoutMixin):
                     "For security reasons, exit your web browser."
                 )
 
+            # depending of settings, redirect to the login page with a logout message or display
+            # the logout page. The default is to display tge logout page.
             if settings.CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT:
                 messages.add_message(request, messages.SUCCESS, logout_msg)
                 if self.ajax:
@@ -191,23 +226,42 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(View):
     """view to authenticated user agains a backend CAS then CAS_FEDERATE is True"""
-    @method_decorator(csrf_exempt)
+    @method_decorator(csrf_exempt)  # csrf is disabled for allowing SLO requests reception
     def dispatch(self, request, *args, **kwargs):
-        """dispatch different http request to the methods of the same name"""
+        """
+            dispatch different http request to the methods of the same name
+
+            :param django.http.HttpRequest request: The current request object
+        """
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
     @staticmethod
     def get_cas_client(request, provider):
-        """return a CAS client object matching provider"""
+        """
+            return a CAS client object matching provider
+
+            :param django.http.HttpRequest request: The current request object
+            :param cas_server.models.FederatedIendityProvider provider: the user identity provider
+            :return: The user CAS client object
+            :rtype: :class:`federate.CASFederateValidateUser<cas_server.federate.CASFederateValidateUser>`
+        """
+        # compute the current url, ignoring ticket dans provider GET parameters
         service_url = utils.get_current_url(request, {"ticket", "provider"})
         return CASFederateValidateUser(provider, service_url)
 
     def post(self, request, provider=None):
-        """method called on POST request"""
+        """
+            method called on POST request
+
+            :param django.http.HttpRequest request: The current request object
+            :param unicode provider: Optional parameter. The user provider suffix.
+        """
+        # if settings.CAS_FEDERATE is not True redirect to the login page
         if not settings.CAS_FEDERATE:
             logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
             return redirect("cas_server:login")
-        # POST with a provider, this is probably an SLO request
+        # POST with a provider suffix, this is probably an SLO request. csrf is disabled for
+        # allowing SLO requests reception
         try:
             provider = FederatedIendityProvider.objects.get(suffix=provider)
             auth = self.get_cas_client(request, provider)
@@ -234,6 +288,7 @@ class FederateAuth(View):
                     params=params
                 )
                 response = HttpResponseRedirect(url)
+                # If the user has checked "remember my identity provider" store it in a cookie
                 if form.cleaned_data["remember"]:
                     max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
                     utils.set_cookie(
@@ -247,21 +302,33 @@ class FederateAuth(View):
                 return redirect("cas_server:login")
 
     def get(self, request, provider=None):
-        """method called on GET request"""
+        """
+            method called on GET request
+
+            :param django.http.HttpRequest request: The current request object
+            :param unicode provider: Optional parameter. The user provider suffix.
+        """
+        # if settings.CAS_FEDERATE is not True redirect to the login page
         if not settings.CAS_FEDERATE:
             logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
             return redirect("cas_server:login")
+        # Is the user is already authenticated, no need to request authentication to the user
+        # identity provider.
         if self.request.session.get("authenticated"):
             logger.warning("User already authenticated, dropping federate authentication request")
             return redirect("cas_server:login")
         try:
+            # get the identity provider from its suffix
             provider = FederatedIendityProvider.objects.get(suffix=provider)
+            # get a CAS client for the user identity provider
             auth = self.get_cas_client(request, provider)
+            # if no ticket submited, redirect to the identity provider CAS login page
             if 'ticket' not in request.GET:
                 logger.info("Trying to authenticate again %s" % auth.provider.server_url)
                 return HttpResponseRedirect(auth.get_login_url())
             else:
                 ticket = request.GET['ticket']
+                # if the ticket validation succeed
                 if auth.verify_ticket(ticket):
                     logger.info(
                         "Got a valid ticket for %s from %s" % (
@@ -273,8 +340,11 @@ class FederateAuth(View):
                     request.session["federate_username"] = auth.federated_username
                     request.session["federate_ticket"] = ticket
                     auth.register_slo(auth.federated_username, request.session.session_key, ticket)
+                    # redirect to the the login page for the user to become authenticated
+                    # thanks to the `federate_username` and `federate_ticket` session parameters
                     url = utils.reverse_params("cas_server:login", params)
                     return HttpResponseRedirect(url)
+                # else redirect to the identity provider CAS login page
                 else:
                     logger.info(
                         "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
@@ -285,6 +355,7 @@ class FederateAuth(View):
                     return HttpResponseRedirect(auth.get_login_url())
         except FederatedIendityProvider.DoesNotExist:
             logger.warning("Identity provider suffix %s not found" % provider)
+            # if the identity provider is not found, redirect to the login page
             return redirect("cas_server:login")
 
 
@@ -294,21 +365,38 @@ class LoginView(View, LogoutMixin):
     # pylint: disable=too-many-instance-attributes
     # Nine is reasonable in this case.
 
+    #: The current :class:`models.User<cas_server.models.User>` object
     user = None
+    #: The form to display to the user
     form = None
 
+    #: current :class:`django.http.HttpRequest` object
     request = None
+    #: service GET/POST parameter
     service = None
+    #: ``True`` if renew GET/POST parameter is present and not "False"
     renew = None
+    #: the warn GET/POST parameter
+    warn = None
+    #: the gateway GET/POST parameter
     gateway = None
+    #: the method GET/POST parameter
     method = None
+
+    #: ``True`` if the HTTP_X_AJAX http header is sent and ``settings.CAS_ENABLE_AJAX_AUTH``
+    #: is ``True``, ``False`` otherwise.
     ajax = None
 
+    #: ``True`` if the user has just authenticated
     renewed = False
+    #: ``True`` if renew GET/POST parameter is present and not "False"
     warned = False
 
-    # used if CAS_FEDERATE is True
+    #: The :class:`FederateAuth` transmited username (only used if ``settings.CAS_FEDERATE``
+    #: is ``True``)
     username = None
+    #: The :class:`FederateAuth` transmited ticket (only used if ``settings.CAS_FEDERATE`` is
+    #: ``True``)
     ticket = None
 
     INVALID_LOGIN_TICKET = 1
@@ -319,7 +407,11 @@ class LoginView(View, LogoutMixin):
     USER_NOT_AUTHENTICATED = 6
 
     def init_post(self, request):
-        """Initialize POST received parameters"""
+        """
+            Initialize POST received parameters
+
+            :param django.http.HttpRequest request: The current request object
+        """
         self.request = request
         self.service = request.POST.get('service')
         self.renew = bool(request.POST.get('renew') and request.POST['renew'] != "False")
@@ -340,7 +432,12 @@ class LoginView(View, LogoutMixin):
             self.request.session['lt'] = self.request.session['lt'][-100:]
 
     def check_lt(self):
-        """Check is the POSTed LoginTicket is valid, if yes invalide it"""
+        """
+            Check is the POSTed LoginTicket is valid, if yes invalide it
+
+            :return: ``True`` if the LoginTicket is valid, ``False`` otherwise
+            :rtype: bool
+        """
         # save LT for later check
         lt_valid = self.request.session.get('lt', [])
         lt_send = self.request.POST.get('lt')
@@ -351,12 +448,20 @@ class LoginView(View, LogoutMixin):
             return False
         else:
             self.request.session['lt'].remove(lt_send)
+            # we need to redo the affectation for django to detect that the list has changed
+            # and for its new value to be store in the session
             self.request.session['lt'] = self.request.session['lt']
             return True
 
     def post(self, request, *args, **kwargs):
-        """methode called on POST request on this view"""
+        """
+            methode called on POST request on this view
+
+            :param django.http.HttpRequest request: The current request object
+        """
+        # initialize class parameters
         self.init_post(request)
+        # process the POST request
         ret = self.process_post()
         if ret == self.INVALID_LOGIN_TICKET:
             messages.add_message(
@@ -365,6 +470,8 @@ class LoginView(View, LogoutMixin):
                 _(u"Invalid login ticket")
             )
         elif ret == self.USER_LOGIN_OK:
+            # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
+            # attribute by saving it. (``auto_now=True``)
             self.user = models.User.objects.get_or_create(
                 username=self.request.session['username'],
                 session_key=self.request.session.session_key
@@ -375,18 +482,31 @@ class LoginView(View, LogoutMixin):
                 self.ticket = None
                 self.username = None
                 self.init_form()
+            # On login failure, flush the session
             self.logout()
         elif ret == self.USER_ALREADY_LOGGED:
             pass
-        else:
-            raise EnvironmentError("invalid output for LoginView.process_post")  # pragma: no cover
+        else:  # pragma: no cover (should no happen)
+            raise EnvironmentError("invalid output for LoginView.process_post")
+        # call the GET/POST common part
         return self.common()
 
     def process_post(self):
         """
             Analyse the POST request:
+
                 * check that the LoginTicket is valid
                 * check that the user sumited credentials are valid
+
+            :return:
+                * :attr:`INVALID_LOGIN_TICKET` if the POSTed LoginTicket is not valid
+                * :attr:`USER_ALREADY_LOGGED` if the user is already logged and do no request
+                  reauthentication.
+                * :attr:`USER_LOGIN_FAILURE` if the user is not logged or request for
+                  reauthentication and his credentials are not valid
+                * :attr:`USER_LOGIN_OK` if the user is not logged or request for
+                  reauthentication and his credentials are valid
+            :rtype: int
         """
         if not self.check_lt():
             values = self.request.POST.copy()
@@ -396,6 +516,7 @@ class LoginView(View, LogoutMixin):
             logger.warning("Receive an invalid login ticket")
             return self.INVALID_LOGIN_TICKET
         elif not self.request.session.get("authenticated") or self.renew:
+            # authentication request receive, initialize the form to use
             self.init_form(self.request.POST)
             if self.form.is_valid():
                 self.request.session.set_expiry(0)
@@ -414,7 +535,11 @@ class LoginView(View, LogoutMixin):
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
-        """Initialize GET received parameters"""
+        """
+            Initialize GET received parameters
+
+            :param django.http.HttpRequest request: The current request object
+        """
         self.request = request
         self.service = request.GET.get('service')
         self.renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
@@ -423,6 +548,8 @@ class LoginView(View, LogoutMixin):
         self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
         self.warn = request.GET.get('warn')
         if settings.CAS_FEDERATE:
+            # here username and ticket are fetch from the session after a redirection from
+            # FederateAuth.get
             self.username = request.session.get("federate_username")
             self.ticket = request.session.get("federate_ticket")
             if self.username:
@@ -431,22 +558,43 @@ class LoginView(View, LogoutMixin):
                 del request.session["federate_ticket"]
 
     def get(self, request, *args, **kwargs):
-        """methode called on GET request on this view"""
+        """
+            methode called on GET request on this view
+
+            :param django.http.HttpRequest request: The current request object
+        """
+        # initialize class parameters
         self.init_get(request)
+        # process the GET request
         self.process_get()
+        # call the GET/POST common part
         return self.common()
 
     def process_get(self):
-        """Analyse the GET request"""
+        """
+            Analyse the GET request
+
+            :return:
+                * :attr:`USER_NOT_AUTHENTICATED` if the user is not authenticated or is requesting
+                  for authentication renewal
+                * :attr:`USER_AUTHENTICATED` if the user is authenticated and is not requesting
+                  for authentication renewal
+            :rtype: int
+        """
         # generate a new LT
         self.gen_lt()
         if not self.request.session.get("authenticated") or self.renew:
+            # authentication will be needed, initialize the form to use
             self.init_form()
             return self.USER_NOT_AUTHENTICATED
         return self.USER_AUTHENTICATED
 
     def init_form(self, values=None):
-        """Initialization of the good form depending of POST and GET parameters"""
+        """
+            Initialization of the good form depending of POST and GET parameters
+
+            :param django.http.QueryDict values: A POST or GET QueryDict
+        """
         form_initial = {
             'service': self.service,
             'method': self.method,
@@ -472,7 +620,19 @@ class LoginView(View, LogoutMixin):
             )
 
     def service_login(self):
-        """Perform login agains a service"""
+        """
+            Perform login agains a service
+
+            :return:
+                * The rendering of the ``settings.CAS_WARN_TEMPLATE`` if the user asked to be
+                  warned before ticket emission and has not yep been warned.
+                * The redirection to the service URL with a ticket GET parameter
+                * The redirection to the service URL without a ticket if ticket generation failed
+                  and the :attr:`gateway` attribute is set
+                * The rendering of the ``settings.CAS_LOGGED_TEMPLATE`` template with some error
+                  messages if the ticket generation failed (e.g: user not allowed).
+            :rtype: django.http.HttpResponse
+        """
         try:
             # is the service allowed
             service_pattern = ServicePattern.validate(self.service)
@@ -562,12 +722,22 @@ class LoginView(View, LogoutMixin):
             return json_response(self.request, data)
 
     def authenticated(self):
-        """Processing authenticated users"""
+        """
+            Processing authenticated users
+
+            :return:
+                * The returned value of :meth:`service_login` if :attr:`service` is defined
+                * The rendering of ``settings.CAS_LOGGED_TEMPLATE`` otherwise
+            :rtype: django.http.HttpResponse
+        """
+        # Try to get the current :class:`models.User<cas_server.models.User>` object for the current
+        # session
         try:
             self.user = models.User.objects.get(
                 username=self.request.session.get("username"),
                 session_key=self.request.session.session_key
             )
+        # if not found, flush the session and redirect to the login page
         except models.User.DoesNotExist:
             logger.warning(
                 "User %s seems authenticated but is not found in the database." % (
@@ -585,9 +755,10 @@ class LoginView(View, LogoutMixin):
             else:
                 return utils.redirect_params("cas_server:login", params=self.request.GET)
 
-        # if login agains a service is self.requestest
+        # if login agains a service
         if self.service:
             return self.service_login()
+        # else display the logged template
         else:
             if self.ajax:
                 data = {"status": "success", "detail": "logged"}
@@ -600,7 +771,16 @@ class LoginView(View, LogoutMixin):
                 )
 
     def not_authenticated(self):
-        """Processing non authenticated users"""
+        """
+            Processing non authenticated users
+
+            :return:
+                * The rendering of ``settings.CAS_LOGIN_TEMPLATE`` with various messages
+                  depending of GET/POST parameters
+                * The redirection to :class:`FederateAuth` if ``settings.CAS_FEDERATE`` is ``True``
+                  and the "remember my identity provider" cookie is found
+            :rtype: django.http.HttpResponse
+        """
         if self.service:
             try:
                 service_pattern = ServicePattern.validate(self.service)
@@ -678,7 +858,15 @@ class LoginView(View, LogoutMixin):
                 )
 
     def common(self):
-        """Part execute uppon GET and POST request"""
+        """
+            Common part execute uppon GET and POST request
+
+            :return:
+                * The returned value of :meth:`authenticated` if the user is authenticated and
+                  not requesting for authentication or if the authentication has just been renewed
+                * The returned value of :meth:`not_authenticated` otherwise
+            :rtype: django.http.HttpResponse
+        """
         # if authenticated and successfully renewed authentication if needed
         if self.request.session.get("authenticated") and (not self.renew or self.renewed):
             return self.authenticated()
@@ -688,14 +876,29 @@ class LoginView(View, LogoutMixin):
 
 class Auth(View):
     """A simple view to validate username/password/service tuple"""
+    # csrf is disable as it is intended to be used by programs. Security is assured by a shared
+    # secret between the programs dans django-cas-server.
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        """dispatch requests based on method GET, POST, ..."""
+        """
+            dispatch requests based on method GET, POST, ...
+
+            :param django.http.HttpRequest request: The current request object
+        """
         return super(Auth, self).dispatch(request, *args, **kwargs)
 
     @staticmethod
     def post(request):
-        """methode called on GET request on this view"""
+        """
+            methode called on POST request on this view
+
+            :param django.http.HttpRequest request: The current request object
+            :return: ``HttpResponse(u"yes\\n")`` if the POSTed tuple (username, password, service)
+                if valid (i.e. (username, password) is valid dans username is allowed on service).
+                ``HttpResponse(u"no\\n…")`` otherwise, with possibly an error message on the second
+                line.
+            :rtype: django.http.HttpResponse
+        """
         username = request.POST.get('username')
         password = request.POST.get('password')
         service = request.POST.get('service')
@@ -742,10 +945,20 @@ class Validate(View):
     """service ticket validation"""
     @staticmethod
     def get(request):
-        """methode called on GET request on this view"""
+        """
+            methode called on GET request on this view
+
+            :param django.http.HttpRequest request: The current request object
+            :return:
+                * ``HttpResponse("yes\\nusername")`` if submited (service, ticket) is valid
+                * else ``HttpResponse("no\\n")``
+            :rtype: django.http.HttpResponse
+        """
+        # store wanted GET parameters
         service = request.GET.get('service')
         ticket = request.GET.get('ticket')
         renew = True if request.GET.get('renew') else False
+        # service and ticket parameters are mandatory
         if service and ticket:
             try:
                 ticket_queryset = ServiceTicket.objects.filter(
@@ -801,6 +1014,10 @@ class Validate(View):
 @python_2_unicode_compatible
 class ValidateError(Exception):
     """handle service validation error"""
+    #: The error code
+    code = None
+    #: The error message
+    msg = None
     def __init__(self, code, msg=""):
         self.code = code
         self.msg = msg
@@ -810,7 +1027,13 @@ class ValidateError(Exception):
         return u"%s" % self.msg
 
     def render(self, request):
-        """render the error template for the exception"""
+        """
+            render the error template for the exception
+
+            :param django.http.HttpRequest request: The current request object:
+            :return: the rendered ``cas_server/serviceValidateError.xml`` template
+            :rtype: django.http.HttpResponse
+        """
         return render(
             request,
             "cas_server/serviceValidateError.xml",
@@ -819,23 +1042,39 @@ class ValidateError(Exception):
         )
 
 
-class ValidateService(View, AttributesMixin):
+class ValidateService(View):
     """service ticket validation [CAS 2.0] and [CAS 3.0]"""
+    #: Current :class:`django.http.HttpRequest` object
     request = None
+    #: The service GET parameter
     service = None
+    #: the ticket GET parameter
     ticket = None
+    #: the pgtUrl GET parameter
     pgt_url = None
+    #: the renew GET parameter
     renew = None
+    #: specify if ProxyTicket are allowed by the view. Hence we user the same view for
+    #: ``/serviceValidate`` and ``/proxyValidate`` juste changing the parameter.
     allow_proxy_ticket = False
 
     def get(self, request):
-        """methode called on GET request on this view"""
+        """
+            methode called on GET request on this view
+
+            :param django.http.HttpRequest request: The current request object:
+            :return: The rendering of ``cas_server/serviceValidate.xml`` if no errors is raised,
+                the rendering or ``cas_server/serviceValidateError.xml`` otherwise.
+            :rtype: django.http.HttpResponse
+        """
+        # define the class parameters
         self.request = request
         self.service = request.GET.get('service')
         self.ticket = request.GET.get('ticket')
         self.pgt_url = request.GET.get('pgtUrl')
         self.renew = True if request.GET.get('renew') else False
 
+        # service and ticket parameter are mandatory
         if not self.service or not self.ticket:
             logger.warning("ValidateService: missing ticket or service")
             return ValidateError(
@@ -844,7 +1083,9 @@ class ValidateService(View, AttributesMixin):
             ).render(request)
         else:
             try:
+                # search the ticket in the database
                 self.ticket, proxies = self.process_ticket()
+                # prepare template rendering context
                 params = {
                     'username': self.ticket.user.username,
                     'attributes': self.attributes(),
@@ -890,35 +1131,42 @@ class ValidateService(View, AttributesMixin):
                 return error.render(request)
 
     def process_ticket(self):
-        """fetch the ticket angains the database and check its validity"""
+        """
+            fetch the ticket against the database and check its validity
+
+            :raises ValidateError: if the ticket is not found or not valid, potentially for that
+                service
+            :returns: A couple (ticket, proxies list)
+            :rtype: :obj:`tuple`
+        """
         try:
             proxies = []
-            ticket_class = models.Ticket.get_class(self.ticket)
-            if ticket_class:
-                ticket_queryset = ticket_class.objects.filter(
-                    value=self.ticket,
-                    validate=False,
-                    creation__gt=(timezone.now() - timedelta(seconds=ServiceTicket.VALIDITY))
-                )
-                if self.renew:
-                    ticket = ticket_queryset.get(renew=True)
-                else:
-                    ticket = ticket_queryset.get()
-                if ticket_class == models.ProxyTicket:
-                    for prox in ticket.proxies.all():
-                        proxies.append(prox.url)
+            if self.allow_proxy_ticket:
+                ticket = models.Ticket.get(self.ticket, self.renew)
             else:
-                raise ValidateError(u'INVALID_TICKET', self.ticket)
-            ticket.validate = True
-            ticket.save()
+                ticket = models.ServiceTicket.get(self.ticket, self.renew)
+            try:
+                for prox in ticket.proxies.all():
+                    proxies.append(prox.url)
+            except AttributeError:
+                pass
             if ticket.service != self.service:
                 raise ValidateError(u'INVALID_SERVICE', self.service)
             return ticket, proxies
+        except Ticket.DoesNotExist:
+            raise ValidateError(u'INVALID_TICKET', self.ticket)
         except (ServiceTicket.DoesNotExist, ProxyTicket.DoesNotExist):
             raise ValidateError(u'INVALID_TICKET', 'ticket not found')
 
     def process_pgturl(self, params):
-        """Handle PGT request"""
+        """
+            Handle PGT request
+
+            :param dict params: A template context dict
+            :raises ValidateError: if pgtUrl is invalid or if TLS validation of the pgtUrl fails
+            :return: The rendering of ``cas_server/serviceValidate.xml``, using ``params``
+            :rtype: django.http.HttpResponse
+        """
         try:
             pattern = ServicePattern.validate(self.pgt_url)
             if pattern.proxy_callback:
@@ -979,16 +1227,27 @@ class ValidateService(View, AttributesMixin):
 class Proxy(View):
     """proxy ticket service"""
 
+    #: Current :class:`django.http.HttpRequest` object
     request = None
+    #: A ProxyGrantingTicket from the pgt GET parameter
     pgt = None
+    #: the targetService GET parameter
     target_service = None
 
     def get(self, request):
-        """methode called on GET request on this view"""
+        """
+            methode called on GET request on this view
+
+            :param django.http.HttpRequest request: The current request object:
+            :return: The returned value of :meth:`process_proxy` if no error is raised,
+                else the rendering of ``cas_server/serviceValidateError.xml``.
+            :rtype: django.http.HttpResponse
+        """
         self.request = request
         self.pgt = request.GET.get('pgt')
         self.target_service = request.GET.get('targetService')
         try:
+            # pgt and targetService parameters are mandatory
             if self.pgt and self.target_service:
                 return self.process_proxy()
             else:
@@ -1001,10 +1260,18 @@ class Proxy(View):
             return error.render(request)
 
     def process_proxy(self):
-        """handle PT request"""
+        """
+            handle PT request
+
+            :raises ValidateError: if the PGT is not found, or the target service not allowed or
+                the user not allowed on the tardet service.
+            :return: The rendering of ``cas_server/proxy.xml``
+            :rtype: django.http.HttpResponse
+        """
         try:
             # is the target service allowed
             pattern = ServicePattern.validate(self.target_service)
+            # to get a proxy ticket require that the service allow it
             if not pattern.proxy:
                 raise ValidateError(
                     u'UNAUTHORIZED_SERVICE',
@@ -1022,7 +1289,8 @@ class Proxy(View):
                 ProxyTicket,
                 self.target_service,
                 pattern,
-                renew=False)
+                renew=False
+            )
             models.Proxy.objects.create(proxy_ticket=pticket, url=ticket.service)
             logger.info(
                 "Proxy ticket created for user %s on service %s." % (
@@ -1050,6 +1318,10 @@ class Proxy(View):
 @python_2_unicode_compatible
 class SamlValidateError(Exception):
     """handle saml validation error"""
+    #: The error code
+    code = None
+    #: The error message
+    msg = None
     def __init__(self, code, msg=""):
         self.code = code
         self.msg = msg
@@ -1059,7 +1331,13 @@ class SamlValidateError(Exception):
         return u"%s" % self.msg
 
     def render(self, request):
-        """render the error template for the exception"""
+        """
+            render the error template for the exception
+
+            :param django.http.HttpRequest request: The current request object:
+            :return: the rendered ``cas_server/samlValidateError.xml`` template
+            :rtype: django.http.HttpResponse
+        """
         return render(
             request,
             "cas_server/samlValidateError.xml",
@@ -1082,11 +1360,23 @@ class SamlValidate(View, AttributesMixin):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        """dispatch requests based on method GET, POST, ..."""
+        """
+            dispatch requests based on method GET, POST, ...
+
+            :param django.http.HttpRequest request: The current request object
+        """
         return super(SamlValidate, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        """methode called on POST request on this view"""
+        """
+            methode called on POST request on this view
+
+            :param django.http.HttpRequest request: The current request object
+            :return: the rendering of ``cas_server/samlValidate.xml`` if no error is raised,
+                else the rendering of ``cas_server/samlValidateError.xml``.
+            :rtype: django.http.HttpResponse
+            
+        """
         self.request = request
         self.target = request.GET.get('TARGET')
         self.root = etree.fromstring(request.body)
@@ -1134,7 +1424,14 @@ class SamlValidate(View, AttributesMixin):
             return error.render(request)
 
     def process_ticket(self):
-        """validate ticket from SAML XML body"""
+        """
+            validate ticket from SAML XML body
+
+            :raises: SamlValidateError: if the ticket is not found or not valid, or if we fail
+                to parse the posted XML.
+            :return: a ticket object
+            :rtype: :class:`models.Ticket<cas_server.models.Ticket>`
+        """
         try:
             auth_req = self.root.getchildren()[1].getchildren()[0]
             ticket = auth_req.getchildren()[0].text

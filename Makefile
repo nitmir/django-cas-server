@@ -68,9 +68,5 @@ run_tests: test_venv
 test_venv/bin/sphinx-build: test_venv
 	test_venv/bin/pip install Sphinx sphinx_rtd_theme
 
-
-docs/package: test_venv/bin/sphinx-build
-	test_venv/bin/sphinx-apidoc -f -e cas_server -o docs/package/ cas_server/migrations/ cas_server/management/ cas_server/tests/ #cas_server/cas.py
-
-docs: docs/package test_venv/bin/sphinx-build
+docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"

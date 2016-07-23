@@ -70,3 +70,6 @@ test_venv/bin/sphinx-build: test_venv
 
 docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"
+
+publish_pypi_release:
+	python setup.py sdist bdist_wheel upload --sign

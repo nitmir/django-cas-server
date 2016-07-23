@@ -1193,6 +1193,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
 
     def test_validate_proxy(self):
+        """test ProxyTicket validation on /proxyValidate and /serviceValidate"""
         ticket = get_proxy_ticket(self.service)
         client = Client()
         # requesting validation with a good (ticket, service)

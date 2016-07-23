@@ -737,6 +737,7 @@ class Ticket(models.Model):
     TIMEOUT = settings.CAS_TICKET_TIMEOUT
 
     class DoesNotExist(Exception):
+        """raised in :meth:`Ticket.get` then ticket prefix and ticket classes mismatch"""
         pass
 
     def __str__(self):

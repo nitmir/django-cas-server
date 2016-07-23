@@ -1,6 +1,8 @@
 language: python
 python:
   - "2.7"
+  - "3.4"
+  - "3.5"
 env:
   matrix:
     - TOX_ENV=coverage
@@ -12,6 +14,8 @@ env:
     - TOX_ENV=py34-django17
     - TOX_ENV=py34-django18
     - TOX_ENV=py34-django19
+    - TOX_ENV=py35-django18
+    - TOX_ENV=py35-django19
 cache:
   directories:
     - $HOME/.cache/pip/http/

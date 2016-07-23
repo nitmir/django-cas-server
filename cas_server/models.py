@@ -736,6 +736,9 @@ class Ticket(models.Model):
     #: requests.
     TIMEOUT = settings.CAS_TICKET_TIMEOUT
 
+    class DoesNotExist(Exception):
+        pass
+
     def __str__(self):
         return u"Ticket-%s" % self.pk
 
@@ -806,18 +809,107 @@ class Ticket(models.Model):
             )
 
     @staticmethod
-    def get_class(ticket):
+    def get_class(ticket, classes=None):
         """
             Return the ticket class of ``ticket``
 
             :param unicode ticket: A ticket
+            :param list classes: Optinal arguement. A list of possible :class:`Ticket` subclasses
             :return: The class corresponding to ``ticket`` (:class:`ServiceTicket` or
-                :class:`ProxyTicket` or :class:`ProxyGrantingTicket`) if found, ``None`` otherwise.
+                :class:`ProxyTicket` or :class:`ProxyGrantingTicket`) if found among ``classes,
+                ``None`` otherwise.
             :rtype: :obj:`type` or :obj:`NoneType<types.NoneType>`
         """
-        for ticket_class in [ServiceTicket, ProxyTicket, ProxyGrantingTicket]:
+        if classes is None:  # pragma: no cover (not used)
+            classes = [ServiceTicket, ProxyTicket, ProxyGrantingTicket]
+        for ticket_class in classes:
             if ticket.startswith(ticket_class.PREFIX):
                 return ticket_class
+
+    def username(self):
+        """
+            The username to send on ticket validation
+
+            :return: The value of the corresponding user attribute if
+                :attr:`service_pattern`.user_field is set, the user username otherwise.
+        """
+        if self.service_pattern.user_field and self.user.attributs.get(
+            self.service_pattern.user_field
+        ):
+            username = self.user.attributs[self.service_pattern.user_field]
+            if isinstance(username, list):
+                # the list is not empty because we wont generate a ticket with a user_field
+                # that evaluate to False
+                username = username[0]
+        else:
+            username = self.user.username
+        return username
+
+    def attributs_flat(self):
+        """
+            generate attributes list for template rendering
+
+            :return: An list of (attribute name, attribute value) of all user attributes flatened
+                (no nested list)
+            :rtype: :obj:`list` of :obj:`tuple` of :obj:`unicode`
+        """
+        attributes = []
+        for key, value in self.attributs.items():
+            if isinstance(value, list):
+                for elt in value:
+                    attributes.append((key, elt))
+            else:
+                attributes.append((key, value))
+        return attributes
+
+    @classmethod
+    def get(cls, ticket, renew=False, service=None):
+        """
+            Search the database for a valid ticket with provided arguments
+
+           :param unicode ticket: A ticket value
+           :param bool renew: Is authentication renewal needed
+           :param unicode service: Optional argument. The ticket service
+           :raises Ticket.DoesNotExist: if no class is found for the ticket prefix
+           :raises cls.DoesNotExist: if ``ticket`` value is not found in th database
+           :return: a :class:`Ticket` instance
+           :rtype: Ticket
+        """
+        # If the method class is the ticket abstract class, search for the submited ticket
+        # class using its prefix. Assuming ticket is a ProxyTicket or a ServiceTicket
+        if cls == Ticket:
+            ticket_class = cls.get_class(ticket, classes=[ServiceTicket, ProxyTicket])
+        # else use the method class
+        else:
+            ticket_class = cls
+        # If ticket prefix is wrong, raise DoesNotExist
+        if cls != Ticket and not ticket.startswith(cls.PREFIX):
+            raise Ticket.DoesNotExist()
+        if ticket_class:
+            # search for the ticket that is not yet validated and is still valid
+            ticket_queryset = ticket_class.objects.filter(
+                value=ticket,
+                validate=False,
+                creation__gt=(timezone.now() - timedelta(seconds=ticket_class.VALIDITY))
+            )
+            # if service is specified, add it the the queryset
+            if service is not None:
+                ticket_queryset = ticket_queryset.filter(service=service)
+            # only require renew if renew is True, otherwise it do not matter if renew is True
+            # or False.
+            if renew:
+                ticket_queryset = ticket_queryset.filter(renew=True)
+            # fetch the ticket ``MultipleObjectsReturned`` is never raised as the ticket value
+            # is unique across the database
+            ticket = ticket_queryset.get()
+            # For ServiceTicket and Proxyticket, mark it as validated before returning
+            if ticket_class != ProxyGrantingTicket:
+                ticket.validate = True
+                ticket.save()
+            return ticket
+        # If no class found for the ticket, raise DoesNotExist
+        else:
+            raise Ticket.DoesNotExist()
 
 
 @python_2_unicode_compatible

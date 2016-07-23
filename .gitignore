@@ -4,7 +4,6 @@
 *.swp
 
 build/
-bootstrap3
 cas/
 dist/
 db.sqlite3

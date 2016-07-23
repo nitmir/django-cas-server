@@ -84,7 +84,7 @@ class CASFederateValidateUser(object):
         if username is not None:
             if attributs is None:
                 attributs = {}
-            attributs["provider"] = self.provider
+            attributs["provider"] = self.provider.suffix
             self.username = username
             self.attributs = attributs
             user = FederatedUser.objects.update_or_create(

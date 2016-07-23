@@ -9,13 +9,6 @@ CAS Server is a Django application implementing the `CAS Protocol 3.0 Specificat
 By default, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
 
-The default login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__
-but you can use your own templates using settings variables.
-
-Note that for Django 1.7 compatibility, you need a version of
-`django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__ < 7.0.0
-like the 6.2.2 version.
-
 .. contents:: Table of Contents
 
 Features
@@ -39,8 +32,6 @@ Dependencies
 * Django >= 1.7 < 1.10
 * requests >= 2.4
 * requests_futures >= 0.9.5
-* django-picklefield >= 0.3.1
-* django-bootstrap3 >= 5.4 (< 7.0.0 if using django 1.7)
 * lxml >= 3.4
 * six >= 1
 
@@ -55,7 +46,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python-django python-requests python-django-picklefield python-six python-lxml
+    $ sudo apt-get install python-django python-requests python-six python-lxml python-requests-futures
 
    On debian jessie, you can use the version of python-django available in the
    `backports <https://backports.debian.org/Instructions/>`_.
@@ -105,7 +96,6 @@ Quick start
     INSTALLED_APPS = (
         'django.contrib.admin',
         ...
-        'bootstrap3',
         'cas_server',
     )
 
@@ -173,6 +163,17 @@ Template settings
 
 * ``CAS_LOGO_URL``: URL to the logo showed in the up left corner on the default
   templates. Set it to ``False`` to disable it.
+* ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
+  and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
+  ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
+
+        {
+            "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
+            "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
+            "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
+            "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+            "jquery": "//code.jquery.com/jquery.min.js",
+        }
 
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.

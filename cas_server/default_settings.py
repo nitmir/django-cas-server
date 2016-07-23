@@ -18,6 +18,14 @@ from importlib import import_module
 
 #: URL to the logo showed in the up left corner on the default templates.
 CAS_LOGO_URL = static("cas_server/logo.png")
+#: URLs to css and javascript external components.
+CAS_COMPONENT_URLS = {
+    "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
+    "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
+    "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
+    "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+    "jquery": "//code.jquery.com/jquery.min.js",
+}
 #: Path to the template showed on /login then the user is not autenticated.
 CAS_LOGIN_TEMPLATE = 'cas_server/login.html'
 #: Path to the template showed on /login?service=... then the user is authenticated and has asked

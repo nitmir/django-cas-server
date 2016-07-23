@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import django.db.models.deletion
 import cas_server.utils
-import picklefield.fields
 
 
 class Migration(migrations.Migration):
@@ -31,7 +30,7 @@ class Migration(migrations.Migration):
             name='ProxyGrantingTicket',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('attributs', picklefield.fields.PickledObjectField(editable=False)),
+                ('attributs', models.TextField(blank=True, default=None, null=True)),
                 ('validate', models.BooleanField(default=False)),
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),
@@ -47,7 +46,7 @@ class Migration(migrations.Migration):
             name='ProxyTicket',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('attributs', picklefield.fields.PickledObjectField(editable=False)),
+                ('attributs', models.TextField(blank=True, default=None, null=True)),
                 ('validate', models.BooleanField(default=False)),
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),
@@ -80,7 +79,7 @@ class Migration(migrations.Migration):
             name='ServiceTicket',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('attributs', picklefield.fields.PickledObjectField(editable=False)),
+                ('attributs', models.TextField(blank=True, default=None, null=True)),
                 ('validate', models.BooleanField(default=False)),
                 ('service', models.TextField()),
                 ('creation', models.DateTimeField(auto_now_add=True)),

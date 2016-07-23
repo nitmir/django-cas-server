@@ -18,7 +18,6 @@ from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
-from picklefield.fields import PickledObjectField
 
 import re
 import sys
@@ -140,8 +139,8 @@ class FederatedUser(models.Model):
     username = models.CharField(max_length=124)
     #: A foreign key to :class:`FederatedIendityProvider`
     provider = models.ForeignKey(FederatedIendityProvider, on_delete=models.CASCADE)
-    #: The user attributes returned by the CAS backend on successful ticket validation
-    attributs = PickledObjectField()
+    #: The user attributes json encoded
+    _attributs = models.TextField(default=None, null=True, blank=True)
     #: The last ticket used to authenticate :attr:`username` against :attr:`provider`
     ticket = models.CharField(max_length=255)
     #: Last update timespampt. Usually, the last time :attr:`ticket` has been set.
@@ -149,6 +148,17 @@ class FederatedUser(models.Model):
 
     def __str__(self):
         return self.federated_username
+
+    @property
+    def attributs(self):
+        """The user attributes returned by the CAS backend on successful ticket validation"""
+        if self._attributs is not None:
+            return utils.json.loads(self._attributs)
+
+    @attributs.setter
+    def attributs(self, value):
+        """attributs property setter"""
+        self._attributs = utils.json_encode(value)
 
     @property
     def federated_username(self):
@@ -712,8 +722,8 @@ class Ticket(models.Model):
         abstract = True
     #: ForeignKey to a :class:`User`.
     user = models.ForeignKey(User, related_name="%(class)s")
-    #: The user attributes to be transmited to the service on successful validation
-    attributs = PickledObjectField()
+    #: The user attributes to transmit to the service json encoded
+    _attributs = models.TextField(default=None, null=True, blank=True)
     #: A boolean. ``True`` if the ticket has been validated
     validate = models.BooleanField(default=False)
     #: The service url for the ticket
@@ -735,6 +745,17 @@ class Ticket(models.Model):
     #: Time we keep ticket with :attr:`single_log_out` set to ``True`` before sending SingleLogOut
     #: requests.
     TIMEOUT = settings.CAS_TICKET_TIMEOUT
+
+    @property
+    def attributs(self):
+        """The user attributes to be transmited to the service on successful validation"""
+        if self._attributs is not None:
+            return utils.json.loads(self._attributs)
+
+    @attributs.setter
+    def attributs(self, value):
+        """attributs property setter"""
+        self._attributs = utils.json_encode(value)
 
     class DoesNotExist(Exception):
         """raised in :meth:`Ticket.get` then ticket prefix and ticket classes mismatch"""

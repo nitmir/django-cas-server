@@ -1,18 +1,19 @@
 {% extends "cas_server/base.html" %}
-{% load bootstrap3 %}
-{% load staticfiles %}
 {% load i18n %}
+
+{% block ante_messages %}
+{% if auto_submit %}<noscript>{% endif %}
+<h2 class="form-signin-heading">{% trans "Please log in" %}</h2>
+{% if auto_submit %}</noscript>{% endif %}
+{% endblock %}
 {% block content %}
-      <form class="form-signin" method="post" id="login_form"{% if post_url %} action="{{post_url}}"{% endif %}>
-{% if auto_submit %}<noscript>{% endif %}
-        <h2 class="form-signin-heading">{% trans "Please log in" %}</h2>
-{% if auto_submit %}</noscript>{% endif %}
-{% csrf_token %}
-{% bootstrap_form form %}
-{% if auto_submit %}<noscript>{% endif %}
-{% bootstrap_button _('Login') size='lg' button_type="submit" button_class="btn-primary btn-block"%}
-{% if auto_submit %}</noscript>{% endif %}
-      </form>
+<form class="form-signin" method="post" id="login_form"{% if post_url %} action="{{post_url}}"{% endif %}>
+  {% csrf_token %}
+  {% include "cas_server/form.html" %}
+  {% if auto_submit %}<noscript>{% endif %}
+  <button class="btn btn-primary btn-block btn-lg" type="submit">{% trans "Login" %}</button>
+  {% if auto_submit %}</noscript>{% endif %}
+</form>
 {% if auto_submit %}
 <script type="text/javascript">
     document.getElementById('login_form').submit(); // SUBMIT FORM

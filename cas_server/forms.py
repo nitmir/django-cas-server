@@ -18,7 +18,28 @@ import cas_server.utils as utils
 import cas_server.models as models
 
 
-class WarnForm(forms.Form):
+class BootsrapForm(forms.Form):
+    """Form base class to use boostrap then rendering the form fields"""
+    def __init__(self, *args, **kwargs):
+        super(BootsrapForm, self).__init__(*args, **kwargs)
+        for (name, field) in self.fields.items():
+            # Only tweak the fiel if it will be displayed
+            if not isinstance(field.widget, forms.HiddenInput):
+                # tell to display the field (used in form.html)
+                self[name].display = True
+                attrs = {}
+                if isinstance(field.widget, forms.CheckboxInput):
+                    self[name].checkbox = True
+                else:
+                    attrs['class'] = "form-control"
+                    if field.label:
+                        attrs["placeholder"] = field.label
+                if field.required:
+                    attrs["required"] = "required"
+                field.widget.attrs.update(attrs)
+
+
+class WarnForm(BootsrapForm):
     """
         Bases: :class:`django.forms.Form`
 
@@ -38,7 +59,7 @@ class WarnForm(forms.Form):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
-class FederateSelect(forms.Form):
+class FederateSelect(BootsrapForm):
     """
         Bases: :class:`django.forms.Form`
 
@@ -66,7 +87,7 @@ class FederateSelect(forms.Form):
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
 
-class UserCredential(forms.Form):
+class UserCredential(BootsrapForm):
     """
          Bases: :class:`django.forms.Form`
 

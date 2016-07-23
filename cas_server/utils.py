@@ -15,6 +15,8 @@ from .default_settings import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
+from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
+from django.core.serializers.json import DjangoJSONEncoder
 
 import random
 import string
@@ -29,6 +31,15 @@ from datetime import datetime, timedelta
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 
+def json_encode(obj):
+    """Encode a python object to json"""
+    try:
+        return json_encode.encoder.encode(obj)
+    except AttributeError:
+        json_encode.encoder = DjangoJSONEncoder(default=six.text_type)
+        return json_encode(obj)
+
+
 def context(params):
     """
         Function that add somes variable to the context before template rendering
@@ -39,6 +50,7 @@ def context(params):
         :rtype: dict
     """
     params["settings"] = settings
+    params["message_levels"] = DEFAULT_MESSAGE_LEVELS
     return params
 
 

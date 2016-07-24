@@ -428,7 +428,7 @@ class LoginView(View, LogoutMixin):
         # generate a new LT (by posting the LT has been consumed)
         self.gen_lt()
         # check if send LT is valid
-        if lt_valid is None or lt_send not in lt_valid:
+        if lt_send not in lt_valid:
             return False
         else:
             self.request.session['lt'].remove(lt_send)
@@ -466,8 +466,12 @@ class LoginView(View, LogoutMixin):
                 self.ticket = None
                 self.username = None
                 self.init_form()
+            # preserve valid LoginTickets from session flush
+            lt = self.request.session.get('lt', [])
             # On login failure, flush the session
             self.logout()
+            # restore valid LoginTickets
+            self.request.session['lt'] = lt
         elif ret == self.USER_ALREADY_LOGGED:
             pass
         else:  # pragma: no cover (should no happen)
@@ -493,10 +497,7 @@ class LoginView(View, LogoutMixin):
             :rtype: int
         """
         if not self.check_lt():
-            values = self.request.POST.copy()
-            # if not set a new LT and fail
-            values['lt'] = self.request.session['lt'][-1]
-            self.init_form(values)
+            self.init_form(self.request.POST)
             logger.warning("Receive an invalid login ticket")
             return self.INVALID_LOGIN_TICKET
         elif not self.request.session.get("authenticated") or self.renew:
@@ -579,6 +580,9 @@ class LoginView(View, LogoutMixin):
 
             :param django.http.QueryDict values: A POST or GET QueryDict
         """
+        if values:
+            values = values.copy()
+            values['lt'] = self.request.session['lt'][-1]
         form_initial = {
             'service': self.service,
             'method': self.method,

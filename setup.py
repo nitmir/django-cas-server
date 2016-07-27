@@ -30,7 +30,7 @@ if __name__ == '__main__':
         author_email='valentin.samir@crans.org',
         classifiers=[
             'Environment :: Web Environment',
-            'evelopment Status :: 5 - Production/Stable',
+            'Development Status :: 5 - Production/Stable',
             'Framework :: Django',
             'Framework :: Django :: 1.7',
             'Framework :: Django :: 1.8',

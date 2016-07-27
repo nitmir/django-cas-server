@@ -15,86 +15,155 @@ from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterA
 from .models import FederatedIendityProvider
 from .forms import TicketForm
 
-TICKETS_READONLY_FIELDS = ('validate', 'service', 'service_pattern',
-                           'creation', 'renew', 'single_log_out', 'value')
-TICKETS_FIELDS = ('validate', 'service', 'service_pattern',
-                  'creation', 'renew', 'single_log_out')
+
+class BaseInlines(admin.TabularInline):
+    """
+        Bases: :class:`django.contrib.admin.TabularInline`
+
+        Base class for inlines in the admin interface.
+    """
+    #: This controls the number of extra forms the formset will display in addition to
+    #: the initial forms.
+    extra = 0
 
 
-class ServiceTicketInline(admin.TabularInline):
-    """`ServiceTicket` in admin interface"""
+class UserAdminInlines(BaseInlines):
+    """
+        Bases: :class:`BaseInlines`
+
+        Base class for inlines in :class:`UserAdmin` interface
+    """
+    #: The form :class:`TicketForm<cas_server.forms.TicketForm>` used to display tickets.
+    form = TicketForm
+    #: Fields to display on a object that are read only (not editable).
+    readonly_fields = (
+        'validate', 'service', 'service_pattern',
+        'creation', 'renew', 'single_log_out', 'value'
+    )
+    #: Fields to display on a object.
+    fields = (
+        'validate', 'service', 'service_pattern',
+        'creation', 'renew', 'single_log_out'
+    )
+
+
+class ServiceTicketInline(UserAdminInlines):
+    """
+        Bases: :class:`UserAdminInlines`
+
+        :class:`ServiceTicket<cas_server.models.ServiceTicket>` in admin interface
+    """
+    #: The model which the inline is using.
     model = ServiceTicket
-    extra = 0
-    form = TicketForm
-    readonly_fields = TICKETS_READONLY_FIELDS
-    fields = TICKETS_FIELDS
 
 
-class ProxyTicketInline(admin.TabularInline):
-    """`ProxyTicket` in admin interface"""
+class ProxyTicketInline(UserAdminInlines):
+    """
+        Bases: :class:`UserAdminInlines`
+
+        :class:`ProxyTicket<cas_server.models.ProxyTicket>` in admin interface
+    """
+    #: The model which the inline is using.
     model = ProxyTicket
-    extra = 0
-    form = TicketForm
-    readonly_fields = TICKETS_READONLY_FIELDS
-    fields = TICKETS_FIELDS
 
 
-class ProxyGrantingInline(admin.TabularInline):
-    """`ProxyGrantingTicket` in admin interface"""
+class ProxyGrantingInline(UserAdminInlines):
+    """
+        Bases: :class:`UserAdminInlines`
+
+        :class:`ProxyGrantingTicket<cas_server.models.ProxyGrantingTicket>` in admin interface
+    """
+    #: The model which the inline is using.
     model = ProxyGrantingTicket
-    extra = 0
-    form = TicketForm
-    readonly_fields = TICKETS_READONLY_FIELDS
-    fields = TICKETS_FIELDS[1:]
 
 
 class UserAdmin(admin.ModelAdmin):
-    """`User` in admin interface"""
+    """
+        Bases: :class:`django.contrib.admin.ModelAdmin`
+
+        :class:`User<cas_server.models.User>` in admin interface
+    """
+    #: See :class:`ServiceTicketInline`, :class:`ProxyTicketInline`, :class:`ProxyGrantingInline`
+    #: objects below the :class:`UserAdmin` fields.
     inlines = (ServiceTicketInline, ProxyTicketInline, ProxyGrantingInline)
+    #: Fields to display on a object that are read only (not editable).
     readonly_fields = ('username', 'date', "session_key")
+    #: Fields to display on a object.
     fields = ('username', 'date', "session_key")
+    #: Fields to display on the list of class:`UserAdmin` objects.
     list_display = ('username', 'date', "session_key")
 
 
-class UsernamesInline(admin.TabularInline):
-    """`Username` in admin interface"""
+class UsernamesInline(BaseInlines):
+    """
+        Bases: :class:`BaseInlines`
+
+        :class:`Username<cas_server.models.Username>` in admin interface
+    """
+    #: The model which the inline is using.
     model = Username
-    extra = 0
 
 
-class ReplaceAttributNameInline(admin.TabularInline):
-    """`ReplaceAttributName` in admin interface"""
+class ReplaceAttributNameInline(BaseInlines):
+    """
+        Bases: :class:`BaseInlines`
+
+        :class:`ReplaceAttributName<cas_server.models.ReplaceAttributName>` in admin interface
+    """
+    #: The model which the inline is using.
     model = ReplaceAttributName
-    extra = 0
 
 
-class ReplaceAttributValueInline(admin.TabularInline):
-    """`ReplaceAttributValue` in admin interface"""
+class ReplaceAttributValueInline(BaseInlines):
+    """
+        Bases: :class:`BaseInlines`
+
+        :class:`ReplaceAttributValue<cas_server.models.ReplaceAttributValue>` in admin interface
+    """
+    #: The model which the inline is using.
     model = ReplaceAttributValue
-    extra = 0
 
 
-class FilterAttributValueInline(admin.TabularInline):
-    """`FilterAttributValue` in admin interface"""
+class FilterAttributValueInline(BaseInlines):
+    """
+        Bases: :class:`BaseInlines`
+
+        :class:`FilterAttributValue<cas_server.models.FilterAttributValue>` in admin interface
+    """
+    #: The model which the inline is using.
     model = FilterAttributValue
-    extra = 0
 
 
 class ServicePatternAdmin(admin.ModelAdmin):
-    """`ServicePattern` in admin interface"""
+    """
+        Bases: :class:`django.contrib.admin.ModelAdmin`
+
+        :class:`ServicePattern<cas_server.models.ServicePattern>` in admin interface
+    """
+    #: See :class:`UsernamesInline`, :class:`ReplaceAttributNameInline`,
+    #: :class:`ReplaceAttributValueInline`, :class:`FilterAttributValueInline` objects below
+    #: the :class:`ServicePatternAdmin` fields.
     inlines = (
         UsernamesInline,
         ReplaceAttributNameInline,
         ReplaceAttributValueInline,
         FilterAttributValueInline
     )
+    #: Fields to display on the list of class:`ServicePatternAdmin` objects.
     list_display = ('pos', 'name', 'pattern', 'proxy',
                     'single_log_out', 'proxy_callback', 'restrict_users')
 
 
 class FederatedIendityProviderAdmin(admin.ModelAdmin):
-    """`FederatedIendityProvider` in admin interface"""
+    """
+        Bases: :class:`django.contrib.admin.ModelAdmin`
+
+        :class:`FederatedIendityProvider<cas_server.models.FederatedIendityProvider>` in admin
+        interface
+    """
+    #: Fields to display on a object.
     fields = ('pos', 'suffix', 'server_url', 'cas_protocol_version', 'verbose_name', 'display')
+    #: Fields to display on the list of class:`FederatedIendityProviderAdmin` objects.
     list_display = ('verbose_name', 'suffix', 'display')
 
 

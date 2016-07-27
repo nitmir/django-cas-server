@@ -1,7 +1,21 @@
 include tox.ini
 include LICENSE
 include README.rst
+include .coveragerc
+include Makefile
+include pytest.ini
+include requirements-dev.txt
+include requirements.txt
 prune .tox
 recursive-include cas_server/static *
 recursive-include cas_server/templates *
 recursive-include cas_server/locale *
+
+include docs/conf.py
+include docs/index.rst
+include docs/Makefile
+include docs/README.rst
+recursive-include docs/_ext *
+recursive-include docs/package *
+recursive-include docs/_static *
+recursive-include docs/_templates *

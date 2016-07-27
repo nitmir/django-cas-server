@@ -1,36 +1,63 @@
-{% extends 'bootstrap3/bootstrap3.html' %}
 {% load i18n %}
-{% block bootstrap3_title %}{% block title %}{% trans "Central Authentication Service"  %}{% endblock %}{% endblock %}
-
 {% load staticfiles %}
-{% load bootstrap3 %}
-
-{% block bootstrap3_extra_head %}
-<link rel="shortcut icon" href="/static/cas_server/favicon.ico?v=1" />
-<link href="{% static "cas_server/login.css" %}" rel="stylesheet">
-{% endblock %}
-
-{% block bootstrap3_content %}
-<div class="container">
-{% if auto_submit %}<noscript>{% endif %}
-<div class="row">
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <h1 id="app-name">
-        {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}"></img> {% endif %}
-        {% trans "Central Authentication Service" %}</h1>
-  </div>
-</div>
-{% if auto_submit %}</noscript>{% endif %}
-<div class="row">
-<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
-<div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
-{% if auto_submit %}<noscript>{% endif %}
-{% bootstrap_messages %}
-{% if auto_submit %}</noscript>{% endif %}
-{% block content %}
-{% endblock %}
-</div>
-<div class="col-lg-3 col-md-3 col-sm-2 col-xs-0"></div>
-</div>
-    </div> <!-- /container -->
-{% endblock %}
+<!DOCTYPE html>
+<html{% if request.LANGUAGE_CODE %} lang="{{ request.LANGUAGE_CODE }}"{% endif %}>
+    <head>
+        <meta charset="utf-8">
+        <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge" /><![endif]-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}{% trans "Central Authentication Service"  %}{% endblock %}</title>
+        <link href="{{settings.CAS_COMPONENT_URLS.bootstrap3_css}}" rel="stylesheet">
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="{{settings.CAS_COMPONENT_URLS.html5shiv}}"></script>
+        <script src="{{settings.CAS_COMPONENT_URLS.respond}}"></script>
+        <![endif]-->
+        <link rel="shortcut icon" href="{% static "cas_server/favicon.ico?v=1" %}" />
+        <link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            {% if auto_submit %}<noscript>{% endif %}
+            <div class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h1 id="app-name">
+                    {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}"></img> {% endif %}
+                    {% trans "Central Authentication Service" %}</h1>
+              </div>
+            </div>
+            {% if auto_submit %}</noscript>{% endif %}
+            <div class="row">
+            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
+            <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+            {% block ante_messages %}{% endblock %}
+            {% if auto_submit %}<noscript>{% endif %}
+            {% for message in messages %}
+                <div {% spaceless %}
+                    {% if message.level == message_levels.DEBUG %}
+                        class="alert alert-warning alert-dismissable"
+                    {% elif message.level == message_levels.INFO %}
+                        class="alert alert-info alert-dismissable"
+                    {% elif message.level == message_levels.SUCCESS %}
+                        class="alert alert-success alert-dismissable"
+                    {% elif message.level == message_levels.WARNING %}
+                        class="alert alert-warning alert-dismissable"
+                    {% else %}
+                        class="alert alert-danger alert-dismissable"
+                    {% endif %}
+                {% endspaceless %}>
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% if auto_submit %}</noscript>{% endif %}
+            {% block content %}{% endblock %}
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-0"></div>
+            </div>
+        </div> <!-- /container -->
+        <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
+        <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
+    </body>
+</html>

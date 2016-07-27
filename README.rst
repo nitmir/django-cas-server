@@ -1,33 +1,13 @@
 CAS Server
 ##########
 
-.. image:: https://travis-ci.org/nitmir/django-cas-server.svg?branch=master
-    :target: https://travis-ci.org/nitmir/django-cas-server
-
-.. image:: https://img.shields.io/pypi/v/django-cas-server.svg
-    :target: https://pypi.python.org/pypi/django-cas-server
-
-.. image:: https://img.shields.io/pypi/l/django-cas-server.svg
-    :target: https://www.gnu.org/licenses/gpl-3.0.html
-
-.. image:: https://api.codacy.com/project/badge/Grade/255c21623d6946ef8802fa7995b61366
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
-
-.. image:: https://api.codacy.com/project/badge/Coverage/255c21623d6946ef8802fa7995b61366
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+|travis| |version| |lisence| |codacy| |coverage|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
 By default, the authentication process use django internal users but you can easily
 use any sources (see auth classes in the auth.py file)
-
-The default login/logout template use `django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__
-but you can use your own templates using settings variables.
-
-Note that for Django 1.7 compatibility, you need a version of
-`django-bootstrap3 <https://github.com/dyve/django-bootstrap3>`__ < 7.0.0
-like the 6.2.2 version.
 
 .. contents:: Table of Contents
 
@@ -52,8 +32,6 @@ Dependencies
 * Django >= 1.7 < 1.10
 * requests >= 2.4
 * requests_futures >= 0.9.5
-* django-picklefield >= 0.3.1
-* django-bootstrap3 >= 5.4 (< 7.0.0 if using django 1.7)
 * lxml >= 3.4
 * six >= 1
 
@@ -68,7 +46,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python-django python-requests python-django-picklefield python-six python-lxml
+    $ sudo apt-get install python-django python-requests python-six python-lxml python-requests-futures
 
    On debian jessie, you can use the version of python-django available in the
    `backports <https://backports.debian.org/Instructions/>`_.
@@ -118,7 +96,6 @@ Quick start
     INSTALLED_APPS = (
         'django.contrib.admin',
         ...
-        'bootstrap3',
         'cas_server',
     )
 
@@ -186,6 +163,17 @@ Template settings
 
 * ``CAS_LOGO_URL``: URL to the logo showed in the up left corner on the default
   templates. Set it to ``False`` to disable it.
+* ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
+  and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
+  ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
+
+        {
+            "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
+            "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
+            "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
+            "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+            "jquery": "//code.jquery.com/jquery.min.js",
+        }
 
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
@@ -489,3 +477,20 @@ You could for example do as bellow :
 .. code-block::
 
     10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+
+
+
+.. |travis| image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
+    :target: https://travis-ci.org/nitmir/django-cas-server
+
+.. |version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
+    :target: https://pypi.python.org/pypi/django-cas-server
+
+.. |lisence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
+    :target: https://www.gnu.org/licenses/gpl-3.0.html
+
+.. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+
+.. |coverage| image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
+    :target: https://www.codacy.com/app/valentin-samir/django-cas-server

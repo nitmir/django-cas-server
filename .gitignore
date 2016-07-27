@@ -4,12 +4,13 @@
 *.swp
 
 build/
-bootstrap3
 cas/
 dist/
 db.sqlite3
 manage.py
 coverage.xml
+docs/_build/
+docs/django.inv
 
 .tox
 test_venv
@@ -17,3 +18,4 @@ test_venv
 htmlcov/
 tox_logs/
 .cache/
+.eggs/

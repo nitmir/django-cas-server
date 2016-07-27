@@ -9,4 +9,5 @@
 #
 # (c) 2015-2016 Valentin Samir
 """A django CAS server application"""
+#: path the the application configuration class
 default_app_config = 'cas_server.apps.CasAppConfig'

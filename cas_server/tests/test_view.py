@@ -993,7 +993,7 @@ class ValidateTestCase(TestCase):
     def test_validate_service_renew(self):
         """test with a valid (ticket, service) asking for auth renewal"""
         # case 1 client is renewing and service ask for renew
-        (client1, response) = get_auth_client(renew="True", service=self.service)
+        response = get_auth_client(renew="True", service=self.service)[1]
         self.assertEqual(response.status_code, 302)
         ticket_value = response['Location'].split('ticket=')[-1]
         # get a bare client
@@ -1112,7 +1112,9 @@ class ValidateServiceTestCase(TestCase, XmlContent):
             name="localhost",
             pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             # allow to request PGT by the service
-            proxy_callback=True
+            proxy_callback=True,
+            # allow to request PT for the service
+            proxy=True
         )
         # tell the service pattern to transmit all the user attributes (* is a joker)
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
@@ -1190,10 +1192,30 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         # the attributes settings.CAS_TEST_ATTRIBUTES
         self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
 
+    def test_validate_proxy(self):
+        """test ProxyTicket validation on /proxyValidate and /serviceValidate"""
+        ticket = get_proxy_ticket(self.service)
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get('/proxyValidate', {'ticket': ticket.value, 'service': self.service})
+        # and it should succeed
+        self.assert_success(response, settings.CAS_TEST_USER, settings.CAS_TEST_ATTRIBUTES)
+
+        ticket = get_proxy_ticket(self.service)
+        client = Client()
+        # requesting validation with a good (ticket, service)
+        response = client.get('/serviceValidate', {'ticket': ticket.value, 'service': self.service})
+        # and it should succeed
+        self.assert_error(
+            response,
+            "INVALID_TICKET",
+            ticket.value
+        )
+
     def test_validate_service_renew(self):
         """test with a valid (ticket, service) asking for auth renewal"""
         # case 1 client is renewing and service ask for renew
-        (client1, response) = get_auth_client(renew="True", service=self.service)
+        response = get_auth_client(renew="True", service=self.service)[1]
         self.assertEqual(response.status_code, 302)
         ticket_value = response['Location'].split('ticket=')[-1]
         # get a bare client

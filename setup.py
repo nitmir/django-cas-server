@@ -2,7 +2,7 @@ import os
 import pkg_resources
 from setuptools import setup
 
-VERSION = '0.6.0'
+VERSION = '0.6.1'
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()

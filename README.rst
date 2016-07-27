@@ -1,7 +1,7 @@
 CAS Server
 ##########
 
-|travis| |version| |lisence| |codacy| |coverage|
+|travis| |version| |lisence| |codacy| |coverage| |doc|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
@@ -494,3 +494,6 @@ You could for example do as bellow :
 
 .. |coverage| image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
     :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+
+.. |doc| image:: https://badges.genua.fr/local/readthedocs/?version=latest
+    :target: http://django-cas-server.readthedocs.io

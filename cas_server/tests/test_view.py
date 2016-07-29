@@ -337,7 +337,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
             response = client.get("/login", {'service': service})
             # the ticket is not created and a warning is displayed to the user
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(b"User charateristics non allowed" in response.content)
+            self.assertTrue(b"User characteristics non allowed" in response.content)
 
         # same but with rectriction that a valid upon the test user attributes
         response = client.get("/login", {'service': self.service_filter_success})
@@ -355,7 +355,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login", {'service': self.service_field_needed_fail})
         # the ticket is not created and a warning is displayed to the user
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b"The attribut uid is needed to use that service" in response.content)
+        self.assertTrue(b"The attribute uid is needed to use that service" in response.content)
 
         # same but with a attribute that the test user has
         response = client.get("/login", {'service': self.service_field_needed_success})
@@ -379,7 +379,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login", {"service": self.service_field_needed_success})
         # the ticket is not created and a warning is displayed to the user
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b"The attribut alias is needed to use that service" in response.content)
+        self.assertTrue(b"The attribute alias is needed to use that service" in response.content)
 
     def test_gateway(self):
         """test gateway parameter"""

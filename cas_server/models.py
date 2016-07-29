@@ -468,13 +468,13 @@ class ServicePattern(models.Model):
             "As it is a regular expression, special character must be escaped with a '\\'."
         )
     )
-    #: Name of the attribut to transmit as username, if empty the user login is used
+    #: Name of the attribute to transmit as username, if empty the user login is used
     user_field = models.CharField(
         max_length=255,
         default="",
         blank=True,
         verbose_name=_(u"user field"),
-        help_text=_("Name of the attribut to transmit as username, empty = login")
+        help_text=_("Name of the attribute to transmit as username, empty = login")
     )
     #: A boolean allowing to limit username allowed to connect to :attr:`usernames`.
     restrict_users = models.BooleanField(
@@ -624,7 +624,7 @@ class ReplaceAttributName(models.Model):
     name = models.CharField(
         max_length=255,
         verbose_name=_(u"name"),
-        help_text=_(u"name of an attribut to send to the service, use * for all attributes")
+        help_text=_(u"name of an attribute to send to the service, use * for all attributes")
     )
     #: The name of the attribute to transmit to the service. If empty, the value of :attr:`name`
     #: is used.
@@ -632,7 +632,7 @@ class ReplaceAttributName(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_(u"replace"),
-        help_text=_(u"name under which the attribut will be show"
+        help_text=_(u"name under which the attribute will be show"
                     u"to the service. empty = default name of the attribut")
     )
     #: ForeignKey to a :class:`ServicePattern`. :class:`ReplaceAttributName` instances for a
@@ -659,8 +659,8 @@ class FilterAttributValue(models.Model):
     #: The name of a user attribute
     attribut = models.CharField(
         max_length=255,
-        verbose_name=_(u"attribut"),
-        help_text=_(u"Name of the attribut which must verify pattern")
+        verbose_name=_(u"attribute"),
+        help_text=_(u"Name of the attribute which must verify pattern")
     )
     #: A regular expression the attribute :attr:`attribut` value must verify. If :attr:`attribut`
     #: if a list, only one of the list values needs to match.
@@ -689,8 +689,8 @@ class ReplaceAttributValue(models.Model):
     #: Name the attribute: a key of :attr:`User.attributs`
     attribut = models.CharField(
         max_length=255,
-        verbose_name=_(u"attribut"),
-        help_text=_(u"Name of the attribut for which the value must be replace")
+        verbose_name=_(u"attribute"),
+        help_text=_(u"Name of the attribute for which the value must be replace")
     )
     #: A regular expression matching the part of the attribute value that need to be changed
     pattern = models.CharField(

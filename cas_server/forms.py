@@ -82,7 +82,10 @@ class FederateSelect(BootsrapForm):
     #: A checkbox to remember the user choices of :attr:`provider<FederateSelect.provider>`
     remember = forms.BooleanField(label=_('Remember the identity provider'), required=False)
     #: A checkbox to ask to be warn before emiting a ticket for another service
-    warn = forms.BooleanField(label=_('warn'), required=False)
+    warn = forms.BooleanField(
+        label=_('Warn me before logging me into other sites.'),
+        required=False
+    )
     #: Is the service asking the authentication renewal ?
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
@@ -94,7 +97,7 @@ class UserCredential(BootsrapForm):
          Form used on the login page to retrive user credentials
      """
     #: The user username
-    username = forms.CharField(label=_('login'))
+    username = forms.CharField(label=_('username'))
     #: The service url for which the user want a ticket
     service = forms.CharField(label=_('service'), widget=forms.HiddenInput(), required=False)
     #: The user password
@@ -103,7 +106,10 @@ class UserCredential(BootsrapForm):
     lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
     #: A checkbox to ask to be warn before emiting a ticket for another service
-    warn = forms.BooleanField(label=_('warn'), required=False)
+    warn = forms.BooleanField(
+        label=_('Warn me before logging me into other sites.'),
+        required=False
+    )
     #: Is the service asking the authentication renewal ?
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
@@ -124,7 +130,9 @@ class UserCredential(BootsrapForm):
         if auth.test_password(cleaned_data.get("password")):
             cleaned_data["username"] = auth.username
         else:
-            raise forms.ValidationError(_(u"Bad user"))
+            raise forms.ValidationError(
+                _(u"The credentials you provided cannot be determined to be authentic.")
+            )
         return cleaned_data
 
 

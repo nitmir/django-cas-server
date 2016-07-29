@@ -349,8 +349,8 @@ class FederateAuth(View):
                         messages.ERROR,
                         _(
                             u"Invalid response from your identity provider CAS upon "
-                            u"ticket %s validation: %r"
-                        ) % (ticket, error)
+                            u"ticket %(ticket)s validation: %(error)r"
+                        ) % {'ticket': ticket, 'error': error}
                     )
                     response = redirect("cas_server:login")
                     response.delete_cookie("_remember_provider")
@@ -469,7 +469,7 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"Invalid login ticket")
+                _(u"Invalid login ticket, please retry to login")
             )
         elif ret == self.USER_LOGIN_OK:
             # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
@@ -701,14 +701,14 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"User charateristics non allowed")
+                _(u"User characteristics non allowed")
             )
         except models.UserFieldNotDefined:
             error = 4
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"The attribut %(field)s is needed to use"
+                _(u"The attribute %(field)s is needed to use"
                   u" that service") % {'field': service_pattern.user_field}
             )
 

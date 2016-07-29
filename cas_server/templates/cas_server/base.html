@@ -14,7 +14,7 @@
         <script src="{{settings.CAS_COMPONENT_URLS.html5shiv}}"></script>
         <script src="{{settings.CAS_COMPONENT_URLS.respond}}"></script>
         <![endif]-->
-        <link rel="shortcut icon" href="{% static "cas_server/favicon.ico?v=1" %}" />
+        {% if settings.CAS_FAVICON_URL %}<link rel="shortcut icon" href="{{settings.CAS_FAVICON_URL}}" />{% endif %}
         <link href="{% static "cas_server/styles.css" %}" rel="stylesheet">
     </head>
     <body>

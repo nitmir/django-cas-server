@@ -163,6 +163,8 @@ Template settings
 
 * ``CAS_LOGO_URL``: URL to the logo showed in the up left corner on the default
   templates. Set it to ``False`` to disable it.
+* ``CAS_FAVICON_URL``: URL to the favicon (shortcut icon) used by the default templates.
+  Default is a key icon. Set it to ``False`` to disable it.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
   and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
   ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::

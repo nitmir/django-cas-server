@@ -18,6 +18,8 @@ from importlib import import_module
 
 #: URL to the logo showed in the up left corner on the default templates.
 CAS_LOGO_URL = static("cas_server/logo.png")
+#: URL to the favicon (shortcut icon) used by the default templates. Default is a key icon.
+CAS_FAVICON_URL = static("cas_server/favicon.ico")
 #: URLs to css and javascript external components.
 CAS_COMPONENT_URLS = {
     "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",

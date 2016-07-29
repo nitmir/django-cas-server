@@ -25,10 +25,18 @@ import hashlib
 import crypt
 import base64
 import six
+import requests
+import time
+import logging
 
 from importlib import import_module
 from datetime import datetime, timedelta
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+
+from . import VERSION
+
+#: logger facility
+logger = logging.getLogger(__name__)
 
 
 def json_encode(obj):
@@ -51,6 +59,16 @@ def context(params):
     """
     params["settings"] = settings
     params["message_levels"] = DEFAULT_MESSAGE_LEVELS
+    if settings.CAS_NEW_VERSION_HTML_WARNING:
+        LAST_VERSION = last_version()
+        params["VERSION"] = VERSION
+        params["LAST_VERSION"] = LAST_VERSION
+        if LAST_VERSION is not None:
+            t_version = decode_version(VERSION)
+            t_last_version = decode_version(LAST_VERSION)
+            params["upgrade_available"] = t_version < t_last_version
+        else:
+            params["upgrade_available"] = False
     return params
 
 
@@ -603,3 +621,51 @@ def check_password(method, password, hashed_password, charset):
         )(password).hexdigest().encode("ascii") == hashed_password.lower()
     else:
         raise ValueError("Unknown password method check %r" % method)
+
+
+def decode_version(version):
+    """
+        decode a version string following version semantic http://semver.org/ input a tuple of int
+
+        :param unicode version: A dotted version
+        :return: A tuple a int
+        :rtype: tuple
+    """
+    return tuple(int(sub_version) for sub_version in version.split('.'))
+
+
+def last_version():
+    """
+        Fetch the last version from pypi and return it. On successful fetch from pypi, the response
+        is cached 24h, on error, it is cached 10 min.
+
+        :return: the last django-cas-server version
+        :rtype: unicode
+    """
+    try:
+        last_update, version, success = last_version._cache
+    except AttributeError:
+        last_update = 0
+        version = None
+        success = False
+    cache_delta = 24 * 3600 if success else 600
+    if (time.time() - last_update) < cache_delta:
+        return version
+    else:
+        try:
+            req = requests.get(settings.CAS_NEW_VERSION_JSON_URL)
+            data = json.loads(req.content)
+            versions = data["releases"].keys()
+            versions.sort()
+            version = versions[-1]
+            last_version._cache = (time.time(), version, True)
+            return version
+        except (
+            KeyError,
+            ValueError,
+            requests.exceptions.RequestException
+        ) as error: # pragma: no cover (should not happen unless pypi is not available)
+            logger.error(
+                "Unable to fetch %s: %s" % (settings.CAS_NEW_VERSION_JSON_URL, error)
+            )
+            last_version._cache = (time.time(), version, False)

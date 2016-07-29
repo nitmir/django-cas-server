@@ -140,6 +140,15 @@ CAS_FEDERATE = False
 #: Time after witch the cookie use for “remember my identity provider” expire (one week).
 CAS_FEDERATE_REMEMBER_TIMEOUT = 604800
 
+#: A :class:`bool` for diplaying a warning on html pages then a new version of the application
+#: is avaible. Once closed by a user, it is not displayed to this user until the next new version.
+CAS_NEW_VERSION_HTML_WARNING = True
+#: A :class:`bool` for sending emails to ``settings.ADMINS`` when a new version is available.
+CAS_NEW_VERSION_EMAIL_WARNING = True
+#: URL to the pypi json of the application. Used to retreive the version number of the last version.
+#: You should not change it.
+CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
+
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():
     # get the current setting value, falling back to default_value

@@ -219,6 +219,16 @@ Federation settings
   ``_remember_provider``.
 
 
+New version warnings settings
+-----------------------------
+
+* ``CAS_NEW_VERSION_HTML_WARNING``: A boolean for diplaying a warning on html pages then a new
+  version of the application is avaible. Once closed by a user, it is not displayed to this user
+  until the next new version. The default is ``True``.
+* ``CAS_NEW_VERSION_EMAIL_WARNING``: A bolean sot sending a email to ``settings.ADMINS`` when a new
+  version is available. The default is ``True``.
+
+
 Tickets validity settings
 -------------------------
 

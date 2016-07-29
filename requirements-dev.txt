@@ -9,3 +9,4 @@ requests>=2.4
 requests_futures>=0.9.5
 lxml>=3.4
 six>=1
+mock>=1

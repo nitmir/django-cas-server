@@ -31,8 +31,14 @@
             <div class="row">
             <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
             <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
-            {% block ante_messages %}{% endblock %}
             {% if auto_submit %}<noscript>{% endif %}
+            {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+              <div class="alert alert-info alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true" id="alert-version">&#215;</button>
+                {% blocktrans %}A new version of the application is available. This instance runs {{VERSION}} and the last version is {{LAST_VERSION}}. Please consider upgrading.{% endblocktrans %}
+              </div>
+            {% endif %}
+            {% block ante_messages %}{% endblock %}
             {% for message in messages %}
                 <div {% spaceless %}
                     {% if message.level == message_levels.DEBUG %}
@@ -58,5 +64,9 @@
         </div> <!-- /container -->
         <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
         <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
+        {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+        <script src="{% static "cas_server/alert-version.js" %}"></script>
+        <script>alert_version("{{LAST_VERSION}}")</script>
+        {% endif %}
     </body>
 </html>

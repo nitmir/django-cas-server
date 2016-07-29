@@ -20,6 +20,7 @@ from django.utils import timezone
 
 import random
 import json
+import mock
 from lxml import etree
 from six.moves import range
 
@@ -46,6 +47,28 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         """Prepare the test context:"""
         # we prepare a bunch a service url and service patterns for tests
         self.setup_service_patterns()
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
+    @mock.patch("cas_server.utils.last_version", lambda:"1.2.3")
+    @mock.patch("cas_server.utils.VERSION", "0.1.2")
+    def test_new_version_available_ok(self):
+        client = Client()
+        response = client.get("/login")
+        self.assertIn(b"A new version of the application is available", response.content)
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
+    @mock.patch("cas_server.utils.last_version", lambda:None)
+    @mock.patch("cas_server.utils.VERSION", "0.1.2")
+    def test_new_version_available_badpypi(self):
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(b"A new version of the application is available", response.content)
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=False)
+    def test_new_version_available_disabled(self):
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(b"A new version of the application is available", response.content)
 
     def test_login_view_post_goodpass_goodlt(self):
         """Test a successul login"""

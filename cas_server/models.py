@@ -18,15 +18,19 @@ from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 
 import re
 import sys
+import smtplib
 import logging
 from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
 import cas_server.utils as utils
+from . import VERSION
 
 #: logger facility
 logger = logging.getLogger(__name__)
@@ -1003,3 +1007,60 @@ class Proxy(models.Model):
 
     def __str__(self):
         return self.url
+
+
+class NewVersionWarning(models.Model):
+    """
+        Bases: :class:`django.db.models.Model`
+
+        The last new version available version sent
+    """
+    version = models.CharField(max_length=255)
+
+    @classmethod
+    def send_mails(cls):
+        """
+            For each new django-cas-server version, if the current instance is not up to date
+            send one mail to ``settings.ADMINS``.
+        """
+        if settings.CAS_NEW_VERSION_EMAIL_WARNING and settings.ADMINS:
+            try:
+                obj = cls.objects.get()
+            except cls.DoesNotExist:
+                obj = NewVersionWarning.objects.create(version=VERSION)
+            LAST_VERSION = utils.last_version()
+            if LAST_VERSION is not None and LAST_VERSION != obj.version:
+                if utils.decode_version(VERSION) < utils.decode_version(LAST_VERSION):
+                    try:
+                        send_mail(
+                            (
+                                '%sA new version of django-cas-server is available'
+                            ) % settings.EMAIL_SUBJECT_PREFIX,
+                            u'''
+A new version of the django-cas-server is available.
+
+Your version: %s
+New version: %s
+
+Upgrade using:
+    * pip install -U django-cas-server
+    * fetching the last release on
+      https://github.com/nitmir/django-cas-server/ or on
+      https://pypi.python.org/pypi/django-cas-server
+
+After upgrade, do not forget to run:
+    * ./manage.py migrate
+    * ./manage.py collectstatic
+and to reload your wsgi server (apache2, uwsgi, gunicord, etc…)
+
+--\u0020
+django-cas-server
+'''.strip() % (VERSION, LAST_VERSION),
+                            settings.SERVER_EMAIL,
+                            ["%s <%s>" % admin for admin in settings.ADMINS],
+                            fail_silently=False,
+                        )
+                        obj.version = LAST_VERSION
+                        obj.save()
+                    except smtplib.SMTPException as error:  # pragma: no cover (should not happen)
+                        logger.error("Unable to send new version mail: %s" % error)

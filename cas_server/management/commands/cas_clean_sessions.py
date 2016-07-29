@@ -23,3 +23,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         models.User.clean_deleted_sessions()
+        models.NewVersionWarning.send_mails()

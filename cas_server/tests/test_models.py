@@ -16,7 +16,9 @@ import django
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.core import mail
 
+import mock
 from datetime import timedelta
 from importlib import import_module
 
@@ -271,3 +273,39 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         )
         self.assertIsNone(ticket._attributs)
         self.assertIsNone(ticket.attributs)
+
+
+@mock.patch("cas_server.utils.last_version", lambda:"1.2.3")
+@override_settings(ADMINS=[("Ano Nymous", "ano.nymous@example.net")])
+@override_settings(CAS_NEW_VERSION_EMAIL_WARNING=True)
+class NewVersionWarningTestCase(TestCase):
+    """tests for the new version warning model"""
+
+    @mock.patch("cas_server.models.VERSION", "0.1.2")
+    def test_send_mails(self):
+        models.NewVersionWarning.send_mails()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].subject,
+            '%sA new version of django-cas-server is available' % settings.EMAIL_SUBJECT_PREFIX
+        )
+
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 1)
+
+    @mock.patch("cas_server.models.VERSION", "1.2.3")
+    def test_send_mails_same_version(self):
+        models.NewVersionWarning.objects.create(version="0.1.2")
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(ADMINS=[])
+    def test_send_mails_no_admins(self):
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(CAS_NEW_VERSION_EMAIL_WARNING=False)
+    def test_send_mails_disabled(self):
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)

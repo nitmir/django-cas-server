@@ -13,6 +13,7 @@
 from django.test import TestCase, RequestFactory
 
 import six
+import warnings
 
 from cas_server import utils
 
@@ -208,3 +209,28 @@ class UtilsTestCase(TestCase):
         self.assertEqual(utils.get_tuple(test_tuple, 3), None)
         self.assertEqual(utils.get_tuple(test_tuple, 3, 'toto'), 'toto')
         self.assertEqual(utils.get_tuple(None, 3), None)
+
+    def test_last_version(self):
+        """
+            test the function last_version. An internet connection is needed, if you do not have
+            one, this test will fail and you should ignore it.
+        """
+        try:
+            # first check if pypi is available
+            utils.requests.get("https://pypi.python.org/simple/django-cas-server/")
+        except utils.requests.exceptions.RequestException:
+            warnings.warn(
+                (
+                    "Pypi seems not available, perhaps you do not have internet access. "
+                    "Consequently, the test cas_server.tests.test_utils.UtilsTestCase.test_last_"
+                    "version is ignored"
+                ),
+                RuntimeWarning
+            )
+        else:
+            version = utils.last_version()
+            self.assertIsInstance(version, six.text_type)
+            self.assertEqual(len(version.split('.')), 3)
+
+            # version is cached 24h so calling it a second time should return the save value
+            self.assertEqual(version, utils.last_version())

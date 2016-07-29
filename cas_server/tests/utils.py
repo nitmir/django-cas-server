@@ -12,16 +12,21 @@
 """Some utils functions for tests"""
 from cas_server.default_settings import settings
 
+import django
 from django.test import Client
-from django.template import loader, Context
+from django.template import loader
 from django.utils import timezone
+if django.VERSION < (1, 8):
+    from django.template import Context
+else:
+    Context = lambda x:x
 
 import cgi
 import six
 from threading import Thread
 from lxml import etree
 from six.moves import BaseHTTPServer
-from six.moves.urllib.parse import urlparse, parse_qsl
+from six.moves.urllib.parse import urlparse, parse_qsl, parse_qs
 from datetime import timedelta
 
 from cas_server import models
@@ -166,7 +171,7 @@ class HttpParamsHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             postvars = cgi.parse_multipart(self.rfile, pdict)
         elif ctype == 'application/x-www-form-urlencoded':
             length = int(self.headers.get('content-length'))
-            postvars = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+            postvars = parse_qs(self.rfile.read(length), keep_blank_values=1)
         else:
             postvars = {}
         self.server.PARAMS = postvars

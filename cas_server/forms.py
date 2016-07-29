@@ -32,7 +32,7 @@ class BootsrapForm(forms.Form):
                     self[name].checkbox = True
                 else:
                     attrs['class'] = "form-control"
-                    if field.label:
+                    if field.label:  # pragma: no branch (currently all field are hidden or labeled)
                         attrs["placeholder"] = field.label
                 if field.required:
                     attrs["required"] = "required"

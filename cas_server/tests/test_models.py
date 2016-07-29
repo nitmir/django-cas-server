@@ -60,6 +60,24 @@ class FederatedUserTestCase(TestCase, UserModels, FederatedIendityProviderModel)
         with self.assertRaises(models.FederatedUser.DoesNotExist):
             models.FederatedUser.objects.get(username="test2")
 
+    def test_json_attributes(self):
+        """test the json storage of ``atrributs`` in ``_attributs``"""
+        provider = models.FederatedIendityProvider.objects.get(suffix="example.com")
+        user = models.FederatedUser.objects.create(
+            username=settings.CAS_TEST_USER,
+            provider=provider,
+            attributs=settings.CAS_TEST_ATTRIBUTES,
+            ticket=""
+        )
+        self.assertEqual(utils.json_encode(settings.CAS_TEST_ATTRIBUTES), user._attributs)
+        user.delete()
+        user = models.FederatedUser.objects.create(
+            username=settings.CAS_TEST_USER,
+            provider=provider,
+            ticket=""
+        )
+        self.assertIsNone(user._attributs)
+        self.assertIsNone(user.attributs)
 
 class FederateSLOTestCase(TestCase, UserModels):
     """test for the federated SLO model"""
@@ -231,3 +249,25 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
         # only 1 ticket remain in the db
         self.assertEqual(len(models.ServiceTicket.objects.all()), 1)
+
+    def test_json_attributes(self):
+        """test the json storage of ``atrributs`` in ``_attributs``"""
+        # ge an authenticated client
+        client = get_auth_client()
+        # get the user associated to the client
+        user = self.get_user(client)
+        ticket = models.ServiceTicket.objects.create(
+            user=user,
+            service=self.service,
+            attributs=settings.CAS_TEST_ATTRIBUTES,
+            service_pattern=self.service_pattern
+        )
+        self.assertEqual(utils.json_encode(settings.CAS_TEST_ATTRIBUTES), ticket._attributs)
+        ticket.delete()
+        ticket = models.ServiceTicket.objects.create(
+            user=user,
+            service=self.service,
+            service_pattern=self.service_pattern
+        )
+        self.assertIsNone(ticket._attributs)
+        self.assertIsNone(ticket.attributs)

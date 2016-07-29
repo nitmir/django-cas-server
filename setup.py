@@ -66,5 +66,5 @@ if __name__ == '__main__':
         download_url="https://github.com/nitmir/django-cas-server/releases",
         zip_safe=False,
         setup_requires=['pytest-runner'],
-        tests_require=['pytest', 'pytest-django', 'pytest-pythonpath'],
+        tests_require=['pytest', 'pytest-django', 'pytest-pythonpath', 'pytest-warnings', 'mock>=1'],
     )

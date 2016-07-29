@@ -15,7 +15,7 @@
         <script src="{{settings.CAS_COMPONENT_URLS.respond}}"></script>
         <![endif]-->
         <link rel="shortcut icon" href="{% static "cas_server/favicon.ico?v=1" %}" />
-        <link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+        <link href="{% static "cas_server/styles.css" %}" rel="stylesheet">
     </head>
     <body>
         <div class="container">
@@ -36,18 +36,17 @@
             {% for message in messages %}
                 <div {% spaceless %}
                     {% if message.level == message_levels.DEBUG %}
-                        class="alert alert-warning alert-dismissable"
+                        class="alert alert-warning"
                     {% elif message.level == message_levels.INFO %}
-                        class="alert alert-info alert-dismissable"
+                        class="alert alert-info"
                     {% elif message.level == message_levels.SUCCESS %}
-                        class="alert alert-success alert-dismissable"
+                        class="alert alert-success"
                     {% elif message.level == message_levels.WARNING %}
-                        class="alert alert-warning alert-dismissable"
+                        class="alert alert-warning"
                     {% else %}
-                        class="alert alert-danger alert-dismissable"
+                        class="alert alert-danger"
                     {% endif %}
                 {% endspaceless %}>
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
                     {{ message }}
                 </div>
             {% endfor %}

@@ -183,7 +183,8 @@ class FederateAuthLoginLogoutTestCase(
         """
             The federated view should redirect to /login if the provider is unknown or not provided,
             try to fetch a new ticket if the provided ticket validation fail
-            (network error or bad ticket)
+            (network error or bad ticket), redirect to /login with a error message if identity
+            provider CAS return a bad response (invalid XML document)
         """
         good_provider = "example.com"
         bad_provider = "exemple.fr"
@@ -228,6 +229,18 @@ class FederateAuthLoginLogoutTestCase(
         self.assertEqual(response["Location"], "%s/login" % (
             'http://testserver' if django.VERSION < (1, 9) else ""
         ))
+
+        # test CAS avaible but return a bad XML doc, should redirect to /login with a error message
+        # use "example.net" as it is CASv3
+        tests_utils.HttpParamsHandler.run(8082)
+        response = client.get("/federate/%s" % "example.net", {'ticket': utils.gen_st()})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "%s/login" % (
+            'http://testserver' if django.VERSION < (1, 9) else ""
+        ))
+        response = client.get("/login")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Invalid response from your identity provider CAS", response.content)
 
     def test_auth_federate_slo(self):
         """test that SLO receive from backend CAS log out the users"""

@@ -312,31 +312,49 @@ class FederateAuth(View):
                 return HttpResponseRedirect(auth.get_login_url())
             else:
                 ticket = request.GET['ticket']
-                # if the ticket validation succeed
-                if auth.verify_ticket(ticket):
-                    logger.info(
-                        "Got a valid ticket for %s from %s" % (
-                            auth.username,
-                            auth.provider.server_url
+                try:
+                    # if the ticket validation succeed
+                    if auth.verify_ticket(ticket):
+                        logger.info(
+                            "Got a valid ticket for %s from %s" % (
+                                auth.username,
+                                auth.provider.server_url
+                            )
                         )
-                    )
-                    params = utils.copy_params(request.GET, ignore={"ticket"})
-                    request.session["federate_username"] = auth.federated_username
-                    request.session["federate_ticket"] = ticket
-                    auth.register_slo(auth.federated_username, request.session.session_key, ticket)
-                    # redirect to the the login page for the user to become authenticated
-                    # thanks to the `federate_username` and `federate_ticket` session parameters
-                    url = utils.reverse_params("cas_server:login", params)
-                    return HttpResponseRedirect(url)
-                # else redirect to the identity provider CAS login page
-                else:
-                    logger.info(
-                        "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
-                            auth.username,
-                            auth.provider.server_url
+                        params = utils.copy_params(request.GET, ignore={"ticket"})
+                        request.session["federate_username"] = auth.federated_username
+                        request.session["federate_ticket"] = ticket
+                        auth.register_slo(
+                            auth.federated_username,
+                            request.session.session_key,
+                            ticket
                         )
+                        # redirect to the the login page for the user to become authenticated
+                        # thanks to the `federate_username` and `federate_ticket` session parameters
+                        url = utils.reverse_params("cas_server:login", params)
+                        return HttpResponseRedirect(url)
+                    # else redirect to the identity provider CAS login page
+                    else:
+                        logger.info(
+                            "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
+                                auth.username,
+                                auth.provider.server_url
+                            )
+                        )
+                        return HttpResponseRedirect(auth.get_login_url())
+                # both xml.etree.ElementTree and lxml.etree exceptions inherit from SyntaxError
+                except SyntaxError as error:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        _(
+                            u"Invalid response from your identity provider CAS upon "
+                            u"ticket %s validation: %r"
+                        ) % (ticket, error)
                     )
-                    return HttpResponseRedirect(auth.get_login_url())
+                    response = redirect("cas_server:login")
+                    response.delete_cookie("_remember_provider")
+                    return response
         except FederatedIendityProvider.DoesNotExist:
             logger.warning("Identity provider suffix %s not found" % provider)
             # if the identity provider is not found, redirect to the login page

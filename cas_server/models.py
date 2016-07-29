@@ -18,7 +18,6 @@ from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 
 import re

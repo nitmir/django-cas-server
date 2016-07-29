@@ -16,10 +16,6 @@ import django
 from django.test import Client
 from django.template import loader
 from django.utils import timezone
-if django.VERSION < (1, 8):
-    from django.template import Context
-else:
-    Context = lambda x:x
 
 import cgi
 import six
@@ -31,6 +27,13 @@ from datetime import timedelta
 
 from cas_server import models
 from cas_server import utils
+
+
+if django.VERSION < (1, 8):
+    from django.template import Context
+else:
+    def Context(arg):
+        return arg
 
 
 def return_unicode(string, charset):

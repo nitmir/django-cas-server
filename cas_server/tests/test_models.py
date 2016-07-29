@@ -81,6 +81,7 @@ class FederatedUserTestCase(TestCase, UserModels, FederatedIendityProviderModel)
         self.assertIsNone(user._attributs)
         self.assertIsNone(user.attributs)
 
+
 class FederateSLOTestCase(TestCase, UserModels):
     """test for the federated SLO model"""
     def test_clean_deleted_sessions(self):
@@ -275,7 +276,7 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         self.assertIsNone(ticket.attributs)
 
 
-@mock.patch("cas_server.utils.last_version", lambda:"1.2.3")
+@mock.patch("cas_server.utils.last_version", lambda: "1.2.3")
 @override_settings(ADMINS=[("Ano Nymous", "ano.nymous@example.net")])
 @override_settings(CAS_NEW_VERSION_EMAIL_WARNING=True)
 class NewVersionWarningTestCase(TestCase):

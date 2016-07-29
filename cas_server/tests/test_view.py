@@ -49,7 +49,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.setup_service_patterns()
 
     @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
-    @mock.patch("cas_server.utils.last_version", lambda:"1.2.3")
+    @mock.patch("cas_server.utils.last_version", lambda: "1.2.3")
     @mock.patch("cas_server.utils.VERSION", "0.1.2")
     def test_new_version_available_ok(self):
         client = Client()
@@ -57,7 +57,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertIn(b"A new version of the application is available", response.content)
 
     @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
-    @mock.patch("cas_server.utils.last_version", lambda:None)
+    @mock.patch("cas_server.utils.last_version", lambda: None)
     @mock.patch("cas_server.utils.VERSION", "0.1.2")
     def test_new_version_available_badpypi(self):
         client = Client()

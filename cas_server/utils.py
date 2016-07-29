@@ -654,8 +654,8 @@ def last_version():
     else:
         try:
             req = requests.get(settings.CAS_NEW_VERSION_JSON_URL)
-            data = json.loads(req.content)
-            versions = data["releases"].keys()
+            data = json.loads(req.text)
+            versions = list(data["releases"].keys())
             versions.sort()
             version = versions[-1]
             last_version._cache = (time.time(), version, True)
@@ -664,7 +664,7 @@ def last_version():
             KeyError,
             ValueError,
             requests.exceptions.RequestException
-        ) as error: # pragma: no cover (should not happen unless pypi is not available)
+        ) as error:  # pragma: no cover (should not happen unless pypi is not available)
             logger.error(
                 "Unable to fetch %s: %s" % (settings.CAS_NEW_VERSION_JSON_URL, error)
             )

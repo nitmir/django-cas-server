@@ -134,6 +134,14 @@ class CASClientBase(object):
                 raise CASError(errors[0].attrib['code'], errors[0].text)
         raise CASError("Bad http code %s" % response.code)
 
+    @staticmethod
+    def get_page_charset(page, default="utf-8"):
+        content_type = page.info().get('Content-type')
+        if content_type and "charset=" in content_type:
+            return content_type.split("charset=")[-1]
+        else:
+            return default
+
 
 class CASClientV1(CASClientBase, ReturnUnicode):
     """CAS Client Version 1"""
@@ -152,11 +160,7 @@ class CASClientV1(CASClientBase, ReturnUnicode):
         try:
             verified = page.readline().strip()
             if verified == b'yes':
-                content_type = page.info().get('Content-type')
-                if "charset=" in content_type:
-                    charset = content_type.split("charset=")[-1]
-                else:
-                    charset = "ascii"
+                charset = self.get_page_charset(page, default="ascii")
                 user = self.u(page.readline().strip(), charset)
                 return user, None, None
             else:
@@ -189,11 +193,7 @@ class CASClientV2(CASClientBase, ReturnUnicode):
         url = base_url + '?' + urllib_parse.urlencode(params)
         page = urllib_request.urlopen(url)
         try:
-            content_type = page.info().get('Content-type')
-            if "charset=" in content_type:
-                charset = content_type.split("charset=")[-1]
-            else:
-                charset = "ascii"
+            charset = self.get_page_charset(page)
             return (page.read(), charset)
         finally:
             page.close()
@@ -306,11 +306,7 @@ class CASClientWithSAMLV1(CASClientV2, SingleLogoutMixin):
             from elementtree import ElementTree
 
         page = self.fetch_saml_validation(ticket)
-        content_type = page.info().get('Content-type')
-        if "charset=" in content_type:
-            charset = content_type.split("charset=")[-1]
-        else:
-            charset = "ascii"
+        charset = self.get_page_charset(page)
 
         try:
             user = None

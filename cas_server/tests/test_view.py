@@ -52,6 +52,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
     @mock.patch("cas_server.utils.last_version", lambda: "1.2.3")
     @mock.patch("cas_server.utils.VERSION", "0.1.2")
     def test_new_version_available_ok(self):
+        """test the new version info box"""
         client = Client()
         response = client.get("/login")
         self.assertIn(b"A new version of the application is available", response.content)
@@ -60,12 +61,16 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
     @mock.patch("cas_server.utils.last_version", lambda: None)
     @mock.patch("cas_server.utils.VERSION", "0.1.2")
     def test_new_version_available_badpypi(self):
+        """
+            test the new version info box if pypi is not available (unable to retreive last version)
+        """
         client = Client()
         response = client.get("/login")
         self.assertNotIn(b"A new version of the application is available", response.content)
 
     @override_settings(CAS_NEW_VERSION_HTML_WARNING=False)
     def test_new_version_available_disabled(self):
+        """test the new version info box is disabled"""
         client = Client()
         response = client.get("/login")
         self.assertNotIn(b"A new version of the application is available", response.content)

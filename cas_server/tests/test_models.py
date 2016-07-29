@@ -284,6 +284,7 @@ class NewVersionWarningTestCase(TestCase):
 
     @mock.patch("cas_server.models.VERSION", "0.1.2")
     def test_send_mails(self):
+        """test the send_mails method with ADMINS and a new version available"""
         models.NewVersionWarning.send_mails()
 
         self.assertEqual(len(mail.outbox), 1)
@@ -297,16 +298,19 @@ class NewVersionWarningTestCase(TestCase):
 
     @mock.patch("cas_server.models.VERSION", "1.2.3")
     def test_send_mails_same_version(self):
+        """test the send_mails method with with current version being the last"""
         models.NewVersionWarning.objects.create(version="0.1.2")
         models.NewVersionWarning.send_mails()
         self.assertEqual(len(mail.outbox), 0)
 
     @override_settings(ADMINS=[])
     def test_send_mails_no_admins(self):
+        """test the send_mails method without ADMINS"""
         models.NewVersionWarning.send_mails()
         self.assertEqual(len(mail.outbox), 0)
 
     @override_settings(CAS_NEW_VERSION_EMAIL_WARNING=False)
     def test_send_mails_disabled(self):
+        """test the send_mails method if disabled"""
         models.NewVersionWarning.send_mails()
         self.assertEqual(len(mail.outbox), 0)

@@ -136,9 +136,12 @@ class CheckPasswordCase(TestCase):
         """test all the hex_HASH method: the hashed password is a simple hash of the password"""
         hashes = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
         hashed_password1 = []
-        for hash in hashes:
+        for hash_scheme in hashes:
             hashed_password1.append(
-                ("hex_%s" % hash, getattr(utils.hashlib, hash)(self.password1).hexdigest())
+                (
+                    "hex_%s" % hash_scheme,
+                    getattr(utils.hashlib, hash_scheme)(self.password1).hexdigest()
+                )
             )
         for (method, hp1) in hashed_password1:
             self.assertTrue(utils.check_password(method, self.password1, hp1, "utf8"))

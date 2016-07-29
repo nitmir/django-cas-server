@@ -33,6 +33,11 @@ if django.VERSION < (1, 8):
     from django.template import Context
 else:
     def Context(arg):
+        """
+            Starting from django 1.8 render take a dict and deprecated the use of a Context.
+            So this is the identity function, only use for compatibility with django 1.7 where
+            render MUST take a Context as argument.
+        """
         return arg
 
 

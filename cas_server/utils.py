@@ -64,9 +64,7 @@ def context(params):
         params["VERSION"] = VERSION
         params["LAST_VERSION"] = LAST_VERSION
         if LAST_VERSION is not None:
-            t_version = decode_version(VERSION)
-            t_last_version = decode_version(LAST_VERSION)
-            params["upgrade_available"] = t_version < t_last_version
+            params["upgrade_available"] = decode_version(VERSION) < decode_version(LAST_VERSION)
         else:
             params["upgrade_available"] = False
     return params

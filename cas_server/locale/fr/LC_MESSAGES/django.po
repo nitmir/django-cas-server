@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-30 01:25+0200\n"
-"PO-Revision-Date: 2016-07-30 01:30+0200\n"
+"POT-Creation-Date: 2016-07-30 19:19+0200\n"
+"PO-Revision-Date: 2016-07-30 19:20+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -27,7 +27,7 @@ msgstr "Service Central d'Authentification"
 msgid "Identity provider"
 msgstr "fournisseur d'identité"
 
-#: forms.py:80 forms.py:102 forms.py:205
+#: forms.py:80 forms.py:102 forms.py:208
 msgid "service"
 msgstr "service"
 
@@ -35,7 +35,7 @@ msgstr "service"
 msgid "Remember the identity provider"
 msgstr "Se souvenir du fournisseur d'identité"
 
-#: forms.py:86 forms.py:109
+#: forms.py:86 forms.py:110
 msgid "Warn me before logging me into other sites."
 msgstr "Prévenez-moi avant d'accéder à d'autres services."
 
@@ -47,11 +47,11 @@ msgstr "nom d'utilisateur"
 msgid "password"
 msgstr "mot de passe"
 
-#: forms.py:131
+#: forms.py:134
 msgid "The credentials you provided cannot be determined to be authentic."
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
-#: forms.py:191
+#: forms.py:194
 msgid "User not found in the temporary database, please try to reconnect"
 msgstr ""
 "Utilisateur non trouvé dans la base de donnée temporaire, essayez de vous "
@@ -285,14 +285,6 @@ msgstr ""
 "vous mettre a jour."
 
 #: templates/cas_server/logged.html:4
-msgid "Logged"
-msgstr ""
-"<h3>Connexion réussie</h3>Vous vous êtes authentifié(e) auprès du Service "
-"Central d'Authentification.<br/>Pour des raisons de sécurité, veuillez vous "
-"déconnecter et fermer votre navigateur lorsque vous avez fini d'accéder aux "
-"services authentifiés."
-
-#: templates/cas_server/logged.html:8
 msgid ""
 "<h3>Log In Successful</h3>You have successfully logged into the Central "
 "Authentication Service.<br/>For security reasons, please Log Out and Exit "
@@ -303,6 +295,10 @@ msgstr ""
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
 "navigateur après avoir fini d'accéder a des services demandant une "
 "authentification !"
+
+#: templates/cas_server/logged.html:8
+msgid "Log me out from all my sessions"
+msgstr "Me déconnecter de toutes mes sessions"
 
 #: templates/cas_server/logged.html:11
 msgid "Logout"
@@ -402,6 +398,13 @@ msgstr "Authentification requise par le service %(name)s (%(url)s)."
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"
 
+#~ msgid "Logged"
+#~ msgstr ""
+#~ "<h3>Connexion réussie</h3>Vous vous êtes authentifié(e) auprès du Service "
+#~ "Central d'Authentification.<br/>Pour des raisons de sécurité, veuillez "
+#~ "vous déconnecter et fermer votre navigateur lorsque vous avez fini "
+#~ "d'accéder aux services authentifiés."
+
 #~ msgid "warn"
 #~ msgstr "Prévenez-moi avant d'accéder à d'autres services."
 
@@ -410,9 +413,6 @@ msgstr "Le service %s n'est pas autorisé"
 
 #~ msgid "Bad user"
 #~ msgstr "Les informations transmises n'ont pas permis de vous authentifier."
-
-#~ msgid "Log me out from all my sessions"
-#~ msgstr "Me déconnecter de toutes mes sessions"
 
 #~ msgid ""
 #~ "Error during service logout %(service)s:\n"

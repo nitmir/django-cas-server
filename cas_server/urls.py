@@ -53,8 +53,8 @@ urlpatterns = [
     url('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
     url(
         '^auth$',
-        sensitive_variables('password')(
-            sensitive_post_parameters('password')(
+        sensitive_variables('password', 'secret')(
+            sensitive_post_parameters('password', 'secret')(
                 views.Auth.as_view()
             )
         ),

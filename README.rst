@@ -193,12 +193,14 @@ Template settings
 Authentication settings
 -----------------------
 
-*  ``CAS_AUTH_CLASS``: A dotted path to a class or a class implementing
-   ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
+* ``CAS_AUTH_CLASS``: A dotted path to a class or a class implementing
+  ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
+  Available classes bundled with ``django-cas-server`` are listed below in the
+  `Authentication backend`_ section.
 
-*  ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
-   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
-   reduce it to something like ``86400`` seconds (1 day).
+* ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
+  which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
+  reduce it to something like ``86400`` seconds (1 day).
 
 * ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificate authorities file. Usually on linux
   the local CAs are in ``/etc/ssl/certs/ca-certificates.crt``. The default is ``True`` which
@@ -214,8 +216,8 @@ Authentication settings
 Federation settings
 -------------------
 
-* ``CAS_FEDERATE``: A boolean for activating the federated mode (see the federate section below).
-  The default is ``False``.
+* ``CAS_FEDERATE``: A boolean for activating the federated mode (see the `Federation mode`_
+  section below). The default is ``False``.
 * ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
   provider" expire. The default is ``604800``, one week. The cookie is called
   ``_remember_provider``.
@@ -269,6 +271,7 @@ Tickets miscellaneous settings
 
 Mysql backend settings
 ----------------------
+Deprecated, see the Sql backend settings.
 Only usefull if you are using the mysql authentication backend:
 
 * ``CAS_SQL_HOST``: Host for the SQL server. The default is ``"localhost"``.
@@ -295,6 +298,64 @@ Only usefull if you are using the mysql authentication backend:
   The default is ``"crypt"``.
 
 
+Sql backend settings
+--------------------
+Only usefull if you are using the sql authentication backend. You must add a ``"cas_server"``
+database to `settings.DATABASES <https://docs.djangoproject.com/fr/1.9/ref/settings/#std:setting-DATABASES>`__
+as defined in the django documentation. It is then the database
+use by the sql backend.
+
+* ``CAS_SQL_USER_QUERY``: The query performed upon user authentication.
+  The username must be in field ``username``, the password in ``password``,
+  additional fields are used as the user attributes.
+  The default is ``"SELECT user AS username, pass AS password, users.* FROM users WHERE user = %s"``
+* ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
+
+  * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
+    should begin this $
+  * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
+    the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+  * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
+    The hashed password in the database is compare to the hexadecimal digest of the clear
+    password hashed with the corresponding algorithm.
+  * ``"plain"``, the password in the database must be in clear.
+
+  The default is ``"crypt"``.
+* ``CAS_SQL_PASSWORD_CHARSET``: Charset the SQL users passwords was hash with. This is needed to
+  encode the user sended password before hashing it for comparison. The default is ``"utf-8"``.
+
+
+Ldap backend settings
+---------------------
+Only usefull if you are using the ldap authentication backend:
+
+* ``CAS_LDAP_SERVER``: Address of the LDAP server. The default is ``"localhost"``.
+* ``CAS_LDAP_USER``: User bind address, for example ``"cn=admin,dc=crans,dc=org"`` for
+  connecting to the LDAP server.
+* ``CAS_LDAP_PASSWORD``: Password for connecting to the LDAP server.
+* ``CAS_LDAP_BASE_DN``: LDAP search base DN, for example ``"ou=data,dc=crans,dc=org"``.
+* ``CAS_LDAP_USER_QUERY``: Search filter for searching user by username. User inputed usernames are
+  escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%s)"``
+* ``CAS_LDAP_USERNAME_ATTR``: Attribute used for users usernames. The default is ``"uid"``
+* ``CAS_LDAP_PASSWORD_ATTR``: Attribute used for users passwords. The default is ``"userPassword"``
+* ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
+
+  * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
+    should begin this $
+  * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
+    the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+  * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
+    The hashed password in the database is compare to the hexadecimal digest of the clear
+    password hashed with the corresponding algorithm.
+  * ``"plain"``, the password in the database must be in clear.
+
+  The default is ``"ldap"``.
+* ``CAS_LDAP_PASSWORD_CHARSET``: Charset the LDAP users passwords was hash with. This is needed to
+  encode the user sended password before hashing it for comparison. The default is ``"utf-8"``.
+
+
 Test backend settings
 ---------------------
 Only usefull if you are using the test authentication backend:
@@ -316,10 +377,16 @@ Authentication backend
   for the user are defined by the ``CAS_TEST_*`` settings.
 * django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated against django users system.
   This is the default backend. The returned attributes are the fields available on the user model.
-* mysql backend ``cas_server.auth.MysqlAuthUser``: see the 'Mysql backend settings' section.
+* mysql backend ``cas_server.auth.MysqlAuthUser``: Deprecated, use the sql backend instead.
+  see the `Mysql backend settings`_ section. The returned attributes are those return by sql query
+  ``CAS_SQL_USER_QUERY``.
+* sql backend ``cas_server.auth.SqlAuthUser``: see the `Sql backend settings`_ section.
   The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
+* ldap backend ``cas_server.auth.LdapAuthUser``: see the `Ldap backend settings`_ section.
+  The returned attributes are those of the ldap node returned by the query filter ``CAS_LDAP_USER_QUERY``.
 * federated backend ``cas_server.auth.CASFederateAuth``: It is automatically used then ``CAS_FEDERATE`` is ``True``.
   You should not set it manually without setting ``CAS_FEDERATE`` to ``True``.
+
 
 Logs
 ====

@@ -582,7 +582,7 @@ def check_password(method, password, hashed_password, charset):
         :param hashed_password: The hashed password as stored in the database
         :type hashed_password: :obj:`str` or :obj:`unicode`
         :param str charset: The used char encoding (also used internally, so it must be valid for
-            the charset used by ``password`` even if it is inputed as an :obj:`unicode`)
+            the charset used by ``password`` when it was initially )
         :return: True if ``password`` match ``hashed_password`` using ``method``,
             ``False`` otherwise
         :rtype: bool
@@ -670,3 +670,12 @@ def last_version():
                 "Unable to fetch %s: %s" % (settings.CAS_NEW_VERSION_JSON_URL, error)
             )
             last_version._cache = (time.time(), version, False)
+
+
+def dictfetchall(cursor):
+    "Return all rows from a django cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]

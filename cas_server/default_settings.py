@@ -112,12 +112,39 @@ CAS_SQL_PASSWORD = ''
 CAS_SQL_DBNAME = ''
 #: Database charset.
 CAS_SQL_DBCHARSET = 'utf8'
+
 #: The query performed upon user authentication.
-CAS_SQL_USER_QUERY = 'SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s'
+CAS_SQL_USER_QUERY = 'SELECT user AS username, pass AS password, users.* FROM users WHERE user = %s'
 #: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
 #: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
 #: ``"hex_sha512"``, ``"plain"``.
-CAS_SQL_PASSWORD_CHECK = 'crypt'  # crypt or plain
+CAS_SQL_PASSWORD_CHECK = 'crypt'
+#: charset the SQL users passwords was hash with
+CAS_SQL_PASSWORD_CHARSET = "utf-8"
+
+
+#: Address of the LDAP server
+CAS_LDAP_SERVER = 'localhost'
+#: LDAP user bind address, for example ``"cn=admin,dc=crans,dc=org"`` for connecting to the LDAP
+#: server.
+CAS_LDAP_USER = None
+#: LDAP connection password
+CAS_LDAP_PASSWORD = None
+#: LDAP seach base DN, for example ``"ou=data,dc=crans,dc=org"``.
+CAS_LDAP_BASE_DN = None
+#: LDAP search filter for searching user by username. User inputed usernames are escaped using
+#: :func:`ldap3.utils.conv.escape_bytes`.
+CAS_LDAP_USER_QUERY = "(uid=%s)"
+#: LDAP attribute used for users usernames
+CAS_LDAP_USERNAME_ATTR = "uid"
+#: LDAP attribute used for users passwords
+CAS_LDAP_PASSWORD_ATTR = "userPassword"
+#: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
+#: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
+#: ``"hex_sha512"``, ``"plain"``.
+CAS_LDAP_PASSWORD_CHECK = "ldap"
+#: charset the LDAP users passwords was hash with
+CAS_LDAP_PASSWORD_CHARSET = "utf-8"
 
 
 #: Username of the test user.

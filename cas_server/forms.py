@@ -19,7 +19,11 @@ import cas_server.models as models
 
 
 class BootsrapForm(forms.Form):
-    """Form base class to use boostrap then rendering the form fields"""
+    """
+        Bases: :class:`django.forms.Form`
+
+        Form base class to use boostrap then rendering the form fields
+    """
     def __init__(self, *args, **kwargs):
         super(BootsrapForm, self).__init__(*args, **kwargs)
         for (name, field) in self.fields.items():
@@ -39,29 +43,36 @@ class BootsrapForm(forms.Form):
                 field.widget.attrs.update(attrs)
 
 
-class WarnForm(BootsrapForm):
+class BaseLogin(BootsrapForm):
     """
-        Bases: :class:`django.forms.Form`
+        Bases: :class:`BootsrapForm`
 
-        Form used on warn page before emiting a ticket
+        Base form with all field possibly hidden on the login pages
     """
-
     #: The service url for which the user want a ticket
     service = forms.CharField(widget=forms.HiddenInput(), required=False)
+    #: A valid LoginTicket to prevent POST replay
+    lt = forms.CharField(widget=forms.HiddenInput(), required=False)
     #: Is the service asking the authentication renewal ?
     renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     #: Url to redirect to if the authentication fail (user not authenticated or bad service)
     gateway = forms.CharField(widget=forms.HiddenInput(), required=False)
     method = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+
+class WarnForm(BaseLogin):
+    """
+        Bases: :class:`BaseLogin`
+
+        Form used on warn page before emiting a ticket
+    """
     #: ``True`` if the user has been warned of the ticket emission
     warned = forms.BooleanField(widget=forms.HiddenInput(), required=False)
-    #: A valid LoginTicket to prevent POST replay
-    lt = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
-class FederateSelect(BootsrapForm):
+class FederateSelect(BaseLogin):
     """
-        Bases: :class:`django.forms.Form`
+        Bases: :class:`BaseLogin`
 
         Form used on the login page when ``settings.CAS_FEDERATE`` is ``True``
         allowing the user to choose an identity provider.
@@ -76,9 +87,6 @@ class FederateSelect(BootsrapForm):
         to_field_name="suffix",
         label=_('Identity provider'),
     )
-    #: The service url for which the user want a ticket
-    service = forms.CharField(label=_('service'), widget=forms.HiddenInput(), required=False)
-    method = forms.CharField(widget=forms.HiddenInput(), required=False)
     #: A checkbox to remember the user choices of :attr:`provider<FederateSelect.provider>`
     remember = forms.BooleanField(label=_('Remember the identity provider'), required=False)
     #: A checkbox to ask to be warn before emiting a ticket for another service
@@ -86,35 +94,23 @@ class FederateSelect(BootsrapForm):
         label=_('Warn me before logging me into other sites.'),
         required=False
     )
-    #: Is the service asking the authentication renewal ?
-    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
 
-class UserCredential(BootsrapForm):
+class UserCredential(BaseLogin):
     """
-         Bases: :class:`django.forms.Form`
+         Bases: :class:`BaseLogin`
 
          Form used on the login page to retrive user credentials
      """
     #: The user username
     username = forms.CharField(label=_('username'))
-    #: The service url for which the user want a ticket
-    service = forms.CharField(label=_('service'), widget=forms.HiddenInput(), required=False)
     #: The user password
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
-    #: A valid LoginTicket to prevent POST replay
-    lt = forms.CharField(widget=forms.HiddenInput(), required=False)
-    method = forms.CharField(widget=forms.HiddenInput(), required=False)
     #: A checkbox to ask to be warn before emiting a ticket for another service
     warn = forms.BooleanField(
         label=_('Warn me before logging me into other sites.'),
         required=False
     )
-    #: Is the service asking the authentication renewal ?
-    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(UserCredential, self).__init__(*args, **kwargs)
 
     def clean(self):
         """
@@ -138,7 +134,7 @@ class UserCredential(BootsrapForm):
 
 class FederateUserCredential(UserCredential):
     """
-        Bases: :class:`UserCredential`
+        Bases: :class:`BaseLogin`, :class:`UserCredential`
 
         Form used on a auto submited page for linking the views
         :class:`FederateAuth<cas_server.views.FederateAuth>` and
@@ -156,21 +152,13 @@ class FederateUserCredential(UserCredential):
         This stub authentication form, allow to implement the federated mode with very few
         modificatons to the :class:`LoginView<cas_server.views.LoginView>` view.
     """
-    #: the user username with the ``@`` component
-    username = forms.CharField(widget=forms.HiddenInput())
-    #: The service url for which the user want a ticket
-    service = forms.CharField(widget=forms.HiddenInput(), required=False)
-    #: The ``ticket`` used to authenticate the user against a provider
-    password = forms.CharField(widget=forms.HiddenInput())
-    #: alias of :attr:`password`
-    ticket = forms.CharField(widget=forms.HiddenInput())
-    #: A valid LoginTicket to prevent POST replay
-    lt = forms.CharField(widget=forms.HiddenInput(), required=False)
-    method = forms.CharField(widget=forms.HiddenInput(), required=False)
-    #: Has the user asked to be warn before emiting a ticket for another service
-    warn = forms.BooleanField(widget=forms.HiddenInput(), required=False)
-    #: Is the service asking the authentication renewal ?
-    renew = forms.BooleanField(widget=forms.HiddenInput(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(FederateUserCredential, self).__init__(*args, **kwargs)
+        # All fields are hidden and auto filled by the /login view logic
+        for name, field in self.fields.items():
+            field.widget = forms.HiddenInput()
+            self[name].display = False
 
     def clean(self):
         """

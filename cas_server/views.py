@@ -264,8 +264,10 @@ class FederateAuth(View):
             if form.is_valid():
                 params = utils.copy_params(
                     request.POST,
-                    ignore={"provider", "csrfmiddlewaretoken", "ticket"}
+                    ignore={"provider", "csrfmiddlewaretoken", "ticket", "lt", "remember"}
                 )
+                if params.get("renew") == "False":
+                    del params["renew"]
                 url = utils.reverse_params(
                     "cas_server:federateAuth",
                     kwargs=dict(provider=form.cleaned_data["provider"].suffix),
@@ -425,7 +427,8 @@ class LoginView(View, LogoutMixin):
         self.warn = request.POST.get('warn')
         if settings.CAS_FEDERATE:
             self.username = request.POST.get('username')
-            self.ticket = request.POST.get('ticket')
+            # in federated mode, the valdated indentity provider CAS ticket is used as password
+            self.ticket = request.POST.get('password')
 
     def gen_lt(self):
         """Generate a new LoginTicket and add it to the list of valid LT for the user"""

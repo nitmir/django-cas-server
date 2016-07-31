@@ -88,16 +88,10 @@ class FederateAuthLoginLogoutTestCase(
             response = client.post('/federate', params)
             # we are redirected to the provider CAS client url
             self.assertEqual(response.status_code, 302)
-            if remember:
-                self.assertEqual(response["Location"], '%s/federate/%s?remember=on' % (
-                    'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider.suffix
-                ))
-            else:
-                self.assertEqual(response["Location"], '%s/federate/%s' % (
-                    'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider.suffix
-                ))
+            self.assertEqual(response["Location"], '%s/federate/%s' % (
+                'http://testserver' if django.VERSION < (1, 9) else "",
+                provider.suffix
+            ))
             # let's follow the redirect
             response = client.get('/federate/%s' % provider.suffix)
             # we are redirected to the provider CAS for authentication

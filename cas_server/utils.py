@@ -561,7 +561,10 @@ class LdapHashUserPassword(object):
         elif scheme == b'{CRYPT}':
             return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
         else:
-            hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
+            try:
+                hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
+            except TypeError as error:
+                raise cls.BadHash("Bad base64: %s" % error)
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
                 raise cls.BadHash("Hash too short for the scheme %s" % scheme)
             return hashed_passord[cls._schemes_to_len[scheme]:]

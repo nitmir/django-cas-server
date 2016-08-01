@@ -147,9 +147,12 @@ class LogoutView(View, LogoutMixin):
         # current querystring
         if settings.CAS_FEDERATE:
             if auth is not None:
-                params = utils.copy_params(request.GET)
+                params = utils.copy_params(request.GET, ignore={"forget_provider"})
                 url = auth.get_logout_url()
-                return HttpResponseRedirect(utils.update_url(url, params))
+                response = HttpResponseRedirect(utils.update_url(url, params))
+                if request.GET.get("forget_provider"):
+                    response.delete_cookie("remember_provider")
+                return response
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
@@ -331,7 +334,7 @@ class FederateAuth(View):
                             max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
                             utils.set_cookie(
                                 response,
-                                "_remember_provider",
+                                "remember_provider",
                                 provider.suffix,
                                 max_age
                             )
@@ -360,7 +363,7 @@ class FederateAuth(View):
                         ) % {'ticket': ticket, 'error': error}
                     )
                     response = redirect("cas_server:login")
-                    response.delete_cookie("_remember_provider")
+                    response.delete_cookie("remember_provider")
                     return response
         except FederatedIendityProvider.DoesNotExist:
             logger.warning("Identity provider suffix %s not found" % provider)
@@ -855,16 +858,16 @@ class LoginView(View, LogoutMixin):
                     )
                 else:
                     if (
-                        self.request.COOKIES.get('_remember_provider') and
+                        self.request.COOKIES.get('remember_provider') and
                         FederatedIendityProvider.objects.filter(
-                            suffix=self.request.COOKIES['_remember_provider']
+                            suffix=self.request.COOKIES['remember_provider']
                         )
                     ):
                         params = utils.copy_params(self.request.GET)
                         url = utils.reverse_params(
                             "cas_server:federateAuth",
                             params=params,
-                            kwargs=dict(provider=self.request.COOKIES['_remember_provider'])
+                            kwargs=dict(provider=self.request.COOKIES['remember_provider'])
                         )
                         return HttpResponseRedirect(url)
                     else:

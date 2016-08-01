@@ -128,8 +128,8 @@ class FederateAuthLoginLogoutTestCase(
                 {'ticket': ticket, 'remember': 'on' if remember else ''}
             )
             if remember:
-                self.assertIn("_remember_provider", client.cookies)
-                self.assertEqual(client.cookies["_remember_provider"].value, provider.suffix)
+                self.assertIn("remember_provider", client.cookies)
+                self.assertEqual(client.cookies["remember_provider"].value, provider.suffix)
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response["Location"], "%s/login" % (
                 'http://testserver' if django.VERSION < (1, 9) else ""

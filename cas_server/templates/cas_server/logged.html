@@ -8,6 +8,13 @@
       <input type="checkbox" name="all" value="1">{% trans "Log me out from all my sessions" %}
     </label>
   </div>
+  {% if settings.CAS_FEDERATE and request.COOKIES.remember_provider %}
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="forget_provider" value="1">{% trans "Forget the identity provider" %}
+    </label>
+  </div>
+  {% endif %}
   <button class="btn btn-danger btn-block btn-lg" type="submit">{% trans "Logout" %}</button>
 </form>
 {% endblock %}

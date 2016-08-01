@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-30 19:19+0200\n"
-"PO-Revision-Date: 2016-07-30 19:20+0200\n"
+"POT-Creation-Date: 2016-08-01 12:01+0200\n"
+"PO-Revision-Date: 2016-08-01 12:01+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -23,39 +23,39 @@ msgstr ""
 msgid "Central Authentication Service"
 msgstr "Service Central d'Authentification"
 
-#: forms.py:77
+#: forms.py:88
 msgid "Identity provider"
 msgstr "fournisseur d'identité"
 
-#: forms.py:80 forms.py:102 forms.py:208
-msgid "service"
-msgstr "service"
-
-#: forms.py:83
-msgid "Remember the identity provider"
-msgstr "Se souvenir du fournisseur d'identité"
-
-#: forms.py:86 forms.py:110
+#: forms.py:92 forms.py:111
 msgid "Warn me before logging me into other sites."
 msgstr "Prévenez-moi avant d'accéder à d'autres services."
 
-#: forms.py:100 models.py:600
+#: forms.py:96
+msgid "Remember the identity provider"
+msgstr "Se souvenir du fournisseur d'identité"
+
+#: forms.py:106 models.py:600
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: forms.py:104
+#: forms.py:108
 msgid "password"
 msgstr "mot de passe"
 
-#: forms.py:134
+#: forms.py:130
 msgid "The credentials you provided cannot be determined to be authentic."
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
-#: forms.py:194
+#: forms.py:182
 msgid "User not found in the temporary database, please try to reconnect"
 msgstr ""
 "Utilisateur non trouvé dans la base de donnée temporaire, essayez de vous "
 "reconnecter"
+
+#: forms.py:196
+msgid "service"
+msgstr "service"
 
 #: management/commands/cas_clean_federate.py:20
 msgid "Clean old federated users"
@@ -300,7 +300,11 @@ msgstr ""
 msgid "Log me out from all my sessions"
 msgstr "Me déconnecter de toutes mes sessions"
 
-#: templates/cas_server/logged.html:11
+#: templates/cas_server/logged.html:14
+msgid "Forget the identity provider"
+msgstr "Oublier le fournisseur d'identité"
+
+#: templates/cas_server/logged.html:18
 msgid "Logout"
 msgstr "Se déconnecter"
 
@@ -316,7 +320,7 @@ msgstr "Connexion"
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: views.py:165
+#: views.py:168
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -325,7 +329,7 @@ msgstr ""
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
 "navigateur."
 
-#: views.py:171
+#: views.py:174
 #, python-format
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from %s sessions "
@@ -336,7 +340,7 @@ msgstr ""
 "Service Central d'Authentification. Pour des raisons de sécurité, veuillez "
 "fermer votre navigateur."
 
-#: views.py:178
+#: views.py:181
 msgid ""
 "<h3>Logout successful</h3>You were already logged out from the Central "
 "Authentication Service. For security reasons, exit your web browser."
@@ -345,7 +349,7 @@ msgstr ""
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
 "navigateur."
 
-#: views.py:351
+#: views.py:361
 #, python-format
 msgid ""
 "Invalid response from your identity provider CAS upon ticket %(ticket)s "
@@ -354,46 +358,46 @@ msgstr ""
 "Réponse invalide du CAS du fournisseur d'identité lors de la validation du "
 "ticket %(ticket)s: %(error)r"
 
-#: views.py:472
+#: views.py:483
 msgid "Invalid login ticket, please retry to login"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
-#: views.py:652
+#: views.py:675
 #, python-format
 msgid "Authentication has been required by service %(name)s (%(url)s)"
 msgstr ""
 "Une demande d'authentification a été émise pour le service %(name)s "
 "(%(url)s)."
 
-#: views.py:690
+#: views.py:713
 #, python-format
 msgid "Service %(url)s non allowed."
 msgstr "le service %(url)s n'est pas autorisé."
 
-#: views.py:697
+#: views.py:720
 msgid "Username non allowed"
 msgstr "Nom d'utilisateur non authorisé"
 
-#: views.py:704
+#: views.py:727
 msgid "User characteristics non allowed"
 msgstr "Caractéristique utilisateur non autorisée"
 
-#: views.py:711
+#: views.py:734
 #, python-format
 msgid "The attribute %(field)s is needed to use that service"
 msgstr "L'attribut %(field)s est nécessaire pour se connecter à ce service"
 
-#: views.py:801
+#: views.py:824
 #, python-format
 msgid "Authentication renewal required by service %(name)s (%(url)s)."
 msgstr "Demande de réauthentification pour le service %(name)s (%(url)s)."
 
-#: views.py:808
+#: views.py:831
 #, python-format
 msgid "Authentication required by service %(name)s (%(url)s)."
 msgstr "Authentification requise par le service %(name)s (%(url)s)."
 
-#: views.py:815
+#: views.py:838
 #, python-format
 msgid "Service %s non allowed"
 msgstr "Le service %s n'est pas autorisé"

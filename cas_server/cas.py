@@ -154,6 +154,8 @@ class CASClientV1(CASClientBase, ReturnUnicode):
         Returns username on success and None on failure.
         """
         params = [('ticket', ticket), ('service', self.service_url)]
+        if self.renew:
+            params.append(('renew', 'true'))
         url = (urllib_parse.urljoin(self.server_url, 'validate') + '?' +
                urllib_parse.urlencode(params))
         page = urllib_request.urlopen(url)
@@ -187,6 +189,8 @@ class CASClientV2(CASClientBase, ReturnUnicode):
 
     def get_verification_response(self, ticket):
         params = [('ticket', ticket), ('service', self.service_url)]
+        if self.renew:
+            params.append(('renew', 'true'))
         if self.proxy_callback:
             params.append(('pgtUrl', self.proxy_callback))
         base_url = urllib_parse.urljoin(self.server_url, self.url_suffix)

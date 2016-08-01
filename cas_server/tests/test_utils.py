@@ -131,8 +131,12 @@ class CheckPasswordCase(TestCase):
         with self.assertRaises(utils.LdapHashUserPassword.BadHash):
             utils.check_password("ldap", self.password1, b"TOTOssdsdsd", "utf8")
         for scheme in schemes_salt:
+            # bad length
             with self.assertRaises(utils.LdapHashUserPassword.BadHash):
                 utils.check_password("ldap", self.password1, scheme + b"dG90b3E8ZHNkcw==", "utf8")
+            # bad base64
+            with self.assertRaises(utils.LdapHashUserPassword.BadHash):
+                utils.check_password("ldap", self.password1, scheme + b"dG90b3E8ZHNkcw", "utf8")
 
     def test_hex(self):
         """test all the hex_HASH method: the hashed password is a simple hash of the password"""

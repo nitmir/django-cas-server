@@ -28,6 +28,7 @@ import six
 import requests
 import time
 import logging
+import binascii
 
 from importlib import import_module
 from datetime import datetime, timedelta
@@ -563,7 +564,7 @@ class LdapHashUserPassword(object):
         else:
             try:
                 hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
-            except TypeError as error:
+            except (TypeError, binascii.Error) as error:
                 raise cls.BadHash("Bad base64: %s" % error)
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
                 raise cls.BadHash("Hash too short for the scheme %s" % scheme)

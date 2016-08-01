@@ -87,13 +87,13 @@ class FederateSelect(BaseLogin):
         to_field_name="suffix",
         label=_('Identity provider'),
     )
-    #: A checkbox to remember the user choices of :attr:`provider<FederateSelect.provider>`
-    remember = forms.BooleanField(label=_('Remember the identity provider'), required=False)
     #: A checkbox to ask to be warn before emiting a ticket for another service
     warn = forms.BooleanField(
         label=_('Warn me before logging me into other sites.'),
         required=False
     )
+    #: A checkbox to remember the user choices of :attr:`provider<FederateSelect.provider>`
+    remember = forms.BooleanField(label=_('Remember the identity provider'), required=False)
 
 
 class UserCredential(BaseLogin):

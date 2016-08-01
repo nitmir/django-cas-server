@@ -498,7 +498,17 @@ class LoginView(View, LogoutMixin):
         else:  # pragma: no cover (should no happen)
             raise EnvironmentError("invalid output for LoginView.process_post")
         # call the GET/POST common part
-        return self.common()
+        response = self.common()
+        if self.warn:
+            utils.set_cookie(
+                response,
+                "warn",
+                "on",
+                10 * 365 * 24 * 3600
+            )
+        else:
+            response.delete_cookie("warn")
+        return response
 
     def process_post(self):
         """
@@ -607,7 +617,9 @@ class LoginView(View, LogoutMixin):
         form_initial = {
             'service': self.service,
             'method': self.method,
-            'warn': self.warn or self.request.session.get("warn"),
+            'warn': (
+                self.warn or self.request.session.get("warn") or self.request.COOKIES.get('warn')
+            ),
             'lt': self.request.session['lt'][-1],
             'renew': self.renew
         }

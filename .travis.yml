@@ -2,8 +2,6 @@ language: python
 matrix:
   include:
   - python: "2.7"
-    env: TOX_ENV=coverage
-  - python: "2.7"
     env: TOX_ENV=flake8
   - python: "2.7"
     env: TOX_ENV=check_rst
@@ -23,6 +21,8 @@ matrix:
     env: TOX_ENV=py35-django18
   - python: "3.5"
     env: TOX_ENV=py35-django19
+  - python: "2.7"
+    env: TOX_ENV=coverage
 cache:
   directories:
     - $HOME/.cache/pip/http/

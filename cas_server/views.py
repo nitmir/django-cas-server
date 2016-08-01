@@ -212,6 +212,7 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(View):
     """view to authenticated user agains a backend CAS then CAS_FEDERATE is True"""
+
     @method_decorator(csrf_exempt)  # csrf is disabled for allowing SLO requests reception
     def dispatch(self, request, *args, **kwargs):
         """
@@ -221,7 +222,7 @@ class FederateAuth(View):
         """
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
-    def get_cas_client(self, request, provider):
+    def get_cas_client(self, request, provider, renew=False):
         """
             return a CAS client object matching provider
 
@@ -234,7 +235,7 @@ class FederateAuth(View):
         # compute the current url, ignoring ticket dans provider GET parameters
         service_url = utils.get_current_url(request, {"ticket", "provider"})
         self.service_url = service_url
-        return CASFederateValidateUser(provider, service_url)
+        return CASFederateValidateUser(provider, service_url, renew=renew)
 
     def post(self, request, provider=None):
         """
@@ -291,16 +292,17 @@ class FederateAuth(View):
         if not settings.CAS_FEDERATE:
             logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
             return redirect("cas_server:login")
+        renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         # Is the user is already authenticated, no need to request authentication to the user
         # identity provider.
-        if self.request.session.get("authenticated"):
+        if self.request.session.get("authenticated") and not renew:
             logger.warning("User already authenticated, dropping federate authentication request")
             return redirect("cas_server:login")
         try:
             # get the identity provider from its suffix
             provider = FederatedIendityProvider.objects.get(suffix=provider)
             # get a CAS client for the user identity provider
-            auth = self.get_cas_client(request, provider)
+            auth = self.get_cas_client(request, provider, renew)
             # if no ticket submited, redirect to the identity provider CAS login page
             if 'ticket' not in request.GET:
                 logger.info("Trying to authenticate again %s" % auth.provider.server_url)
@@ -871,6 +873,24 @@ class LoginView(View, LogoutMixin):
                         )
                         return HttpResponseRedirect(url)
                     else:
+                        # if user is authenticated and auth renewal is requested, redirect directly
+                        # to the user identity provider
+                        if self.renew and self.request.session.get("authenticated"):
+                            try:
+                                user = FederatedUser.get_from_federated_username(
+                                    self.request.session.get("username")
+                                )
+                                params = utils.copy_params(self.request.GET)
+                                url = utils.reverse_params(
+                                    "cas_server:federateAuth",
+                                    params=params,
+                                    kwargs=dict(provider=user.provider.suffix)
+                                )
+                                return HttpResponseRedirect(url)
+                            # Should normally not happen: if the user is logged, it exists in the
+                            # database.
+                            except FederatedUser.DoesNotExist:  # pragma: no cover
+                                pass
                         return render(
                             self.request,
                             settings.CAS_LOGIN_TEMPLATE,

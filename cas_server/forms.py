@@ -134,7 +134,7 @@ class UserCredential(BaseLogin):
 
 class FederateUserCredential(UserCredential):
     """
-        Bases: :class:`BaseLogin`, :class:`UserCredential`
+        Bases: :class:`UserCredential`
 
         Form used on a auto submited page for linking the views
         :class:`FederateAuth<cas_server.views.FederateAuth>` and

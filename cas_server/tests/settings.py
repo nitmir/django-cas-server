@@ -100,3 +100,27 @@ STATIC_URL = '/static/'
 
 CAS_NEW_VERSION_HTML_WARNING = False
 CAS_NEW_VERSION_EMAIL_WARNING = False
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'cas_file': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'cas_stream': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'cas_file',
+        },
+    },
+    'loggers': {
+        'cas_server': {
+            'handlers': ['cas_stream'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

@@ -88,19 +88,23 @@ class FederateAuthLoginLogoutTestCase(
             response = client.post('/federate', params)
             # we are redirected to the provider CAS client url
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response["Location"], '%s/federate/%s' % (
+            self.assertEqual(response["Location"], '%s/federate/%s%s' % (
                 'http://testserver' if django.VERSION < (1, 9) else "",
-                provider.suffix
+                provider.suffix,
+                "?remember=on" if remember else ""
             ))
             # let's follow the redirect
-            response = client.get('/federate/%s' % provider.suffix)
+            response = client.get(
+                '/federate/%s%s' % (provider.suffix, "?remember=on" if remember else "")
+            )
             # we are redirected to the provider CAS for authentication
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response["Location"],
-                "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s" % (
+                "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s%s" % (
                     provider.server_url,
-                    provider.suffix
+                    provider.suffix,
+                    "%3Fremember%3Don" if remember else ""
                 )
             )
             # let's generate a ticket
@@ -108,7 +112,10 @@ class FederateAuthLoginLogoutTestCase(
             # we lauch a dummy CAS server that only validate once for the service
             # http://testserver/federate/example.com with `ticket`
             tests_utils.DummyCAS.run(
-                ("http://testserver/federate/%s" % provider.suffix).encode("ascii"),
+                ("http://testserver/federate/%s%s" % (
+                    provider.suffix,
+                    "?remember=on" if remember else ""
+                )).encode("ascii"),
                 ticket.encode("ascii"),
                 settings.CAS_TEST_USER.encode("utf8"),
                 [],
@@ -116,7 +123,13 @@ class FederateAuthLoginLogoutTestCase(
             )
             # we normally provide a good ticket and should be redirected to /login as the ticket
             # get successfully validated again the dummy CAS
-            response = client.get('/federate/%s' % provider.suffix, {'ticket': ticket})
+            response = client.get(
+                '/federate/%s' % provider.suffix,
+                {'ticket': ticket, 'remember': 'on' if remember else ''}
+            )
+            if remember:
+                self.assertIn("_remember_provider", client.cookies)
+                self.assertEqual(client.cookies["_remember_provider"].value, provider.suffix)
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response["Location"], "%s/login" % (
                 'http://testserver' if django.VERSION < (1, 9) else ""

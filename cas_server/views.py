@@ -218,8 +218,7 @@ class FederateAuth(View):
         """
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def get_cas_client(request, provider):
+    def get_cas_client(self, request, provider):
         """
             return a CAS client object matching provider
 
@@ -231,6 +230,7 @@ class FederateAuth(View):
         """
         # compute the current url, ignoring ticket dans provider GET parameters
         service_url = utils.get_current_url(request, {"ticket", "provider"})
+        self.service_url = service_url
         return CASFederateValidateUser(provider, service_url)
 
     def post(self, request, provider=None):
@@ -264,7 +264,7 @@ class FederateAuth(View):
             if form.is_valid():
                 params = utils.copy_params(
                     request.POST,
-                    ignore={"provider", "csrfmiddlewaretoken", "ticket", "lt", "remember"}
+                    ignore={"provider", "csrfmiddlewaretoken", "ticket", "lt"}
                 )
                 if params.get("renew") == "False":
                     del params["renew"]
@@ -273,17 +273,7 @@ class FederateAuth(View):
                     kwargs=dict(provider=form.cleaned_data["provider"].suffix),
                     params=params
                 )
-                response = HttpResponseRedirect(url)
-                # If the user has checked "remember my identity provider" store it in a cookie
-                if form.cleaned_data["remember"]:
-                    max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
-                    utils.set_cookie(
-                        response,
-                        "_remember_provider",
-                        form.cleaned_data["provider"].suffix,
-                        max_age
-                    )
-                return response
+                return HttpResponseRedirect(url)
             else:
                 return redirect("cas_server:login")
 
@@ -323,7 +313,7 @@ class FederateAuth(View):
                                 auth.provider.server_url
                             )
                         )
-                        params = utils.copy_params(request.GET, ignore={"ticket"})
+                        params = utils.copy_params(request.GET, ignore={"ticket", "remember"})
                         request.session["federate_username"] = auth.federated_username
                         request.session["federate_ticket"] = ticket
                         auth.register_slo(
@@ -334,13 +324,28 @@ class FederateAuth(View):
                         # redirect to the the login page for the user to become authenticated
                         # thanks to the `federate_username` and `federate_ticket` session parameters
                         url = utils.reverse_params("cas_server:login", params)
-                        return HttpResponseRedirect(url)
+                        response = HttpResponseRedirect(url)
+                        # If the user has checked "remember my identity provider" store it in a
+                        # cookie
+                        if request.GET.get("remember"):
+                            max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
+                            utils.set_cookie(
+                                response,
+                                "_remember_provider",
+                                provider.suffix,
+                                max_age
+                            )
+                        return response
                     # else redirect to the identity provider CAS login page
                     else:
                         logger.info(
-                            "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
-                                auth.username,
-                                auth.provider.server_url
+                            (
+                                "Got a invalid ticket %s from %s for service %s. "
+                                "Retrying to authenticate"
+                            ) % (
+                                ticket,
+                                auth.provider.server_url,
+                                self.service_url
                             )
                         )
                         return HttpResponseRedirect(auth.get_login_url())

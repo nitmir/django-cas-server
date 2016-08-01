@@ -11,9 +11,11 @@
 # (c) 2016 Valentin Samir
 """Tests module for utils"""
 from django.test import TestCase, RequestFactory
+from django.db import connection
 
 import six
 import warnings
+import datetime
 
 from cas_server import utils
 
@@ -237,3 +239,15 @@ class UtilsTestCase(TestCase):
 
             # version is cached 24h so calling it a second time should return the save value
             self.assertEqual(version, utils.last_version())
+
+    def test_dictfetchall(self):
+        """test the function dictfetchall"""
+        with connection.cursor() as curs:
+            curs.execute("SELECT * FROM django_migrations")
+            results = utils.dictfetchall(curs)
+            self.assertIsInstance(results, list)
+            self.assertTrue(len(results) > 0)
+            for result in results:
+                self.assertIsInstance(result, dict)
+                self.assertIn('applied', result)
+                self.assertIsInstance(result['applied'], datetime.datetime)

@@ -14,10 +14,17 @@
   <button class="btn btn-primary btn-block btn-lg" type="submit">{% trans "Login" %}</button>
   {% if auto_submit %}</noscript>{% endif %}
 </form>
-{% if auto_submit %}
-<script type="text/javascript">
-    document.getElementById('login_form').submit(); // SUBMIT FORM
-</script>
-{% endif %}
 {% endblock %}
+{% block javascript %}<script type="text/javascript">
+jQuery(function( $ ){
+    $("#id_warn").click(function(e){
+        if($("#id_warn").is(':checked')){
+            createCookie("warn", "on", 10 * 365);
+        } else {
+            eraseCookie("warn");
+        }
+    });
+});{% if auto_submit %}
+document.getElementById('login_form').submit(); // SUBMIT FORM{% endif %}
+</script>{% endblock %}
 

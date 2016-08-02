@@ -1,6 +1,9 @@
+html, body {
+    height: 100%;
+}
 body {
   padding-top: 40px;
-  padding-bottom: 40px;
+  padding-bottom: 0px;
   background-color: #eee;
 }
 
@@ -39,6 +42,22 @@ body {
 }
 #app-name img {
      width:110px;
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by it's height */
+    margin: 0 auto -40px;
+}
+#footer {
+    height: 40px;
+    text-align: center;
+}
+#footer p {
+  padding-top: 10px;
 }
 
 @media screen and (max-width: 680px) {

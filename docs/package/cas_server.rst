@@ -1,6 +1,13 @@
 cas_server package
 ==================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    cas_server.templatetags
+
 Submodules
 ----------
 

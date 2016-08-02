@@ -342,7 +342,7 @@ Only usefull if you are using the mysql authentication backend:
 Sql backend settings
 --------------------
 Only usefull if you are using the sql authentication backend. You must add a ``"cas_server"``
-database to `settings.DATABASES <https://docs.djangoproject.com/fr/1.9/ref/settings/#std:setting-DATABASES>`__
+database to `settings.DATABASES <https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DATABASES>`__
 as defined in the django documentation. It is then the database
 use by the sql backend.
 

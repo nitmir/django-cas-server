@@ -18,9 +18,9 @@ register = template.Library()
 @register.filter(name='is_checkbox')
 def is_checkbox(field):
     """
-        check is a form bound field is a checkbox
+        check if a form bound field is a checkbox
 
-       :param django.forms.boundfield.BoundField field: A bound field
+       :param django.forms.BoundField field: A bound field
        :return: ``True`` if the field is a checkbox, ``False`` otherwise.
        :rtype: bool
     """
@@ -30,9 +30,9 @@ def is_checkbox(field):
 @register.filter(name='is_hidden')
 def is_hidden(field):
     """
-        check is a form bound field is hidden
+        check if a form bound field is hidden
 
-       :param django.forms.boundfield.BoundField field: A bound field
+       :param django.forms.BoundField field: A bound field
        :return: ``True`` if the field is hidden, ``False`` otherwise.
        :rtype: bool
     """

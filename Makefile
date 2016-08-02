@@ -38,7 +38,7 @@ dist:
 
 test_venv/bin/python:
 	virtualenv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt Django
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django<1.10'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas

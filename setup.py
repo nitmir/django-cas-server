@@ -62,7 +62,7 @@ if __name__ == '__main__':
             'lxml >= 3.4', 'six >= 1'
         ],
         url="https://github.com/nitmir/django-cas-server",
-        download_url="https://github.com/nitmir/django-cas-server/releases",
+        download_url="https://github.com/nitmir/django-cas-server/releases/latest",
         zip_safe=False,
         setup_requires=['pytest-runner'],
         tests_require=['pytest', 'pytest-django', 'pytest-pythonpath', 'pytest-warnings', 'mock>=1'],

@@ -145,7 +145,7 @@ Quick start
 
 6. Start the development server and visit http://127.0.0.1:8000/admin/
    to add a first service allowed to authenticate user against the CAS
-   (you'll need the Admin app enabled). See the Service Patterns section bellow.
+   (you'll need the Admin app enabled). See the `Service Patterns`_ section bellow.
 
 7. Visit http://127.0.0.1:8000/cas/ to login with your django users.
 
@@ -271,7 +271,7 @@ Tickets miscellaneous settings
 
 Mysql backend settings
 ----------------------
-Deprecated, see the Sql backend settings.
+Deprecated, see the `Sql backend settings`_.
 Only usefull if you are using the mysql authentication backend:
 
 * ``CAS_SQL_HOST``: Host for the SQL server. The default is ``"localhost"``.

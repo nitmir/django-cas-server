@@ -11,7 +11,7 @@
 """A django CAS server application"""
 
 #: version of the application
-VERSION = '0.6.1'
+VERSION = '0.6.2'
 
 #: path the the application configuration class
 default_app_config = 'cas_server.apps.CasAppConfig'

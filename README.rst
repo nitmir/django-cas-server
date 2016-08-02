@@ -41,9 +41,9 @@ been tested with it. Previous versions of dependencies may or may not work.
 Additionally, denpending of the authentication backend you plan to use, you may need the following
 python packages:
 
-* ldap3        (debian/centos: python-ldap3)
-* psycopg2     (debian/centos: python-psycopg2)
-* mysql-python (debian: python-mysqldb, centos: python2-mysql)
+* ldap3
+* psycopg2
+* mysql-python
 
 
 Here there is a table with the name of python packages and the corresponding packages providing

@@ -26,15 +26,11 @@ class BootsrapForm(forms.Form):
     """
     def __init__(self, *args, **kwargs):
         super(BootsrapForm, self).__init__(*args, **kwargs)
-        for (name, field) in self.fields.items():
+        for field in self.fields.values():
             # Only tweak the fiel if it will be displayed
             if not isinstance(field.widget, forms.HiddenInput):
-                # tell to display the field (used in form.html)
-                self[name].display = True
                 attrs = {}
-                if isinstance(field.widget, forms.CheckboxInput):
-                    self[name].checkbox = True
-                else:
+                if not isinstance(field.widget, forms.CheckboxInput):
                     attrs['class'] = "form-control"
                     if field.label:  # pragma: no branch (currently all field are hidden or labeled)
                         attrs["placeholder"] = field.label

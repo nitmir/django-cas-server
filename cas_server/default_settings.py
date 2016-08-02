@@ -18,6 +18,8 @@ from importlib import import_module
 
 #: URL to the logo showed in the up left corner on the default templates.
 CAS_LOGO_URL = static("cas_server/logo.png")
+#: URL to the favicon (shortcut icon) used by the default templates. Default is a key icon.
+CAS_FAVICON_URL = static("cas_server/favicon.ico")
 #: URLs to css and javascript external components.
 CAS_COMPONENT_URLS = {
     "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
@@ -110,12 +112,39 @@ CAS_SQL_PASSWORD = ''
 CAS_SQL_DBNAME = ''
 #: Database charset.
 CAS_SQL_DBCHARSET = 'utf8'
+
 #: The query performed upon user authentication.
-CAS_SQL_USER_QUERY = 'SELECT user AS usersame, pass AS password, users.* FROM users WHERE user = %s'
+CAS_SQL_USER_QUERY = 'SELECT user AS username, pass AS password, users.* FROM users WHERE user = %s'
 #: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
 #: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
 #: ``"hex_sha512"``, ``"plain"``.
-CAS_SQL_PASSWORD_CHECK = 'crypt'  # crypt or plain
+CAS_SQL_PASSWORD_CHECK = 'crypt'
+#: charset the SQL users passwords was hash with
+CAS_SQL_PASSWORD_CHARSET = "utf-8"
+
+
+#: Address of the LDAP server
+CAS_LDAP_SERVER = 'localhost'
+#: LDAP user bind address, for example ``"cn=admin,dc=crans,dc=org"`` for connecting to the LDAP
+#: server.
+CAS_LDAP_USER = None
+#: LDAP connection password
+CAS_LDAP_PASSWORD = None
+#: LDAP seach base DN, for example ``"ou=data,dc=crans,dc=org"``.
+CAS_LDAP_BASE_DN = None
+#: LDAP search filter for searching user by username. User inputed usernames are escaped using
+#: :func:`ldap3.utils.conv.escape_bytes`.
+CAS_LDAP_USER_QUERY = "(uid=%s)"
+#: LDAP attribute used for users usernames
+CAS_LDAP_USERNAME_ATTR = "uid"
+#: LDAP attribute used for users passwords
+CAS_LDAP_PASSWORD_ATTR = "userPassword"
+#: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
+#: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
+#: ``"hex_sha512"``, ``"plain"``.
+CAS_LDAP_PASSWORD_CHECK = "ldap"
+#: charset the LDAP users passwords was hash with
+CAS_LDAP_PASSWORD_CHARSET = "utf-8"
 
 
 #: Username of the test user.
@@ -139,6 +168,15 @@ CAS_ENABLE_AJAX_AUTH = False
 CAS_FEDERATE = False
 #: Time after witch the cookie use for “remember my identity provider” expire (one week).
 CAS_FEDERATE_REMEMBER_TIMEOUT = 604800
+
+#: A :class:`bool` for diplaying a warning on html pages then a new version of the application
+#: is avaible. Once closed by a user, it is not displayed to this user until the next new version.
+CAS_NEW_VERSION_HTML_WARNING = True
+#: A :class:`bool` for sending emails to ``settings.ADMINS`` when a new version is available.
+CAS_NEW_VERSION_EMAIL_WARNING = True
+#: URL to the pypi json of the application. Used to retreive the version number of the last version.
+#: You should not change it.
+CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
 
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():

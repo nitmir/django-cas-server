@@ -14,8 +14,8 @@
         <script src="{{settings.CAS_COMPONENT_URLS.html5shiv}}"></script>
         <script src="{{settings.CAS_COMPONENT_URLS.respond}}"></script>
         <![endif]-->
-        <link rel="shortcut icon" href="{% static "cas_server/favicon.ico?v=1" %}" />
-        <link href="{% static "cas_server/login.css" %}" rel="stylesheet">
+        {% if settings.CAS_FAVICON_URL %}<link rel="shortcut icon" href="{{settings.CAS_FAVICON_URL}}" />{% endif %}
+        <link href="{% static "cas_server/styles.css" %}" rel="stylesheet">
     </head>
     <body>
         <div class="container">
@@ -31,23 +31,28 @@
             <div class="row">
             <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
             <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
-            {% block ante_messages %}{% endblock %}
             {% if auto_submit %}<noscript>{% endif %}
+            {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+              <div class="alert alert-info alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true" id="alert-version">&#215;</button>
+                {% blocktrans %}A new version of the application is available. This instance runs {{VERSION}} and the last version is {{LAST_VERSION}}. Please consider upgrading.{% endblocktrans %}
+              </div>
+            {% endif %}
+            {% block ante_messages %}{% endblock %}
             {% for message in messages %}
                 <div {% spaceless %}
                     {% if message.level == message_levels.DEBUG %}
-                        class="alert alert-warning alert-dismissable"
+                        class="alert alert-warning"
                     {% elif message.level == message_levels.INFO %}
-                        class="alert alert-info alert-dismissable"
+                        class="alert alert-info"
                     {% elif message.level == message_levels.SUCCESS %}
-                        class="alert alert-success alert-dismissable"
+                        class="alert alert-success"
                     {% elif message.level == message_levels.WARNING %}
-                        class="alert alert-warning alert-dismissable"
+                        class="alert alert-warning"
                     {% else %}
-                        class="alert alert-danger alert-dismissable"
+                        class="alert alert-danger"
                     {% endif %}
                 {% endspaceless %}>
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
                     {{ message }}
                 </div>
             {% endfor %}
@@ -59,5 +64,9 @@
         </div> <!-- /container -->
         <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
         <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
+        {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+        <script src="{% static "cas_server/alert-version.js" %}"></script>
+        <script>alert_version("{{LAST_VERSION}}")</script>
+        {% endif %}
     </body>
 </html>

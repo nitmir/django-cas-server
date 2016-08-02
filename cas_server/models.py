@@ -18,15 +18,18 @@ from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
+from django.core.mail import send_mail
 
 import re
 import sys
+import smtplib
 import logging
 from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
 from requests_futures.sessions import FuturesSession
 
 import cas_server.utils as utils
+from . import VERSION
 
 #: logger facility
 logger = logging.getLogger(__name__)
@@ -465,13 +468,13 @@ class ServicePattern(models.Model):
             "As it is a regular expression, special character must be escaped with a '\\'."
         )
     )
-    #: Name of the attribut to transmit as username, if empty the user login is used
+    #: Name of the attribute to transmit as username, if empty the user login is used
     user_field = models.CharField(
         max_length=255,
         default="",
         blank=True,
         verbose_name=_(u"user field"),
-        help_text=_("Name of the attribut to transmit as username, empty = login")
+        help_text=_("Name of the attribute to transmit as username, empty = login")
     )
     #: A boolean allowing to limit username allowed to connect to :attr:`usernames`.
     restrict_users = models.BooleanField(
@@ -621,7 +624,7 @@ class ReplaceAttributName(models.Model):
     name = models.CharField(
         max_length=255,
         verbose_name=_(u"name"),
-        help_text=_(u"name of an attribut to send to the service, use * for all attributes")
+        help_text=_(u"name of an attribute to send to the service, use * for all attributes")
     )
     #: The name of the attribute to transmit to the service. If empty, the value of :attr:`name`
     #: is used.
@@ -629,7 +632,7 @@ class ReplaceAttributName(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_(u"replace"),
-        help_text=_(u"name under which the attribut will be show"
+        help_text=_(u"name under which the attribute will be show"
                     u"to the service. empty = default name of the attribut")
     )
     #: ForeignKey to a :class:`ServicePattern`. :class:`ReplaceAttributName` instances for a
@@ -656,8 +659,8 @@ class FilterAttributValue(models.Model):
     #: The name of a user attribute
     attribut = models.CharField(
         max_length=255,
-        verbose_name=_(u"attribut"),
-        help_text=_(u"Name of the attribut which must verify pattern")
+        verbose_name=_(u"attribute"),
+        help_text=_(u"Name of the attribute which must verify pattern")
     )
     #: A regular expression the attribute :attr:`attribut` value must verify. If :attr:`attribut`
     #: if a list, only one of the list values needs to match.
@@ -686,8 +689,8 @@ class ReplaceAttributValue(models.Model):
     #: Name the attribute: a key of :attr:`User.attributs`
     attribut = models.CharField(
         max_length=255,
-        verbose_name=_(u"attribut"),
-        help_text=_(u"Name of the attribut for which the value must be replace")
+        verbose_name=_(u"attribute"),
+        help_text=_(u"Name of the attribute for which the value must be replace")
     )
     #: A regular expression matching the part of the attribute value that need to be changed
     pattern = models.CharField(
@@ -1003,3 +1006,60 @@ class Proxy(models.Model):
 
     def __str__(self):
         return self.url
+
+
+class NewVersionWarning(models.Model):
+    """
+        Bases: :class:`django.db.models.Model`
+
+        The last new version available version sent
+    """
+    version = models.CharField(max_length=255)
+
+    @classmethod
+    def send_mails(cls):
+        """
+            For each new django-cas-server version, if the current instance is not up to date
+            send one mail to ``settings.ADMINS``.
+        """
+        if settings.CAS_NEW_VERSION_EMAIL_WARNING and settings.ADMINS:
+            try:
+                obj = cls.objects.get()
+            except cls.DoesNotExist:
+                obj = NewVersionWarning.objects.create(version=VERSION)
+            LAST_VERSION = utils.last_version()
+            if LAST_VERSION is not None and LAST_VERSION != obj.version:
+                if utils.decode_version(VERSION) < utils.decode_version(LAST_VERSION):
+                    try:
+                        send_mail(
+                            (
+                                '%sA new version of django-cas-server is available'
+                            ) % settings.EMAIL_SUBJECT_PREFIX,
+                            u'''
+A new version of the django-cas-server is available.
+
+Your version: %s
+New version: %s
+
+Upgrade using:
+    * pip install -U django-cas-server
+    * fetching the last release on
+      https://github.com/nitmir/django-cas-server/ or on
+      https://pypi.python.org/pypi/django-cas-server
+
+After upgrade, do not forget to run:
+    * ./manage.py migrate
+    * ./manage.py collectstatic
+and to reload your wsgi server (apache2, uwsgi, gunicord, etc…)
+
+--\u0020
+django-cas-server
+'''.strip() % (VERSION, LAST_VERSION),
+                            settings.SERVER_EMAIL,
+                            ["%s <%s>" % admin for admin in settings.ADMINS],
+                            fail_silently=False,
+                        )
+                        obj.version = LAST_VERSION
+                        obj.save()
+                    except smtplib.SMTPException as error:  # pragma: no cover (should not happen)
+                        logger.error("Unable to send new version mail: %s" % error)

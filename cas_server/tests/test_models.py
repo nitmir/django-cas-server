@@ -16,7 +16,9 @@ import django
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.core import mail
 
+import mock
 from datetime import timedelta
 from importlib import import_module
 
@@ -59,6 +61,25 @@ class FederatedUserTestCase(TestCase, UserModels, FederatedIendityProviderModel)
         self.assertEqual(len(models.FederatedUser.objects.all()), 2)
         with self.assertRaises(models.FederatedUser.DoesNotExist):
             models.FederatedUser.objects.get(username="test2")
+
+    def test_json_attributes(self):
+        """test the json storage of ``atrributs`` in ``_attributs``"""
+        provider = models.FederatedIendityProvider.objects.get(suffix="example.com")
+        user = models.FederatedUser.objects.create(
+            username=settings.CAS_TEST_USER,
+            provider=provider,
+            attributs=settings.CAS_TEST_ATTRIBUTES,
+            ticket=""
+        )
+        self.assertEqual(utils.json_encode(settings.CAS_TEST_ATTRIBUTES), user._attributs)
+        user.delete()
+        user = models.FederatedUser.objects.create(
+            username=settings.CAS_TEST_USER,
+            provider=provider,
+            ticket=""
+        )
+        self.assertIsNone(user._attributs)
+        self.assertIsNone(user.attributs)
 
 
 class FederateSLOTestCase(TestCase, UserModels):
@@ -231,3 +252,65 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         self.assertTrue(b'logoutRequest' in params and params[b'logoutRequest'])
         # only 1 ticket remain in the db
         self.assertEqual(len(models.ServiceTicket.objects.all()), 1)
+
+    def test_json_attributes(self):
+        """test the json storage of ``atrributs`` in ``_attributs``"""
+        # ge an authenticated client
+        client = get_auth_client()
+        # get the user associated to the client
+        user = self.get_user(client)
+        ticket = models.ServiceTicket.objects.create(
+            user=user,
+            service=self.service,
+            attributs=settings.CAS_TEST_ATTRIBUTES,
+            service_pattern=self.service_pattern
+        )
+        self.assertEqual(utils.json_encode(settings.CAS_TEST_ATTRIBUTES), ticket._attributs)
+        ticket.delete()
+        ticket = models.ServiceTicket.objects.create(
+            user=user,
+            service=self.service,
+            service_pattern=self.service_pattern
+        )
+        self.assertIsNone(ticket._attributs)
+        self.assertIsNone(ticket.attributs)
+
+
+@mock.patch("cas_server.utils.last_version", lambda: "1.2.3")
+@override_settings(ADMINS=[("Ano Nymous", "ano.nymous@example.net")])
+@override_settings(CAS_NEW_VERSION_EMAIL_WARNING=True)
+class NewVersionWarningTestCase(TestCase):
+    """tests for the new version warning model"""
+
+    @mock.patch("cas_server.models.VERSION", "0.1.2")
+    def test_send_mails(self):
+        """test the send_mails method with ADMINS and a new version available"""
+        models.NewVersionWarning.send_mails()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].subject,
+            '%sA new version of django-cas-server is available' % settings.EMAIL_SUBJECT_PREFIX
+        )
+
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 1)
+
+    @mock.patch("cas_server.models.VERSION", "1.2.3")
+    def test_send_mails_same_version(self):
+        """test the send_mails method with with current version being the last"""
+        models.NewVersionWarning.objects.create(version="0.1.2")
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(ADMINS=[])
+    def test_send_mails_no_admins(self):
+        """test the send_mails method without ADMINS"""
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(CAS_NEW_VERSION_EMAIL_WARNING=False)
+    def test_send_mails_disabled(self):
+        """test the send_mails method if disabled"""
+        models.NewVersionWarning.send_mails()
+        self.assertEqual(len(mail.outbox), 0)

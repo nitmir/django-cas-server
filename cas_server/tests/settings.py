@@ -51,6 +51,22 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
+TEMPLATES = [
+    {
+        'APP_DIRS': True,
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages'
+            ]
+        }
+    }
+]
+
 ROOT_URLCONF = 'cas_server.tests.urls'
 
 # Database
@@ -81,3 +97,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CAS_NEW_VERSION_HTML_WARNING = False
+CAS_NEW_VERSION_EMAIL_WARNING = False
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'cas_file': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'cas_stream': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'cas_file',
+        },
+    },
+    'loggers': {
+        'cas_server': {
+            'handlers': ['cas_stream'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

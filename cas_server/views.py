@@ -147,9 +147,12 @@ class LogoutView(View, LogoutMixin):
         # current querystring
         if settings.CAS_FEDERATE:
             if auth is not None:
-                params = utils.copy_params(request.GET)
+                params = utils.copy_params(request.GET, ignore={"forget_provider"})
                 url = auth.get_logout_url()
-                return HttpResponseRedirect(utils.update_url(url, params))
+                response = HttpResponseRedirect(utils.update_url(url, params))
+                if request.GET.get("forget_provider"):
+                    response.delete_cookie("remember_provider")
+                return response
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
@@ -209,6 +212,7 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(View):
     """view to authenticated user agains a backend CAS then CAS_FEDERATE is True"""
+
     @method_decorator(csrf_exempt)  # csrf is disabled for allowing SLO requests reception
     def dispatch(self, request, *args, **kwargs):
         """
@@ -218,8 +222,7 @@ class FederateAuth(View):
         """
         return super(FederateAuth, self).dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def get_cas_client(request, provider):
+    def get_cas_client(self, request, provider, renew=False):
         """
             return a CAS client object matching provider
 
@@ -231,7 +234,8 @@ class FederateAuth(View):
         """
         # compute the current url, ignoring ticket dans provider GET parameters
         service_url = utils.get_current_url(request, {"ticket", "provider"})
-        return CASFederateValidateUser(provider, service_url)
+        self.service_url = service_url
+        return CASFederateValidateUser(provider, service_url, renew=renew)
 
     def post(self, request, provider=None):
         """
@@ -264,24 +268,16 @@ class FederateAuth(View):
             if form.is_valid():
                 params = utils.copy_params(
                     request.POST,
-                    ignore={"provider", "csrfmiddlewaretoken", "ticket"}
+                    ignore={"provider", "csrfmiddlewaretoken", "ticket", "lt"}
                 )
+                if params.get("renew") == "False":
+                    del params["renew"]
                 url = utils.reverse_params(
                     "cas_server:federateAuth",
                     kwargs=dict(provider=form.cleaned_data["provider"].suffix),
                     params=params
                 )
-                response = HttpResponseRedirect(url)
-                # If the user has checked "remember my identity provider" store it in a cookie
-                if form.cleaned_data["remember"]:
-                    max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
-                    utils.set_cookie(
-                        response,
-                        "_remember_provider",
-                        form.cleaned_data["provider"].suffix,
-                        max_age
-                    )
-                return response
+                return HttpResponseRedirect(url)
             else:
                 return redirect("cas_server:login")
 
@@ -296,47 +292,81 @@ class FederateAuth(View):
         if not settings.CAS_FEDERATE:
             logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
             return redirect("cas_server:login")
+        renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         # Is the user is already authenticated, no need to request authentication to the user
         # identity provider.
-        if self.request.session.get("authenticated"):
+        if self.request.session.get("authenticated") and not renew:
             logger.warning("User already authenticated, dropping federate authentication request")
             return redirect("cas_server:login")
         try:
             # get the identity provider from its suffix
             provider = FederatedIendityProvider.objects.get(suffix=provider)
             # get a CAS client for the user identity provider
-            auth = self.get_cas_client(request, provider)
+            auth = self.get_cas_client(request, provider, renew)
             # if no ticket submited, redirect to the identity provider CAS login page
             if 'ticket' not in request.GET:
                 logger.info("Trying to authenticate again %s" % auth.provider.server_url)
                 return HttpResponseRedirect(auth.get_login_url())
             else:
                 ticket = request.GET['ticket']
-                # if the ticket validation succeed
-                if auth.verify_ticket(ticket):
-                    logger.info(
-                        "Got a valid ticket for %s from %s" % (
-                            auth.username,
-                            auth.provider.server_url
+                try:
+                    # if the ticket validation succeed
+                    if auth.verify_ticket(ticket):
+                        logger.info(
+                            "Got a valid ticket for %s from %s" % (
+                                auth.username,
+                                auth.provider.server_url
+                            )
                         )
-                    )
-                    params = utils.copy_params(request.GET, ignore={"ticket"})
-                    request.session["federate_username"] = auth.federated_username
-                    request.session["federate_ticket"] = ticket
-                    auth.register_slo(auth.federated_username, request.session.session_key, ticket)
-                    # redirect to the the login page for the user to become authenticated
-                    # thanks to the `federate_username` and `federate_ticket` session parameters
-                    url = utils.reverse_params("cas_server:login", params)
-                    return HttpResponseRedirect(url)
-                # else redirect to the identity provider CAS login page
-                else:
-                    logger.info(
-                        "Got a invalid ticket for %s from %s. Retrying to authenticate" % (
-                            auth.username,
-                            auth.provider.server_url
+                        params = utils.copy_params(request.GET, ignore={"ticket", "remember"})
+                        request.session["federate_username"] = auth.federated_username
+                        request.session["federate_ticket"] = ticket
+                        auth.register_slo(
+                            auth.federated_username,
+                            request.session.session_key,
+                            ticket
                         )
+                        # redirect to the the login page for the user to become authenticated
+                        # thanks to the `federate_username` and `federate_ticket` session parameters
+                        url = utils.reverse_params("cas_server:login", params)
+                        response = HttpResponseRedirect(url)
+                        # If the user has checked "remember my identity provider" store it in a
+                        # cookie
+                        if request.GET.get("remember"):
+                            max_age = settings.CAS_FEDERATE_REMEMBER_TIMEOUT
+                            utils.set_cookie(
+                                response,
+                                "remember_provider",
+                                provider.suffix,
+                                max_age
+                            )
+                        return response
+                    # else redirect to the identity provider CAS login page
+                    else:
+                        logger.info(
+                            (
+                                "Got a invalid ticket %s from %s for service %s. "
+                                "Retrying to authenticate"
+                            ) % (
+                                ticket,
+                                auth.provider.server_url,
+                                self.service_url
+                            )
+                        )
+                        return HttpResponseRedirect(auth.get_login_url())
+                # both xml.etree.ElementTree and lxml.etree exceptions inherit from SyntaxError
+                except SyntaxError as error:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        _(
+                            u"Invalid response from your identity provider CAS upon "
+                            u"ticket %(ticket)s validation: %(error)r"
+                        ) % {'ticket': ticket, 'error': error}
                     )
-                    return HttpResponseRedirect(auth.get_login_url())
+                    response = redirect("cas_server:login")
+                    response.delete_cookie("remember_provider")
+                    return response
         except FederatedIendityProvider.DoesNotExist:
             logger.warning("Identity provider suffix %s not found" % provider)
             # if the identity provider is not found, redirect to the login page
@@ -407,7 +437,8 @@ class LoginView(View, LogoutMixin):
         self.warn = request.POST.get('warn')
         if settings.CAS_FEDERATE:
             self.username = request.POST.get('username')
-            self.ticket = request.POST.get('ticket')
+            # in federated mode, the valdated indentity provider CAS ticket is used as password
+            self.ticket = request.POST.get('password')
 
     def gen_lt(self):
         """Generate a new LoginTicket and add it to the list of valid LT for the user"""
@@ -451,7 +482,7 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"Invalid login ticket")
+                _(u"Invalid login ticket, please retry to login")
             )
         elif ret == self.USER_LOGIN_OK:
             # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
@@ -477,7 +508,17 @@ class LoginView(View, LogoutMixin):
         else:  # pragma: no cover (should no happen)
             raise EnvironmentError("invalid output for LoginView.process_post")
         # call the GET/POST common part
-        return self.common()
+        response = self.common()
+        if self.warn:
+            utils.set_cookie(
+                response,
+                "warn",
+                "on",
+                10 * 365 * 24 * 3600
+            )
+        else:
+            response.delete_cookie("warn")
+        return response
 
     def process_post(self):
         """
@@ -586,7 +627,9 @@ class LoginView(View, LogoutMixin):
         form_initial = {
             'service': self.service,
             'method': self.method,
-            'warn': self.warn or self.request.session.get("warn"),
+            'warn': (
+                self.warn or self.request.session.get("warn") or self.request.COOKIES.get('warn')
+            ),
             'lt': self.request.session['lt'][-1],
             'renew': self.renew
         }
@@ -683,14 +726,14 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"User charateristics non allowed")
+                _(u"User characteristics non allowed")
             )
         except models.UserFieldNotDefined:
             error = 4
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"The attribut %(field)s is needed to use"
+                _(u"The attribute %(field)s is needed to use"
                   u" that service") % {'field': service_pattern.user_field}
             )
 
@@ -817,19 +860,37 @@ class LoginView(View, LogoutMixin):
                     )
                 else:
                     if (
-                        self.request.COOKIES.get('_remember_provider') and
+                        self.request.COOKIES.get('remember_provider') and
                         FederatedIendityProvider.objects.filter(
-                            suffix=self.request.COOKIES['_remember_provider']
+                            suffix=self.request.COOKIES['remember_provider']
                         )
                     ):
                         params = utils.copy_params(self.request.GET)
                         url = utils.reverse_params(
                             "cas_server:federateAuth",
                             params=params,
-                            kwargs=dict(provider=self.request.COOKIES['_remember_provider'])
+                            kwargs=dict(provider=self.request.COOKIES['remember_provider'])
                         )
                         return HttpResponseRedirect(url)
                     else:
+                        # if user is authenticated and auth renewal is requested, redirect directly
+                        # to the user identity provider
+                        if self.renew and self.request.session.get("authenticated"):
+                            try:
+                                user = FederatedUser.get_from_federated_username(
+                                    self.request.session.get("username")
+                                )
+                                params = utils.copy_params(self.request.GET)
+                                url = utils.reverse_params(
+                                    "cas_server:federateAuth",
+                                    params=params,
+                                    kwargs=dict(provider=user.provider.suffix)
+                                )
+                                return HttpResponseRedirect(url)
+                            # Should normally not happen: if the user is logged, it exists in the
+                            # database.
+                            except FederatedUser.DoesNotExist:  # pragma: no cover
+                                pass
                         return render(
                             self.request,
                             settings.CAS_LOGIN_TEMPLATE,

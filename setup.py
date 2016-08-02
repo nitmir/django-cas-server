@@ -1,8 +1,7 @@
 import os
 import pkg_resources
 from setuptools import setup
-
-VERSION = '0.6.1'
+from cas_server import VERSION
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
@@ -30,7 +29,7 @@ if __name__ == '__main__':
         author_email='valentin.samir@crans.org',
         classifiers=[
             'Environment :: Web Environment',
-            'evelopment Status :: 5 - Production/Stable',
+            'Development Status :: 5 - Production/Stable',
             'Framework :: Django',
             'Framework :: Django :: 1.7',
             'Framework :: Django :: 1.8',
@@ -66,5 +65,5 @@ if __name__ == '__main__':
         download_url="https://github.com/nitmir/django-cas-server/releases",
         zip_safe=False,
         setup_requires=['pytest-runner'],
-        tests_require=['pytest', 'pytest-django', 'pytest-pythonpath'],
+        tests_require=['pytest', 'pytest-django', 'pytest-pythonpath', 'pytest-warnings', 'mock>=1'],
     )

@@ -42,13 +42,13 @@ class CASFederateValidateUser(object):
     #: the identity provider
     provider = None
 
-    def __init__(self, provider, service_url):
+    def __init__(self, provider, service_url, renew=False):
         self.provider = provider
         self.client = CASClient(
             service_url=service_url,
             version=provider.cas_protocol_version,
             server_url=provider.server_url,
-            renew=False,
+            renew=renew,
         )
 
     def get_login_url(self):

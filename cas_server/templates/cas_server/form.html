@@ -1,10 +1,11 @@
+{% load cas_server %}
 {% for error in form.non_field_errors %}
 <div class="alert alert-danger alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
   {{error}}
 </div>
 {% endfor %}
-{% for field in form %}{% if field.display %}
+{% for field in form %}{% if not field|is_hidden %}
 <div class="form-group{% spaceless %}
   {% if not form.non_field_errors %}
     {% if field.errors %} has-error
@@ -12,7 +13,7 @@
     {% endif %}
   {% endif %}"
 {% endspaceless %}>{% spaceless %}
-  {% if field.checkbox %}
+  {% if field|is_checkbox %}
     <div class="checkbox"><label for="{{field.auto_id}}">{{field}}{{field.label}}</label>
   {% else %}
     <label class="control-label" for="{{field.auto_id}}">{{field.label}}</label>

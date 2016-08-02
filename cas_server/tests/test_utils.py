@@ -11,8 +11,11 @@
 # (c) 2016 Valentin Samir
 """Tests module for utils"""
 from django.test import TestCase, RequestFactory
+from django.db import connection
 
 import six
+import warnings
+import datetime
 
 from cas_server import utils
 
@@ -128,16 +131,23 @@ class CheckPasswordCase(TestCase):
         with self.assertRaises(utils.LdapHashUserPassword.BadHash):
             utils.check_password("ldap", self.password1, b"TOTOssdsdsd", "utf8")
         for scheme in schemes_salt:
+            # bad length
             with self.assertRaises(utils.LdapHashUserPassword.BadHash):
                 utils.check_password("ldap", self.password1, scheme + b"dG90b3E8ZHNkcw==", "utf8")
+            # bad base64
+            with self.assertRaises(utils.LdapHashUserPassword.BadHash):
+                utils.check_password("ldap", self.password1, scheme + b"dG90b3E8ZHNkcw", "utf8")
 
     def test_hex(self):
         """test all the hex_HASH method: the hashed password is a simple hash of the password"""
         hashes = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
         hashed_password1 = []
-        for hash in hashes:
+        for hash_scheme in hashes:
             hashed_password1.append(
-                ("hex_%s" % hash, getattr(utils.hashlib, hash)(self.password1).hexdigest())
+                (
+                    "hex_%s" % hash_scheme,
+                    getattr(utils.hashlib, hash_scheme)(self.password1).hexdigest()
+                )
             )
         for (method, hp1) in hashed_password1:
             self.assertTrue(utils.check_password(method, self.password1, hp1, "utf8"))
@@ -208,3 +218,40 @@ class UtilsTestCase(TestCase):
         self.assertEqual(utils.get_tuple(test_tuple, 3), None)
         self.assertEqual(utils.get_tuple(test_tuple, 3, 'toto'), 'toto')
         self.assertEqual(utils.get_tuple(None, 3), None)
+
+    def test_last_version(self):
+        """
+            test the function last_version. An internet connection is needed, if you do not have
+            one, this test will fail and you should ignore it.
+        """
+        try:
+            # first check if pypi is available
+            utils.requests.get("https://pypi.python.org/simple/django-cas-server/")
+        except utils.requests.exceptions.RequestException:
+            warnings.warn(
+                (
+                    "Pypi seems not available, perhaps you do not have internet access. "
+                    "Consequently, the test cas_server.tests.test_utils.UtilsTestCase.test_last_"
+                    "version is ignored"
+                ),
+                RuntimeWarning
+            )
+        else:
+            version = utils.last_version()
+            self.assertIsInstance(version, six.text_type)
+            self.assertEqual(len(version.split('.')), 3)
+
+            # version is cached 24h so calling it a second time should return the save value
+            self.assertEqual(version, utils.last_version())
+
+    def test_dictfetchall(self):
+        """test the function dictfetchall"""
+        with connection.cursor() as curs:
+            curs.execute("SELECT * FROM django_migrations")
+            results = utils.dictfetchall(curs)
+            self.assertIsInstance(results, list)
+            self.assertTrue(len(results) > 0)
+            for result in results:
+                self.assertIsInstance(result, dict)
+                self.assertIn('applied', result)
+                self.assertIsInstance(result['applied'], datetime.datetime)

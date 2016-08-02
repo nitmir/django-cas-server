@@ -84,29 +84,31 @@ class FederateAuthLoginLogoutTestCase(
             params['provider'] = provider.suffix
             if remember:
                 params['remember'] = 'on'
+            # just try for one suffix
+            if suffix == "example.com":
+                # if renew=False is posted it should be ignored
+                params["renew"] = False
             # post the choosed provider
             response = client.post('/federate', params)
             # we are redirected to the provider CAS client url
             self.assertEqual(response.status_code, 302)
-            if remember:
-                self.assertEqual(response["Location"], '%s/federate/%s?remember=on' % (
-                    'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider.suffix
-                ))
-            else:
-                self.assertEqual(response["Location"], '%s/federate/%s' % (
-                    'http://testserver' if django.VERSION < (1, 9) else "",
-                    provider.suffix
-                ))
+            self.assertEqual(response["Location"], '%s/federate/%s%s' % (
+                'http://testserver' if django.VERSION < (1, 9) else "",
+                provider.suffix,
+                "?remember=on" if remember else ""
+            ))
             # let's follow the redirect
-            response = client.get('/federate/%s' % provider.suffix)
+            response = client.get(
+                '/federate/%s%s' % (provider.suffix, "?remember=on" if remember else "")
+            )
             # we are redirected to the provider CAS for authentication
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response["Location"],
-                "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s" % (
+                "%s/login?service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s%s" % (
                     provider.server_url,
-                    provider.suffix
+                    provider.suffix,
+                    "%3Fremember%3Don" if remember else ""
                 )
             )
             # let's generate a ticket
@@ -114,7 +116,10 @@ class FederateAuthLoginLogoutTestCase(
             # we lauch a dummy CAS server that only validate once for the service
             # http://testserver/federate/example.com with `ticket`
             tests_utils.DummyCAS.run(
-                ("http://testserver/federate/%s" % provider.suffix).encode("ascii"),
+                ("http://testserver/federate/%s%s" % (
+                    provider.suffix,
+                    "?remember=on" if remember else ""
+                )).encode("ascii"),
                 ticket.encode("ascii"),
                 settings.CAS_TEST_USER.encode("utf8"),
                 [],
@@ -122,7 +127,13 @@ class FederateAuthLoginLogoutTestCase(
             )
             # we normally provide a good ticket and should be redirected to /login as the ticket
             # get successfully validated again the dummy CAS
-            response = client.get('/federate/%s' % provider.suffix, {'ticket': ticket})
+            response = client.get(
+                '/federate/%s' % provider.suffix,
+                {'ticket': ticket, 'remember': 'on' if remember else ''}
+            )
+            if remember:
+                self.assertIn("remember_provider", client.cookies)
+                self.assertEqual(client.cookies["remember_provider"].value, provider.suffix)
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response["Location"], "%s/login" % (
                 'http://testserver' if django.VERSION < (1, 9) else ""
@@ -183,7 +194,8 @@ class FederateAuthLoginLogoutTestCase(
         """
             The federated view should redirect to /login if the provider is unknown or not provided,
             try to fetch a new ticket if the provided ticket validation fail
-            (network error or bad ticket)
+            (network error or bad ticket), redirect to /login with a error message if identity
+            provider CAS return a bad response (invalid XML document)
         """
         good_provider = "example.com"
         bad_provider = "exemple.fr"
@@ -228,6 +240,18 @@ class FederateAuthLoginLogoutTestCase(
         self.assertEqual(response["Location"], "%s/login" % (
             'http://testserver' if django.VERSION < (1, 9) else ""
         ))
+
+        # test CAS avaible but return a bad XML doc, should redirect to /login with a error message
+        # use "example.net" as it is CASv3
+        tests_utils.HttpParamsHandler.run(8082)
+        response = client.get("/federate/%s" % "example.net", {'ticket': utils.gen_st()})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "%s/login" % (
+            'http://testserver' if django.VERSION < (1, 9) else ""
+        ))
+        response = client.get("/login")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Invalid response from your identity provider CAS", response.content)
 
     def test_auth_federate_slo(self):
         """test that SLO receive from backend CAS log out the users"""
@@ -330,6 +354,76 @@ class FederateAuthLoginLogoutTestCase(
                 'http://testserver' if django.VERSION < (1, 9) else "",
                 provider.suffix
             ))
+
+    def test_forget_provider(self):
+        """Test the logout option to forget remembered provider"""
+        tickets = self.test_login_post_provider(remember=True)
+        for (provider, _, client) in tickets:
+            self.assertIn("remember_provider", client.cookies)
+            self.assertEqual(client.cookies["remember_provider"].value, provider.suffix)
+            self.assertNotEqual(client.cookies["remember_provider"]["max-age"], 0)
+            client.get("/logout?forget_provider=1")
+            self.assertEqual(client.cookies["remember_provider"]["max-age"], 0)
+
+    def test_renew(self):
+        """
+            Test authentication renewal with federation mode
+        """
+        tickets = self.test_login_post_provider()
+        for (provider, _, client) in tickets:
+            # Try to renew authentication(client already authenticated in test_login_post_provider
+            response = client.get("/login?renew=true")
+            # we should be redirected to the user CAS
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response["Location"], "%s/federate/%s?renew=true" % (
+                'http://testserver' if django.VERSION < (1, 9) else "",
+                provider.suffix
+            ))
+
+            response = client.get("/federate/%s?renew=true" % provider.suffix)
+            self.assertEqual(response.status_code, 302)
+            service_url = (
+                "service=http%%3A%%2F%%2Ftestserver%%2Ffederate%%2F%s%%3Frenew%%3Dtrue"
+            ) % provider.suffix
+            self.assertIn(service_url, response["Location"])
+            self.assertIn("renew=true", response["Location"])
+
+            cas_port = int(provider.server_url.split(':')[-1])
+            # let's generate a ticket
+            ticket = utils.gen_st()
+            # we lauch a dummy CAS server that only validate once for the service
+            # http://testserver/federate/example.com?renew=true with `ticket`
+            tests_utils.DummyCAS.run(
+                ("http://testserver/federate/%s?renew=true" % provider.suffix).encode("ascii"),
+                ticket.encode("ascii"),
+                settings.CAS_TEST_USER.encode("utf8"),
+                [],
+                cas_port
+            )
+            # we normally provide a good ticket and should be redirected to /login as the ticket
+            # get successfully validated again the dummy CAS
+            response = client.get(
+                '/federate/%s' % provider.suffix,
+                {'ticket': ticket, 'renew': 'true'}
+            )
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response["Location"], "%s/login?renew=true" % (
+                'http://testserver' if django.VERSION < (1, 9) else ""
+            ))
+            # follow the redirect and try to get a ticket to see is it has renew set to True
+            response = client.get("/login?renew=true&service=%s" % self.service)
+            # we should get a page with a from with all widget hidden that auto POST to /login using
+            # javascript. If javascript is disabled, a "connect" button is showed
+            self.assertTrue(response.context['auto_submit'])
+            self.assertEqual(response.context['post_url'], '/login')
+            params = tests_utils.copy_form(response.context["form"])
+            # POST get prefiled from parameters
+            response = client.post("/login", params)
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(response["Location"].startswith("%s?ticket=" % self.service))
+            ticket_value = response["Location"].split('ticket=')[-1]
+            ticket = models.ServiceTicket.objects.get(value=ticket_value)
+            self.assertTrue(ticket.renew)
 
     def test_login_bad_ticket(self):
         """

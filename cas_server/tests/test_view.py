@@ -20,6 +20,7 @@ from django.utils import timezone
 
 import random
 import json
+import mock
 from lxml import etree
 from six.moves import range
 
@@ -46,6 +47,33 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         """Prepare the test context:"""
         # we prepare a bunch a service url and service patterns for tests
         self.setup_service_patterns()
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
+    @mock.patch("cas_server.utils.last_version", lambda: "1.2.3")
+    @mock.patch("cas_server.utils.VERSION", "0.1.2")
+    def test_new_version_available_ok(self):
+        """test the new version info box"""
+        client = Client()
+        response = client.get("/login")
+        self.assertIn(b"A new version of the application is available", response.content)
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=True)
+    @mock.patch("cas_server.utils.last_version", lambda: None)
+    @mock.patch("cas_server.utils.VERSION", "0.1.2")
+    def test_new_version_available_badpypi(self):
+        """
+            test the new version info box if pypi is not available (unable to retreive last version)
+        """
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(b"A new version of the application is available", response.content)
+
+    @override_settings(CAS_NEW_VERSION_HTML_WARNING=False)
+    def test_new_version_available_disabled(self):
+        """test the new version info box is disabled"""
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(b"A new version of the application is available", response.content)
 
     def test_login_view_post_goodpass_goodlt(self):
         """Test a successul login"""
@@ -309,7 +337,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
             response = client.get("/login", {'service': service})
             # the ticket is not created and a warning is displayed to the user
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(b"User charateristics non allowed" in response.content)
+            self.assertTrue(b"User characteristics non allowed" in response.content)
 
         # same but with rectriction that a valid upon the test user attributes
         response = client.get("/login", {'service': self.service_filter_success})
@@ -327,7 +355,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login", {'service': self.service_field_needed_fail})
         # the ticket is not created and a warning is displayed to the user
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b"The attribut uid is needed to use that service" in response.content)
+        self.assertTrue(b"The attribute uid is needed to use that service" in response.content)
 
         # same but with a attribute that the test user has
         response = client.get("/login", {'service': self.service_field_needed_success})
@@ -351,7 +379,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login", {"service": self.service_field_needed_success})
         # the ticket is not created and a warning is displayed to the user
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b"The attribut alias is needed to use that service" in response.content)
+        self.assertTrue(b"The attribute alias is needed to use that service" in response.content)
 
     def test_gateway(self):
         """test gateway parameter"""

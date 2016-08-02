@@ -25,10 +25,19 @@ import hashlib
 import crypt
 import base64
 import six
+import requests
+import time
+import logging
+import binascii
 
 from importlib import import_module
 from datetime import datetime, timedelta
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+
+from . import VERSION
+
+#: logger facility
+logger = logging.getLogger(__name__)
 
 
 def json_encode(obj):
@@ -51,6 +60,14 @@ def context(params):
     """
     params["settings"] = settings
     params["message_levels"] = DEFAULT_MESSAGE_LEVELS
+    if settings.CAS_NEW_VERSION_HTML_WARNING:
+        LAST_VERSION = last_version()
+        params["VERSION"] = VERSION
+        params["LAST_VERSION"] = LAST_VERSION
+        if LAST_VERSION is not None:
+            params["upgrade_available"] = decode_version(VERSION) < decode_version(LAST_VERSION)
+        else:
+            params["upgrade_available"] = False
     return params
 
 
@@ -545,7 +562,10 @@ class LdapHashUserPassword(object):
         elif scheme == b'{CRYPT}':
             return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
         else:
-            hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
+            try:
+                hashed_passord = base64.b64decode(hashed_passord[len(scheme):])
+            except (TypeError, binascii.Error) as error:
+                raise cls.BadHash("Bad base64: %s" % error)
             if len(hashed_passord) < cls._schemes_to_len[scheme]:
                 raise cls.BadHash("Hash too short for the scheme %s" % scheme)
             return hashed_passord[cls._schemes_to_len[scheme]:]
@@ -563,7 +583,7 @@ def check_password(method, password, hashed_password, charset):
         :param hashed_password: The hashed password as stored in the database
         :type hashed_password: :obj:`str` or :obj:`unicode`
         :param str charset: The used char encoding (also used internally, so it must be valid for
-            the charset used by ``password`` even if it is inputed as an :obj:`unicode`)
+            the charset used by ``password`` when it was initially )
         :return: True if ``password`` match ``hashed_password`` using ``method``,
             ``False`` otherwise
         :rtype: bool
@@ -603,3 +623,60 @@ def check_password(method, password, hashed_password, charset):
         )(password).hexdigest().encode("ascii") == hashed_password.lower()
     else:
         raise ValueError("Unknown password method check %r" % method)
+
+
+def decode_version(version):
+    """
+        decode a version string following version semantic http://semver.org/ input a tuple of int
+
+        :param unicode version: A dotted version
+        :return: A tuple a int
+        :rtype: tuple
+    """
+    return tuple(int(sub_version) for sub_version in version.split('.'))
+
+
+def last_version():
+    """
+        Fetch the last version from pypi and return it. On successful fetch from pypi, the response
+        is cached 24h, on error, it is cached 10 min.
+
+        :return: the last django-cas-server version
+        :rtype: unicode
+    """
+    try:
+        last_update, version, success = last_version._cache
+    except AttributeError:
+        last_update = 0
+        version = None
+        success = False
+    cache_delta = 24 * 3600 if success else 600
+    if (time.time() - last_update) < cache_delta:
+        return version
+    else:
+        try:
+            req = requests.get(settings.CAS_NEW_VERSION_JSON_URL)
+            data = json.loads(req.text)
+            versions = list(data["releases"].keys())
+            versions.sort()
+            version = versions[-1]
+            last_version._cache = (time.time(), version, True)
+            return version
+        except (
+            KeyError,
+            ValueError,
+            requests.exceptions.RequestException
+        ) as error:  # pragma: no cover (should not happen unless pypi is not available)
+            logger.error(
+                "Unable to fetch %s: %s" % (settings.CAS_NEW_VERSION_JSON_URL, error)
+            )
+            last_version._cache = (time.time(), version, False)
+
+
+def dictfetchall(cursor):
+    "Return all rows from a django cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]

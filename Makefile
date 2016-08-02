@@ -38,7 +38,7 @@ dist:
 
 test_venv/bin/python:
 	virtualenv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt Django
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django<1.10'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
@@ -62,7 +62,7 @@ run_server: test_project
 
 run_tests: test_venv
 	python setup.py check --restructuredtext --stric
-	test_venv/bin/py.test --cov=cas_server --cov-report html
+	test_venv/bin/py.test -rw -x --cov=cas_server --cov-report html
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
 test_venv/bin/sphinx-build: test_venv

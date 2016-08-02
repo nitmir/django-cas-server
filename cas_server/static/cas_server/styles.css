@@ -3,7 +3,7 @@ html, body {
 }
 body {
   padding-top: 40px;
-  padding-bottom: 0px;
+  padding-bottom: 0;
   background-color: #eee;
 }
 
@@ -47,7 +47,7 @@ body {
 /* Wrapper for page content to push down footer */
 #wrap {
     min-height: 100%;
-    height: auto !important;
+    height: auto;
     height: 100%;
     /* Negative indent footer by it's height */
     margin: 0 auto -40px;

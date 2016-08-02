@@ -29,11 +29,49 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.7 < 1.10
+* Django >= 1.7.1 < 1.10
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
-* six >= 1
+* six >= 1.8
+
+Minimal version of packages dependancy are just indicative and meens that ``django-cas-server`` has
+been tested with it. Previous versions of dependencies may or may not work.
+
+Additionally, denpending of the authentication backend you plan to use, you may need the following
+python packages:
+
+* ldap3        (debian/centos: python-ldap3)
+* psycopg2     (debian/centos: python-psycopg2)
+* mysql-python (debian: python-mysqldb, centos: python2-mysql)
+
+
+Here there is a table with the name of python packages and the corresponding packages providing
+them on debian like systems and centos like systems.
+You should try as much as possible to use system packages as there are automatically updated then
+you update your system. You can then install Not Available (N/A)
+packages on your system using pip inside a virtualenv as described in the `Installation`_ section.
+For use with python3, just replace python(2) in the table by python3.
+
++------------------+-------------------------+---------------------+
+| python package   | debian like systems     | centos like systems |
++==================+=========================+=====================+
+| Django           | python-django           | python-django       |
++------------------+-------------------------+---------------------+
+| requests         | python-requests         | python-requests     |
++------------------+-------------------------+---------------------+
+| requests_futures | python-requests-futures | N/A                 |
++------------------+-------------------------+---------------------+
+| lxml             | python-lxml             | python-lxml         |
++------------------+-------------------------+---------------------+
+| six              | python-six              | python-six          |
++------------------+-------------------------+---------------------+
+| ldap3            | python-ldap3            | python-ldap3        |
++------------------+-------------------------+---------------------+
+| psycopg2         | python-psycopg2         | python-psycopg2     |
++------------------+-------------------------+---------------------+
+| mysql-python     | python-mysqldb          | python2-mysql       |
++------------------+-------------------------+---------------------+
 
 Installation
 ============
@@ -63,14 +101,17 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
     New python executable in cas/bin/python2
     Also creating executable in cas/bin/python
     Installing setuptools, pip...done.
+
+4. And `activate it <https://virtualenv.pypa.io/en/stable/userguide/#activate-script>`__::
+
     $ cd cas_venv/; . bin/activate
 
-4. Create a django project::
+5. Create a django project::
 
    $ django-admin startproject cas_project
    $ cd cas_project
 
-5. Install `django-cas-server`. To use the last published release, run::
+6. Install `django-cas-server`. To use the last published release, run::
 
     $ pip install django-cas-server
 
@@ -81,11 +122,11 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
     $ pip install -r requirements.txt
 
    Then, either run ``make install`` to create a python package using the sources of the repository
-   and install it with pip, or place the `cas_server` directory into your
+   and install it with pip, or place the ``cas_server`` directory into your
    `PYTHONPATH <https://docs.python.org/2/using/cmdline.html#envvar-PYTHONPATH>`_
-   (for instance by symlinking `cas_server` to the root of your django project).
+   (for instance by symlinking ``cas_server`` to the root of your django project).
 
-6. Open ``cas_project/settings.py`` in you favourite editor and follow the quick start section.
+7. Open ``cas_project/settings.py`` in you favourite editor and follow the quick start section.
 
 
 Quick start

@@ -17,6 +17,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
 
 import random
 import string
@@ -680,3 +681,22 @@ def dictfetchall(cursor):
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
+
+
+def logout_request(ticket):
+    """
+        Forge a SLO logout request
+
+        :param unicode ticket: A ticket value
+        :return: A SLO XML body request
+        :rtype: unicode
+    """
+    return u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+ ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
+<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
+<samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
+</samlp:LogoutRequest>""" % {
+        'id': gen_saml_id(),
+        'datetime': timezone.now().isoformat(),
+        'ticket':  ticket
+    }

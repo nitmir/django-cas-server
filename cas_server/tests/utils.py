@@ -340,17 +340,3 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
         httpd_thread.daemon = True
         httpd_thread.start()
         return (httpd, host, port)
-
-
-def logout_request(ticket):
-    """build a SLO request XML, ready to be send"""
-    return u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
- ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
-<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
-<samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
-</samlp:LogoutRequest>""" % \
-        {
-            'id': utils.gen_saml_id(),
-            'datetime': timezone.now().isoformat(),
-            'ticket':  ticket
-        }

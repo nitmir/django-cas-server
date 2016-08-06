@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 class LogoutMixin(object):
     """destroy CAS session utils"""
+
     def logout(self, all_session=False):
         """
             effectively destroy a CAS session
@@ -63,41 +64,51 @@ class LogoutMixin(object):
                 logger.info("Logging out user %s from all of they sessions." % username)
             else:
                 logger.info("Logging out user %s." % username)
-        # logout the user from the current session
+        users = []
+        # try to get the user from the current session
         try:
-            user = models.User.objects.get(
-                username=username,
-                session_key=self.request.session.session_key
+            users.append(
+                models.User.objects.get(
+                    username=username,
+                    session_key=self.request.session.session_key
+                )
             )
-            # flush the session
+        except models.User.DoesNotExist:
+            # if user not found in database, flush the session anyway
             self.request.session.flush()
+
+        # If all_session is set, search all of the user sessions
+        if all_session:
+            users.extend(models.User.objects.filter(username=username))
+
+        # Iterate over all user sessions that have to be logged out
+        for user in users:
+            # get the user session
+            session = SessionStore(session_key=user.session_key)
+            # flush the session
+            session.flush()
             # send SLO requests
             user.logout(self.request)
             # delete the user
             user.delete()
             # increment the destroyed session counter
             session_nb += 1
-        except models.User.DoesNotExist:
-            # if user not found in database, flush the session anyway
-            self.request.session.flush()
-
-        # If all_session is set logout user from alternative sessions
-        if all_session:
-            # Iterate over all user sessions
-            for user in models.User.objects.filter(username=username):
-                # get the user session
-                session = SessionStore(session_key=user.session_key)
-                # flush the session
-                session.flush()
-                # send SLO requests
-                user.logout(self.request)
-                # delete the user
-                user.delete()
-                # increment the destroyed session counter
-                session_nb += 1
         if username:
             logger.info("User %s logged out" % username)
         return session_nb
+
+
+class CsrfExemptView(View):
+    """base class for csrf exempt class views"""
+
+    @method_decorator(csrf_exempt)  # csrf is disabled for allowing SLO requests reception
+    def dispatch(self, request, *args, **kwargs):
+        """
+            dispatch different http request to the methods of the same name
+
+            :param django.http.HttpRequest request: The current request object
+        """
+        return super(CsrfExemptView, self).dispatch(request, *args, **kwargs)
 
 
 class LogoutView(View, LogoutMixin):
@@ -210,17 +221,12 @@ class LogoutView(View, LogoutMixin):
                     )
 
 
-class FederateAuth(View):
-    """view to authenticated user agains a backend CAS then CAS_FEDERATE is True"""
+class FederateAuth(CsrfExemptView):
+    """
+        view to authenticated user agains a backend CAS then CAS_FEDERATE is True
 
-    @method_decorator(csrf_exempt)  # csrf is disabled for allowing SLO requests reception
-    def dispatch(self, request, *args, **kwargs):
-        """
-            dispatch different http request to the methods of the same name
-
-            :param django.http.HttpRequest request: The current request object
-        """
-        return super(FederateAuth, self).dispatch(request, *args, **kwargs)
+        csrf is disabled for allowing SLO requests reception.
+    """
 
     def get_cas_client(self, request, provider, renew=False):
         """
@@ -923,18 +929,13 @@ class LoginView(View, LogoutMixin):
             return self.not_authenticated()
 
 
-class Auth(View):
-    """A simple view to validate username/password/service tuple"""
-    # csrf is disable as it is intended to be used by programs. Security is assured by a shared
-    # secret between the programs dans django-cas-server.
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        """
-            dispatch requests based on method GET, POST, ...
+class Auth(CsrfExemptView):
+    """
+        A simple view to validate username/password/service tuple
 
-            :param django.http.HttpRequest request: The current request object
-        """
-        return super(Auth, self).dispatch(request, *args, **kwargs)
+        csrf is disable as it is intended to be used by programs. Security is assured by a shared
+        secret between the programs dans django-cas-server.
+    """
 
     @staticmethod
     def post(request):
@@ -1041,8 +1042,9 @@ class Validate(View):
 
 
 @python_2_unicode_compatible
-class ValidateError(Exception):
-    """handle service validation error"""
+class ValidationBaseError(Exception):
+    """Base class for both saml and cas validation error"""
+
     #: The error code
     code = None
     #: The error message
@@ -1064,12 +1066,23 @@ class ValidateError(Exception):
             :return: the rendered ``cas_server/serviceValidateError.xml`` template
             :rtype: django.http.HttpResponse
         """
-        return render(
-            request,
-            "cas_server/serviceValidateError.xml",
-            {'code': self.code, 'msg': self.msg},
-            content_type="text/xml; charset=utf-8"
-        )
+        return render(request, self.template, self.contex(), content_type="text/xml; charset=utf-8")
+
+
+class ValidateError(ValidationBaseError):
+    """handle service validation error"""
+
+    #: template to be render for the error
+    template = "cas_server/serviceValidateError.xml"
+
+    def context(self):
+        """
+            content to use to render :attr:`template`
+
+            :return: A dictionary to contextualize :attr:`template`
+            :rtype: dict
+        """
+        return {'code': self.code, 'msg': self.msg}
 
 
 class ValidateService(View):
@@ -1333,58 +1346,31 @@ class Proxy(View):
             )
 
 
-@python_2_unicode_compatible
-class SamlValidateError(Exception):
+class SamlValidateError(ValidationBaseError):
     """handle saml validation error"""
-    #: The error code
-    code = None
-    #: The error message
-    msg = None
 
-    def __init__(self, code, msg=""):
-        self.code = code
-        self.msg = msg
-        super(SamlValidateError, self).__init__(code)
+    #: template to be render for the error
+    template = "cas_server/samlValidateError.xml"
 
-    def __str__(self):
-        return u"%s" % self.msg
-
-    def render(self, request):
+    def context(self):
         """
-            render the error template for the exception
-
-            :param django.http.HttpRequest request: The current request object:
-            :return: the rendered ``cas_server/samlValidateError.xml`` template
-            :rtype: django.http.HttpResponse
+            :return: A dictionary to contextualize :attr:`template`
+            :rtype: dict
         """
-        return render(
-            request,
-            "cas_server/samlValidateError.xml",
-            {
-                'code': self.code,
-                'msg': self.msg,
-                'IssueInstant': timezone.now().isoformat(),
-                'ResponseID': utils.gen_saml_id()
-            },
-            content_type="text/xml; charset=utf-8"
-        )
+        return {
+            'code': self.code,
+            'msg': self.msg,
+            'IssueInstant': timezone.now().isoformat(),
+            'ResponseID': utils.gen_saml_id()
+        }
 
 
-class SamlValidate(View):
+class SamlValidate(CsrfExemptView):
     """SAML ticket validation"""
     request = None
     target = None
     ticket = None
     root = None
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        """
-            dispatch requests based on method GET, POST, ...
-
-            :param django.http.HttpRequest request: The current request object
-        """
-        return super(SamlValidate, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
         """

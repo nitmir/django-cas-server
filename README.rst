@@ -1,7 +1,7 @@
 CAS Server
 ##########
 
-|travis| |coverage| |lisence| |github_version| |pypi_version| |codacy| |doc|
+|travis| |coverage| |licence| |github_version| |pypi_version| |codacy| |doc|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
@@ -610,7 +610,7 @@ You could for example do as bellow :
 .. |github_version| image:: https://badges.genua.fr/github/tag/nitmir/django-cas-server.svg?label=github
     :target: https://github.com/nitmir/django-cas-server/releases/latest
 
-.. |lisence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
+.. |licence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
 .. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg

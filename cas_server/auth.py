@@ -379,6 +379,23 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
                 field_names = self.user._meta.get_all_field_names()
             for name in field_names:
                 attr[name] = getattr(self.user, name)
+
+            # unfold user_permissions many to many relation
+            if 'user_permissions' in attr:
+                attr['user_permissions'] = [
+                    (
+                        u"%s.%s" % (
+                            perm.content_type.model_class().__module__,
+                            perm.content_type.model_class().__name__
+                        ),
+                        perm.codename
+                    ) for perm in attr['user_permissions'].filter()
+                ]
+
+            # unfold group many to many relation
+            if 'groups' in attr:
+                attr['groups'] = [group.name for group in attr['groups'].filter()]
+
             return attr
         else:
             return {}

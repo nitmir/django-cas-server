@@ -115,8 +115,8 @@ def get_validated_ticket(service):
 
     client = Client()
     response = client.get('/validate', {'ticket': ticket.value, 'service': service})
-    assert (response.status_code == 200)
-    assert (response.content == b'yes\ntest\n')
+    assert response.status_code == 200
+    assert response.content == b'yes\ntest\n'
 
     ticket = models.ServiceTicket.objects.get(value=ticket.value)
     return (auth_client, ticket)
@@ -222,6 +222,10 @@ class Http404Handler(HttpParamsHandler):
 
 class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
     """A dummy CAS that validate for only one (service, ticket) used in federated mode tests"""
+
+    #: dict of the last receive GET parameters
+    params = None
+
     def test_params(self):
         """check that internal and provided (service, ticket) matches"""
         if (

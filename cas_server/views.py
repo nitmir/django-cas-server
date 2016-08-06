@@ -79,7 +79,13 @@ class LogoutMixin(object):
 
         # If all_session is set, search all of the user sessions
         if all_session:
-            users.extend(models.User.objects.filter(username=username))
+            users.extend(
+                models.User.objects.filter(
+                    username=username
+                ).exclude(
+                    session_key=self.request.session.session_key
+                )
+            )
 
         # Iterate over all user sessions that have to be logged out
         for user in users:
@@ -228,6 +234,9 @@ class FederateAuth(CsrfExemptView):
         csrf is disabled for allowing SLO requests reception.
     """
 
+    #: current URL used as service URL by the CAS client
+    service_url = None
+
     def get_cas_client(self, request, provider, renew=False):
         """
             return a CAS client object matching provider
@@ -291,7 +300,7 @@ class FederateAuth(CsrfExemptView):
         """
             method called on GET request
 
-            :param django.http.HttpRequest request: The current request object
+            :param django.http.HttpRequestself. request: The current request object
             :param unicode provider: Optional parameter. The user provider suffix.
         """
         # if settings.CAS_FEDERATE is not True redirect to the login page
@@ -1053,7 +1062,7 @@ class ValidationBaseError(Exception):
     def __init__(self, code, msg=""):
         self.code = code
         self.msg = msg
-        super(ValidateError, self).__init__(code)
+        super(ValidationBaseError, self).__init__(code)
 
     def __str__(self):
         return u"%s" % self.msg
@@ -1066,7 +1075,11 @@ class ValidationBaseError(Exception):
             :return: the rendered ``cas_server/serviceValidateError.xml`` template
             :rtype: django.http.HttpResponse
         """
-        return render(request, self.template, self.contex(), content_type="text/xml; charset=utf-8")
+        return render(
+            request,
+            self.template,
+            self.context(), content_type="text/xml; charset=utf-8"
+        )
 
 
 class ValidateError(ValidationBaseError):

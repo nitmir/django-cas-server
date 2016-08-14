@@ -115,8 +115,8 @@ def get_validated_ticket(service):
 
     client = Client()
     response = client.get('/validate', {'ticket': ticket.value, 'service': service})
-    assert (response.status_code == 200)
-    assert (response.content == b'yes\ntest\n')
+    assert response.status_code == 200
+    assert response.content == b'yes\ntest\n'
 
     ticket = models.ServiceTicket.objects.get(value=ticket.value)
     return (auth_client, ticket)
@@ -222,6 +222,10 @@ class Http404Handler(HttpParamsHandler):
 
 class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
     """A dummy CAS that validate for only one (service, ticket) used in federated mode tests"""
+
+    #: dict of the last receive GET parameters
+    params = None
+
     def test_params(self):
         """check that internal and provided (service, ticket) matches"""
         if (
@@ -340,17 +344,3 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
         httpd_thread.daemon = True
         httpd_thread.start()
         return (httpd, host, port)
-
-
-def logout_request(ticket):
-    """build a SLO request XML, ready to be send"""
-    return u"""<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
- ID="%(id)s" Version="2.0" IssueInstant="%(datetime)s">
-<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:NameID>
-<samlp:SessionIndex>%(ticket)s</samlp:SessionIndex>
-</samlp:LogoutRequest>""" % \
-        {
-            'id': utils.gen_saml_id(),
-            'datetime': timezone.now().isoformat(),
-            'ticket':  ticket
-        }

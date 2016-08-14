@@ -14,7 +14,7 @@
   {% endif %}"
 {% endspaceless %}>{% spaceless %}
   {% if field|is_checkbox %}
-    <div class="checkbox"><label for="{{field.auto_id}}">{{field}}{{field.label}}</label>
+    <div class="checkbox"><label for="{{field.auto_id}}">{{field}}{{field.label}}</label></div>
   {% else %}
     <label class="control-label" for="{{field.auto_id}}">{{field.label}}</label>
     {{field}}

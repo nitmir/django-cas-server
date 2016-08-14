@@ -261,7 +261,7 @@ class FederateAuthLoginLogoutTestCase(
             # SLO for an unkown ticket should do nothing
             response = client.post(
                 "/federate/%s" % provider.suffix,
-                {'logoutRequest': tests_utils.logout_request(utils.gen_st())}
+                {'logoutRequest': utils.logout_request(utils.gen_st())}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")
@@ -288,7 +288,7 @@ class FederateAuthLoginLogoutTestCase(
             # 3 or 'CAS_2_SAML_1_0'
             response = client.post(
                 "/federate/%s" % provider.suffix,
-                {'logoutRequest': tests_utils.logout_request(ticket)}
+                {'logoutRequest': utils.logout_request(ticket)}
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, b"ok")

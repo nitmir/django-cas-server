@@ -1,6 +1,4 @@
-{% load i18n %}
-{% load staticfiles %}
-<!DOCTYPE html>
+{% load i18n %}{% load staticfiles %}<!DOCTYPE html>
 <html{% if request.LANGUAGE_CODE %} lang="{{ request.LANGUAGE_CODE }}"{% endif %}>
     <head>
         <meta charset="utf-8">
@@ -18,12 +16,13 @@
         <link href="{% static "cas_server/styles.css" %}" rel="stylesheet">
     </head>
     <body>
+      <div id="wrap">
         <div class="container">
             {% if auto_submit %}<noscript>{% endif %}
             <div class="row">
               <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h1 id="app-name">
-                    {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}"></img> {% endif %}
+                    {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}" alt="cas-logo" />{% endif %}
                     {% trans "Central Authentication Service" %}</h1>
               </div>
             </div>
@@ -53,7 +52,7 @@
                         class="alert alert-danger"
                     {% endif %}
                 {% endspaceless %}>
-                    {{ message }}
+                    {{message|safe}}
                 </div>
             {% endfor %}
             {% if auto_submit %}</noscript>{% endif %}
@@ -62,11 +61,25 @@
             <div class="col-lg-3 col-md-3 col-sm-2 col-xs-0"></div>
             </div>
         </div> <!-- /container -->
-        <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
-        <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
-        {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
-        <script src="{% static "cas_server/alert-version.js" %}"></script>
-        <script>alert_version("{{LAST_VERSION}}")</script>
-        {% endif %}
+      </div>
+      <div style="clear: both;"></div>
+      {% if settings.CAS_SHOW_POWERED %}
+      <div id="footer">
+          <p><a class="text-muted" href="https://pypi.python.org/pypi/django-cas-server">django-cas-server powered</a></p>
+      </div>
+      {% endif %}
+      <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
+      <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
+      <script src="{% static "cas_server/functions.js" %}"></script>
+      {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+      <script type="text/javascript">alert_version("{{LAST_VERSION}}")</script>
+      {% endif %}
+      {% block javascript %}{% endblock %}
     </body>
 </html>
+<!--
+Powered by django-cas-server version {{VERSION}}
+
+Pypi: https://pypi.python.org/pypi/django-cas-server
+github: https://github.com/nitmir/django-cas-server
+-->

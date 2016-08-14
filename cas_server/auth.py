@@ -369,8 +369,34 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
         """
         if self.user:
             attr = {}
-            for field in self.user._meta.fields:
-                attr[field.attname] = getattr(self.user, field.attname)
+            # _meta.get_fields() is from the new documented _meta interface in django 1.8
+            try:
+                field_names = [
+                    field.attname for field in self.user._meta.get_fields()
+                    if hasattr(field, "attname")
+                ]
+            # backward compatibility with django 1.7
+            except AttributeError:  # pragma: no cover (only used by django 1.7)
+                field_names = self.user._meta.get_all_field_names()
+            for name in field_names:
+                attr[name] = getattr(self.user, name)
+
+            # unfold user_permissions many to many relation
+            if 'user_permissions' in attr:
+                attr['user_permissions'] = [
+                    (
+                        u"%s.%s" % (
+                            perm.content_type.model_class().__module__,
+                            perm.content_type.model_class().__name__
+                        ),
+                        perm.codename
+                    ) for perm in attr['user_permissions'].filter()
+                ]
+
+            # unfold group many to many relation
+            if 'groups' in attr:
+                attr['groups'] = [group.name for group in attr['groups'].filter()]
+
             return attr
         else:
             return {}

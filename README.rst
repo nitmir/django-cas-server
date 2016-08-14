@@ -1,7 +1,7 @@
 CAS Server
 ##########
 
-|travis| |version| |lisence| |codacy| |coverage| |doc|
+|travis| |coverage| |licence| |github_version| |pypi_version| |codacy| |doc|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
@@ -206,6 +206,7 @@ Template settings
   templates. Set it to ``False`` to disable it.
 * ``CAS_FAVICON_URL``: URL to the favicon (shortcut icon) used by the default templates.
   Default is a key icon. Set it to ``False`` to disable it.
+* ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
   and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
   ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
@@ -603,10 +604,13 @@ You could for example do as bellow :
 .. |travis| image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
     :target: https://travis-ci.org/nitmir/django-cas-server
 
-.. |version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
+.. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.python.org/pypi/django-cas-server
 
-.. |lisence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
+.. |github_version| image:: https://badges.genua.fr/github/tag/nitmir/django-cas-server.svg?label=github
+    :target: https://github.com/nitmir/django-cas-server/releases/latest
+
+.. |licence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
 .. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg

@@ -466,7 +466,8 @@ class ServicePattern(models.Model):
             "A regular expression matching services. "
             "Will usually looks like '^https://some\\.server\\.com/path/.*$'."
             "As it is a regular expression, special character must be escaped with a '\\'."
-        )
+        ),
+        validators=[utils.regexpr_validator]
     )
     #: Name of the attribute to transmit as username, if empty the user login is used
     user_field = models.CharField(
@@ -660,7 +661,8 @@ class FilterAttributValue(models.Model):
     pattern = models.CharField(
         max_length=255,
         verbose_name=_(u"pattern"),
-        help_text=_(u"a regular expression")
+        help_text=_(u"a regular expression"),
+        validators=[utils.regexpr_validator]
     )
     #: ForeignKey to a :class:`ServicePattern`. :class:`FilterAttributValue` instances for a
     #: :class:`ServicePattern` are accessible thought its :attr:`ServicePattern.filters`
@@ -689,7 +691,8 @@ class ReplaceAttributValue(models.Model):
     pattern = models.CharField(
         max_length=255,
         verbose_name=_(u"pattern"),
-        help_text=_(u"An regular expression maching whats need to be replaced")
+        help_text=_(u"An regular expression maching whats need to be replaced"),
+        validators=[utils.regexpr_validator]
     )
     #: The replacement to what is mached by :attr:`pattern`. groups are capture by \\1, \\2 …
     replace = models.CharField(

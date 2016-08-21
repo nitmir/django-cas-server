@@ -18,7 +18,10 @@ from django.contrib import messages
 from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
+import re
 import random
 import string
 import json
@@ -700,3 +703,19 @@ def logout_request(ticket):
         'datetime': timezone.now().isoformat(),
         'ticket':  ticket
     }
+
+
+def regexpr_validator(value):
+    """
+        Test that ``value`` is a valid regular expression
+
+        :param unicode value: A regular expression to test
+        :raises ValidationError: if ``value`` is not a valid regular expression
+    """
+    try:
+        re.compile(value)
+    except re.error:
+        raise ValidationError(
+            _('"%(value)s" is not a valid regular expression'),
+            params={'value': value}
+        )

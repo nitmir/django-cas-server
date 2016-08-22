@@ -174,13 +174,11 @@ Quick start
      inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
      seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
 
-   You could for example do as bellow :
+   You could for example do as bellow::
 
-   .. code-block::
-
-      0   0  * * * cas-user /path/to/project/manage.py clearsessions
-      */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
-      5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
+     0   0  * * * cas-user /path/to/project/manage.py clearsessions
+     */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
+     5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
 
 5. Run ``python manage.py createsuperuser`` to create an administrator user.
 
@@ -230,7 +228,7 @@ Template settings
   authenticated. The default is ``"cas_server/logged.html"``.
 * ``CAS_LOGOUT_TEMPLATE``: Path to the template showed on ``/logout`` then to user
   is being disconnected. The default is ``"cas_server/logout.html"``
-* ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to `/login` after they
+* ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to ``/login`` after they
   logged out instead of displaying ``CAS_LOGOUT_TEMPLATE``. The default is ``False``.
 
 
@@ -547,10 +545,10 @@ A service pattern has 4 associated models:
   an email address to connect to it. To do so, put ``email`` in ``Attribute`` and ``.*`` in ``pattern``.
 
 Then a user ask a ticket for a service, the service URL is compare against each service patterns
-sorted by `position`. The first service pattern that matches the service URL is chosen.
-Hence, you should give low `position` to very specific patterns like
-``^https://www\.example\.com(/.*)?$`` and higher `position` to generic patterns like ``^https://.*``.
-So the service URL `https://www.examle.com` will use the service pattern for
+sorted by ``position``. The first service pattern that matches the service URL is chosen.
+Hence, you should give low ``position`` to very specific patterns like
+``^https://www\.example\.com(/.*)?$`` and higher ``position`` to generic patterns like ``^https://.*``.
+So the service URL ``https://www.examle.com`` will use the service pattern for
 ``^https://www\.example\.com(/.*)?$`` and not the one for ``^https://.*``.
 
 
@@ -574,7 +572,7 @@ An identity provider comes with 5 fields:
 * ``Suffix``: the suffix that will be append to the username returned by the identity provider.
   It must be unique.
 * ``Server url``: the URL to the identity provider CAS. For instance, if you are using
-  ``https://cas.example.org/login`` to authenticate on the CAS, the `server url` is
+  ``https://cas.example.org/login`` to authenticate on the CAS, the ``server url`` is
   ``https://cas.example.org``
 * ``CAS protocol version``: the version of the CAS protocol to use to contact the identity provider.
   The default is version 3.
@@ -595,11 +593,9 @@ Then using federate mode, you should add one command to a daily crontab: ``cas_c
 This command clean the local cache of federated user from old unused users.
 
 
-You could for example do as bellow :
+You could for example do as bellow::
 
-.. code-block::
-
-   10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+  10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
 
 
 

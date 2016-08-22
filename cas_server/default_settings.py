@@ -182,11 +182,17 @@ CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
 
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():
-    # get the current setting value, falling back to default_value
-    value = getattr(settings, name, default_value)
-    # set the setting value to its value if defined, ellse to the default_value.
-    setattr(settings, name, value)
+    # only care about parameter begining by CAS_
+    if name.startswith("CAS_"):
+        # get the current setting value, falling back to default_value
+        value = getattr(settings, name, default_value)
+        # set the setting value to its value if defined, ellse to the default_value.
+        setattr(settings, name, value)
 
+# Allow the user defined CAS_COMPONENT_URLS to omit not changed values
+MERGED_CAS_COMPONENT_URLS = CAS_COMPONENT_URLS.copy()
+MERGED_CAS_COMPONENT_URLS.update(settings.CAS_COMPONENT_URLS)
+settings.CAS_COMPONENT_URLS = MERGED_CAS_COMPONENT_URLS
 
 # if the federated mode is enabled, we must use the :class`cas_server.auth.CASFederateAuth` auth
 # backend.

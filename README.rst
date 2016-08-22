@@ -208,7 +208,7 @@ Template settings
   Default is a key icon. Set it to ``False`` to disable it.
 * ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
-  and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
+  having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
   ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
 
         {
@@ -218,6 +218,7 @@ Template settings
             "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
             "jquery": "//code.jquery.com/jquery.min.js",
         }
+  if you omit some keys of the dictionnary, the default value for these keys is used.
 
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
@@ -597,7 +598,7 @@ You could for example do as bellow :
 
 .. code-block::
 
-    10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+   10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
 
 
 

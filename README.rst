@@ -7,7 +7,7 @@ CAS Server is a Django application implementing the `CAS Protocol 3.0 Specificat
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
 By default, the authentication process use django internal users but you can easily
-use any sources (see auth classes in the auth.py file)
+use any sources (see the `Authentication backend`_ section and auth classes in the auth.py file)
 
 .. contents:: Table of Contents
 
@@ -38,7 +38,7 @@ Dependencies
 Minimal version of packages dependancy are just indicative and meens that ``django-cas-server`` has
 been tested with it. Previous versions of dependencies may or may not work.
 
-Additionally, denpending of the authentication backend you plan to use, you may need the following
+Additionally, denpending of the `Authentication backend`_ you plan to use, you may need the following
 python packages:
 
 * ldap3

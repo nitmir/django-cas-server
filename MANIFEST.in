@@ -1,6 +1,7 @@
 include tox.ini
 include LICENSE
 include README.rst
+include CHANGELOG.rst
 include .coveragerc
 include Makefile
 include pytest.ini
@@ -15,6 +16,7 @@ include docs/conf.py
 include docs/index.rst
 include docs/Makefile
 include docs/README.rst
+include docs/CHANGELOG.rst
 recursive-include docs/_ext *
 recursive-include docs/package *
 recursive-include docs/_static *

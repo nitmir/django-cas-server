@@ -14,6 +14,11 @@ Contents:
    README
    package/cas_server
 
+.. toctree::
+   :maxdepth: 2
+
+   CHANGELOG
+
 Indices and tables
 ==================
 

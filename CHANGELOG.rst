@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Added
+-----
+* Add a forgotten migration (only change help_text and validators)
+
+
 v0.7.0 - 2016-08-24
 ===================
 

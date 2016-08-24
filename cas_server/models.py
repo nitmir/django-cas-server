@@ -626,7 +626,7 @@ class ReplaceAttributName(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_(u"replace"),
-        help_text=_(u"name under which the attribute will be show"
+        help_text=_(u"name under which the attribute will be show "
                     u"to the service. empty = default name of the attribut")
     )
     #: ForeignKey to a :class:`ServicePattern`. :class:`ReplaceAttributName` instances for a

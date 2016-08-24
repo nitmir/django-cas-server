@@ -727,21 +727,21 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u'Service %(url)s non allowed.') % {'url': self.service}
+                _(u'Service %(url)s not allowed.') % {'url': self.service}
             )
         except models.BadUsername:
             error = 2
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"Username non allowed")
+                _(u"Username not allowed")
             )
         except models.BadFilter:
             error = 3
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"User characteristics non allowed")
+                _(u"User characteristics not allowed")
             )
         except models.UserFieldNotDefined:
             error = 4
@@ -852,7 +852,7 @@ class LoginView(View, LogoutMixin):
                 messages.add_message(
                     self.request,
                     messages.ERROR,
-                    _(u'Service %s non allowed') % self.service
+                    _(u'Service %s not allowed') % self.service
                 )
         if self.ajax:
             data = {

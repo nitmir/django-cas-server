@@ -75,6 +75,45 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login")
         self.assertNotIn(b"A new version of the application is available", response.content)
 
+    @override_settings(CAS_INFO_MESSAGES_ORDER=["cas_explained"])
+    def test_messages_info_box_enabled(self):
+        """test that the message info-box is displayed then enabled"""
+        client = Client()
+        response = client.get("/login")
+        self.assertIn(
+            b"The Central Authentication Service grants you access to most of our websites by ",
+            response.content
+        )
+
+    @override_settings(CAS_INFO_MESSAGES_ORDER=[])
+    def test_messages_info_box_disabled(self):
+        """test that the message info-box is not displayed then disabled"""
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(
+            b"The Central Authentication Service grants you access to most of our websites by ",
+            response.content
+        )
+
+    # test1 and test2 are malformed and should be ignored, test3 is ok, test5 do not
+    # exists and should be ignored
+    @override_settings(CAS_INFO_MESSAGES_ORDER=["test1", "test2", "test3", "test5"])
+    @override_settings(CAS_INFO_MESSAGES={
+        "test1": "test",  # not a dict, should be ignored
+        "test2": {"type": "success"},  # not "message" key, should be ignored
+        "test3": {"message": "test3"},
+        "test4": {"message": "test4"},
+    })
+    def test_messages_info_box_bad_messages(self):
+        """test that mal formated messages dict are ignored"""
+        client = Client()
+        # not errors should be raises
+        response = client.get("/login")
+        # test3 is ok est should be there
+        self.assertIn(b"test3", response.content)
+        # test4 is not in CAS_INFO_MESSAGES_ORDER and should not be there
+        self.assertNotIn(b"test4", response.content)
+
     def test_login_view_post_goodpass_goodlt(self):
         """Test a successul login"""
         # we get a client who fetch a frist time the login page and the login form default

@@ -78,10 +78,9 @@ def context(params):
         params["CAS_INFO_RENDER"] = []
         for msg_name in settings.CAS_INFO_MESSAGES_ORDER:
             if msg_name in settings.CAS_INFO_MESSAGES:
-                try:
-                    msg = settings.CAS_INFO_MESSAGES[msg_name].copy()
-                except AttributeError:
+                if not isinstance(settings.CAS_INFO_MESSAGES[msg_name], dict):
                     continue
+                msg = settings.CAS_INFO_MESSAGES[msg_name].copy()
                 if "message" in msg:
                     msg["name"] = msg_name
                     # use info as default infox type

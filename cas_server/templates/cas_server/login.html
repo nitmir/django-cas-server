@@ -15,7 +15,7 @@
   {% if auto_submit %}</noscript>{% endif %}
 </form>
 {% endblock %}
-{% block javascript %}<script type="text/javascript">
+{% block javascript_inline %}
 jQuery(function( $ ){
     $("#id_warn").click(function(e){
         if($("#id_warn").is(':checked')){
@@ -26,5 +26,5 @@ jQuery(function( $ ){
     });
 });{% if auto_submit %}
 document.getElementById('login_form').submit(); // SUBMIT FORM{% endif %}
-</script>{% endblock %}
+{% endblock %}
 

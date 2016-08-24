@@ -23,7 +23,18 @@ msgstr ""
 msgid "Central Authentication Service"
 msgstr "Service Central d'Authentification"
 
-#: forms.py:88
+#: default_settings.py:197
+msgid ""
+"The Central Authentication Service grants you access to most of our websites "
+"by authenticating only once, so you don't need to type your credentials "
+"again unless your session expires or you logout."
+msgstr ""
+"Le Service Central d'Authentification permet, en vous authentifiant une "
+"seule fois, d'accéder à la plupart de nos sites sans avoir à retaper votre "
+"identifiant et votre mot de passe chaque fois que vous changez de site, "
+"jusqu'à ce que votre session expire ou que vous vous déconnectiez."
+
+#: forms.py:84
 msgid "Identity provider"
 msgstr "fournisseur d'identité"
 

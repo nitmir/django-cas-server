@@ -12,6 +12,7 @@
 """Default values for the app's settings"""
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.utils.translation import ugettext_lazy as _
 
 from importlib import import_module
 
@@ -179,6 +180,32 @@ CAS_NEW_VERSION_EMAIL_WARNING = True
 #: URL to the pypi json of the application. Used to retreive the version number of the last version.
 #: You should not change it.
 CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
+
+
+#: Messages displayed in a info-box on the html pages of the default templates.
+#: ``CAS_INFO_MESSAGES`` is a :class:`dict` mapping message name to a message :class:`dict`.
+#: A message :class:`dict` has 3 keys:
+#:  * ``message``: A :class:`unicode`, the message to display, potentially wrapped around
+#:    ugettex_lazy
+#:  * ``discardable``: A :class:`bool`, specify if the users can close the message info-box
+#:  * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+#: ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explain
+#: roughly the purpose of a CAS.
+CAS_INFO_MESSAGES = {
+    "cas_explained": {
+        "message": _(
+            u"The Central Authentication Service grants you access to most of our websites by "
+            u"authenticating only once, so you don't need to type your credentials again unless "
+            u"your session expires or you logout."
+        ),
+        "discardable": True,
+        "type": "info",  # one of info, success, info, warning, danger
+    },
+}
+#: :class:`list` of message names. Order in which info-box messages are displayed.
+#: Let the list empty to disable messages display.
+CAS_INFO_MESSAGES_ORDER = []
+
 
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():

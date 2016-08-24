@@ -219,6 +219,30 @@ Template settings
 
   if you omit some keys of the dictionnary, the default value for these keys is used.
 
+* ``CAS_INFO_MESSAGES``: Messages displayed in info-boxes on the html pages of the default templates.
+  It is a dictionnary mapping message name to a message dict. A message dict has 3 keys:
+
+  * ``message``: A unicode message to display, potentially wrapped around ugettex_lazy
+  * ``discardable``: A boolean, specify if the users can close the message info-box
+  * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+
+  ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explain
+  roughly the purpose of a CAS. The default is::
+
+    {
+        "cas_explained": {
+            "message":_(
+                u"The Central Authentication Service grants you access to most of our websites by "
+                u"authenticating only once, so you don't need to type your credentials again unless "
+                u"your session expires or you logout."
+            ),
+            "discardable": True,
+            "type": "info",  # one of info, success, info, warning, danger
+        },
+    }
+
+* ``CAS_INFO_MESSAGES_ORDER``: A list of message names. Order in which info-box messages are
+  displayed. Use an empty list to disable messages display. The default is ``[]``.
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
 * ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then

@@ -31,10 +31,16 @@
             <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12"></div>
             <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
             {% if auto_submit %}<noscript>{% endif %}
+            {% for msg in CAS_INFO_RENDER %}
+              <div class="alert alert-{{msg.type}}{% if msg.discardable %} alert-dismissable{% endif %}">
+                {% if msg.discardable %}<button type="button" class="close" data-dismiss="alert" aria-hidden="true" id="info-{{msg.name}}">&#215;</button>{% endif %}
+                <p>{{msg.message}}</p>
+              </div>
+            {% endfor %}
             {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
               <div class="alert alert-info alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true" id="alert-version">&#215;</button>
-                {% blocktrans %}A new version of the application is available. This instance runs {{VERSION}} and the last version is {{LAST_VERSION}}. Please consider upgrading.{% endblocktrans %}
+                <p>{% blocktrans %}A new version of the application is available. This instance runs {{VERSION}} and the last version is {{LAST_VERSION}}. Please consider upgrading.{% endblocktrans %}</p>
               </div>
             {% endif %}
             {% block ante_messages %}{% endblock %}
@@ -52,7 +58,7 @@
                         class="alert alert-danger"
                     {% endif %}
                 {% endspaceless %}>
-                    {{message|safe}}
+                    <p>{{message|safe}}</p>
                 </div>
             {% endfor %}
             {% if auto_submit %}</noscript>{% endif %}
@@ -71,9 +77,17 @@
       <script src="{{settings.CAS_COMPONENT_URLS.jquery}}"></script>
       <script src="{{settings.CAS_COMPONENT_URLS.bootstrap3_js}}"></script>
       <script src="{% static "cas_server/functions.js" %}"></script>
-      {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
-      <script type="text/javascript">alert_version("{{LAST_VERSION}}")</script>
-      {% endif %}
+      <script type="text/javascript">
+{% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+discard_and_remember("#alert-version", "cas-alert-version", "{{LAST_VERSION}}");
+{% endif %}
+{% for msg in CAS_INFO_RENDER %}
+{% if msg.discardable %}
+discard_and_remember("#info-{{msg.name}}", "cas-info-{{msg.name}}", "{{msg.hash}}");
+{% endif %}
+{% endfor %}
+{% block javascript_inline %}{% endblock %}
+</script>
       {% block javascript %}{% endblock %}
     </body>
 </html>

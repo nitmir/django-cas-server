@@ -64,6 +64,7 @@ def context(params):
     """
     params["settings"] = settings
     params["message_levels"] = DEFAULT_MESSAGE_LEVELS
+
     if settings.CAS_NEW_VERSION_HTML_WARNING:
         LAST_VERSION = last_version()
         params["VERSION"] = VERSION
@@ -72,6 +73,28 @@ def context(params):
             params["upgrade_available"] = decode_version(VERSION) < decode_version(LAST_VERSION)
         else:
             params["upgrade_available"] = False
+
+    if settings.CAS_INFO_MESSAGES_ORDER:
+        params["CAS_INFO_RENDER"] = []
+        for msg_name in settings.CAS_INFO_MESSAGES_ORDER:
+            if msg_name in settings.CAS_INFO_MESSAGES:
+                try:
+                    msg = settings.CAS_INFO_MESSAGES[msg_name].copy()
+                except AttributeError:
+                    continue
+                if "message" in msg:
+                    msg["name"] = msg_name
+                    # use info as default infox type
+                    msg["type"] = msg.get("type", "info")
+                    # make box discardable by default
+                    msg["discardable"] = msg.get("discardable", True)
+                    msg_hash = (
+                        six.text_type(msg["message"]).encode("utf-8") +
+                        msg["type"].encode("utf-8")
+                    )
+                    # hash depend of the rendering language
+                    msg["hash"] = hashlib.md5(msg_hash).hexdigest()
+                    params["CAS_INFO_RENDER"].append(msg)
     return params
 
 

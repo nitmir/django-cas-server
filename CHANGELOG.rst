@@ -14,15 +14,19 @@ Added
 * Add a CHANGELOG.rst file.
 * Add a validator to models CharField that should be regular expressions checking that user input
   are valids regular expressions.
+* Add a CAS_INFO_MESSAGES and CAS_INFO_MESSAGES_ORDER settings allowing to display messages in
+  info-boxes on the html pages of the default templates.
 
 Changed
 -------
 * Allow the user defined CAS_COMPONENT_URLS to omit not changed values.
 * replace code-block without language indication by literal blocks.
+* Update french translation
 
 Fixed
 -----
 * Some README.rst typos.
+* some english typos
 
 
 v0.6.4 - 2016-08-14

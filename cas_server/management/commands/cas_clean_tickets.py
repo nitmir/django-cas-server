@@ -19,7 +19,7 @@ from ... import models
 class Command(BaseCommand):
     """Clean old trickets"""
     args = ''
-    help = _(u"Clean old trickets")
+    help = _(u"Clean old tickets")
 
     def handle(self, *args, **options):
         models.User.clean_old_entries()

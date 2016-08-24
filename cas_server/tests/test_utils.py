@@ -255,3 +255,9 @@ class UtilsTestCase(TestCase):
                 self.assertIsInstance(result, dict)
                 self.assertIn('applied', result)
                 self.assertIsInstance(result['applied'], datetime.datetime)
+
+    def test_regexpr_validator(self):
+        """test the function regexpr_validator"""
+        utils.regexpr_validator("^a$")
+        with self.assertRaises(utils.ValidationError):
+            utils.regexpr_validator("[")

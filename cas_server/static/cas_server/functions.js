@@ -31,14 +31,14 @@ function eraseCookie(name) {
     createCookie(name,"",-1);
 }
 
-function alert_version(last_version){
+function discard_and_remember(id, cookie_name, token, days=10*365){
     jQuery(function( $ ){
-        $("#alert-version").click(function( e ){
+        $(id).click(function( e ){
             e.preventDefault();
-            createCookie("cas-alert-version", last_version, 10*365);
+            createCookie(cookie_name, token, days);
         });
-        if(readCookie("cas-alert-version") === last_version){
-            $("#alert-version").parent().hide();
+        if(readCookie(cookie_name) === token){
+            $(id).parent().hide();
         }
     });
 }

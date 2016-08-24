@@ -75,6 +75,45 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login")
         self.assertNotIn(b"A new version of the application is available", response.content)
 
+    @override_settings(CAS_INFO_MESSAGES_ORDER=["cas_explained"])
+    def test_messages_info_box_enabled(self):
+        """test that the message info-box is displayed then enabled"""
+        client = Client()
+        response = client.get("/login")
+        self.assertIn(
+            b"The Central Authentication Service grants you access to most of our websites by ",
+            response.content
+        )
+
+    @override_settings(CAS_INFO_MESSAGES_ORDER=[])
+    def test_messages_info_box_disabled(self):
+        """test that the message info-box is not displayed then disabled"""
+        client = Client()
+        response = client.get("/login")
+        self.assertNotIn(
+            b"The Central Authentication Service grants you access to most of our websites by ",
+            response.content
+        )
+
+    # test1 and test2 are malformed and should be ignored, test3 is ok, test5 do not
+    # exists and should be ignored
+    @override_settings(CAS_INFO_MESSAGES_ORDER=["test1", "test2", "test3", "test5"])
+    @override_settings(CAS_INFO_MESSAGES={
+        "test1": "test",  # not a dict, should be ignored
+        "test2": {"type": "success"},  # not "message" key, should be ignored
+        "test3": {"message": "test3"},
+        "test4": {"message": "test4"},
+    })
+    def test_messages_info_box_bad_messages(self):
+        """test that mal formated messages dict are ignored"""
+        client = Client()
+        # not errors should be raises
+        response = client.get("/login")
+        # test3 is ok est should be there
+        self.assertIn(b"test3", response.content)
+        # test4 is not in CAS_INFO_MESSAGES_ORDER and should not be there
+        self.assertNotIn(b"test4", response.content)
+
     def test_login_view_post_goodpass_goodlt(self):
         """Test a successul login"""
         # we get a client who fetch a frist time the login page and the login form default
@@ -234,7 +273,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login?service=https://www.example.net")
         self.assertEqual(response.status_code, 200)
         # we warn the user that https://www.example.net is not an allowed service url
-        self.assertTrue(b"Service https://www.example.net non allowed" in response.content)
+        self.assertTrue(b"Service https://www.example.net not allowed" in response.content)
 
     def test_view_login_get_auth_allowed_service(self):
         """Request a ticket for an allowed service by an authenticated client"""
@@ -280,7 +319,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertEqual(response.status_code, 200)
         # we warn the user that https://www.example.net is not an allowed service url
         # NO ticket are created
-        self.assertTrue(b"Service https://www.example.org non allowed" in response.content)
+        self.assertTrue(b"Service https://www.example.org not allowed" in response.content)
 
     def test_user_logged_not_in_db(self):
         """If the user is logged but has been delete from the database, it should be logged out"""
@@ -314,7 +353,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         response = client.get("/login", {'service': self.service_restrict_user_fail})
         self.assertEqual(response.status_code, 200)
         # the ticket is not created and a warning is displayed to the user
-        self.assertTrue(b"Username non allowed" in response.content)
+        self.assertTrue(b"Username not allowed" in response.content)
 
         # same but with the tes user username being one of the allowed usernames
         response = client.get("/login", {'service': self.service_restrict_user_success})
@@ -337,7 +376,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
             response = client.get("/login", {'service': service})
             # the ticket is not created and a warning is displayed to the user
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(b"User characteristics non allowed" in response.content)
+            self.assertTrue(b"User characteristics not allowed" in response.content)
 
         # same but with rectriction that a valid upon the test user attributes
         response = client.get("/login", {'service': self.service_filter_success})
@@ -546,7 +585,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertEqual(data["messages"][0]["level"], "error")
         self.assertEqual(
             data["messages"][0]["message"],
-            "Service https://www.example.org non allowed."
+            "Service https://www.example.org not allowed."
         )
 
     @override_settings(CAS_ENABLE_AJAX_AUTH=True)

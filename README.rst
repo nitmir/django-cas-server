@@ -7,7 +7,7 @@ CAS Server is a Django application implementing the `CAS Protocol 3.0 Specificat
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
 By default, the authentication process use django internal users but you can easily
-use any sources (see auth classes in the auth.py file)
+use any sources (see the `Authentication backend`_ section and auth classes in the auth.py file)
 
 .. contents:: Table of Contents
 
@@ -38,7 +38,7 @@ Dependencies
 Minimal version of packages dependancy are just indicative and meens that ``django-cas-server`` has
 been tested with it. Previous versions of dependencies may or may not work.
 
-Additionally, denpending of the authentication backend you plan to use, you may need the following
+Additionally, denpending of the `Authentication backend`_ you plan to use, you may need the following
 python packages:
 
 * ldap3
@@ -174,13 +174,11 @@ Quick start
      inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
      seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
 
-   You could for example do as bellow :
+   You could for example do as bellow::
 
-   .. code-block::
-
-      0   0  * * * cas-user /path/to/project/manage.py clearsessions
-      */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
-      5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
+     0   0  * * * cas-user /path/to/project/manage.py clearsessions
+     */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
+     5   0  * * * cas-user /path/to/project/manage.py cas_clean_sessions
 
 5. Run ``python manage.py createsuperuser`` to create an administrator user.
 
@@ -208,7 +206,7 @@ Template settings
   Default is a key icon. Set it to ``False`` to disable it.
 * ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
-  and it must have the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
+  having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
   ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
 
         {
@@ -219,6 +217,32 @@ Template settings
             "jquery": "//code.jquery.com/jquery.min.js",
         }
 
+  if you omit some keys of the dictionnary, the default value for these keys is used.
+
+* ``CAS_INFO_MESSAGES``: Messages displayed in info-boxes on the html pages of the default templates.
+  It is a dictionnary mapping message name to a message dict. A message dict has 3 keys:
+
+  * ``message``: A unicode message to display, potentially wrapped around ugettex_lazy
+  * ``discardable``: A boolean, specify if the users can close the message info-box
+  * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+
+  ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explain
+  roughly the purpose of a CAS. The default is::
+
+    {
+        "cas_explained": {
+            "message":_(
+                u"The Central Authentication Service grants you access to most of our websites by "
+                u"authenticating only once, so you don't need to type your credentials again unless "
+                u"your session expires or you logout."
+            ),
+            "discardable": True,
+            "type": "info",  # one of info, success, info, warning, danger
+        },
+    }
+
+* ``CAS_INFO_MESSAGES_ORDER``: A list of message names. Order in which info-box messages are
+  displayed. Use an empty list to disable messages display. The default is ``[]``.
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
   is not autenticated.  The default is ``"cas_server/login.html"``.
 * ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then
@@ -228,7 +252,7 @@ Template settings
   authenticated. The default is ``"cas_server/logged.html"``.
 * ``CAS_LOGOUT_TEMPLATE``: Path to the template showed on ``/logout`` then to user
   is being disconnected. The default is ``"cas_server/logout.html"``
-* ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to `/login` after they
+* ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to ``/login`` after they
   logged out instead of displaying ``CAS_LOGOUT_TEMPLATE``. The default is ``False``.
 
 
@@ -271,7 +295,7 @@ New version warnings settings
 * ``CAS_NEW_VERSION_HTML_WARNING``: A boolean for diplaying a warning on html pages then a new
   version of the application is avaible. Once closed by a user, it is not displayed to this user
   until the next new version. The default is ``True``.
-* ``CAS_NEW_VERSION_EMAIL_WARNING``: A bolean sot sending a email to ``settings.ADMINS`` when a new
+* ``CAS_NEW_VERSION_EMAIL_WARNING``: A boolean for sending a email to ``settings.ADMINS`` when a new
   version is available. The default is ``True``.
 
 
@@ -545,10 +569,10 @@ A service pattern has 4 associated models:
   an email address to connect to it. To do so, put ``email`` in ``Attribute`` and ``.*`` in ``pattern``.
 
 Then a user ask a ticket for a service, the service URL is compare against each service patterns
-sorted by `position`. The first service pattern that matches the service URL is chosen.
-Hence, you should give low `position` to very specific patterns like
-``^https://www\.example\.com(/.*)?$`` and higher `position` to generic patterns like ``^https://.*``.
-So the service URL `https://www.examle.com` will use the service pattern for
+sorted by ``position``. The first service pattern that matches the service URL is chosen.
+Hence, you should give low ``position`` to very specific patterns like
+``^https://www\.example\.com(/.*)?$`` and higher ``position`` to generic patterns like ``^https://.*``.
+So the service URL ``https://www.examle.com`` will use the service pattern for
 ``^https://www\.example\.com(/.*)?$`` and not the one for ``^https://.*``.
 
 
@@ -572,7 +596,7 @@ An identity provider comes with 5 fields:
 * ``Suffix``: the suffix that will be append to the username returned by the identity provider.
   It must be unique.
 * ``Server url``: the URL to the identity provider CAS. For instance, if you are using
-  ``https://cas.example.org/login`` to authenticate on the CAS, the `server url` is
+  ``https://cas.example.org/login`` to authenticate on the CAS, the ``server url`` is
   ``https://cas.example.org``
 * ``CAS protocol version``: the version of the CAS protocol to use to contact the identity provider.
   The default is version 3.
@@ -593,11 +617,9 @@ Then using federate mode, you should add one command to a daily crontab: ``cas_c
 This command clean the local cache of federated user from old unused users.
 
 
-You could for example do as bellow :
+You could for example do as bellow::
 
-.. code-block::
-
-    10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
+  10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
 
 
 

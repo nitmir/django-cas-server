@@ -13,6 +13,11 @@ Added
 -----
 * Add Django 1.10 support
 
+Fixed
+-----
+* Fix BootsrapForm: placeholder on Input and Textarea only, use class form-control on
+  Input, Select and Textarea.
+
 
 v0.7.1 - 2016-08-24
 ===================

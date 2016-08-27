@@ -1,5 +1,5 @@
-{% load i18n %}{% load staticfiles %}<!DOCTYPE html>
-<html{% if request.LANGUAGE_CODE %} lang="{{ request.LANGUAGE_CODE }}"{% endif %}>
+{% load i18n %}{% load staticfiles %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html{% if LANGUAGE_CODE %} lang="{{LANGUAGE_CODE}}"{% endif %}>
     <head>
         <meta charset="utf-8">
         <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge" /><![endif]-->

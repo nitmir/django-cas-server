@@ -17,6 +17,8 @@ Fixed
 -----
 * Fix BootsrapForm: placeholder on Input and Textarea only, use class form-control on
   Input, Select and Textarea.
+* Fix lang attribute in django 1.7. On html pages, the lang attribute of the <html> was not
+  present in django 1.7. We use now a methode to display it that is also available in django 1.7
 
 
 v0.7.1 - 2016-08-24

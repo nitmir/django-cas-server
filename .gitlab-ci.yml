@@ -1,0 +1,128 @@
+before_script:
+- pip install tox setuptools
+
+flake8:
+  image: "python:2.7"
+  cache:
+    key: flake8
+    paths:
+    - .tox/flake8
+  script:
+  - tox -e flake8
+
+check_rst:
+  image: "python:2.7"
+  cache:
+    key: check_rst
+    paths:
+    - .tox/check_rst
+  script:
+  - tox -e check_rst
+
+py27-django17:
+  image: "python:2.7"
+  cache:
+    key: py27-django17
+    paths:
+    - .tox/py27-django17
+  script:
+  - tox -e py27-django17
+
+py27-django18:
+  image: "python:2.7"
+  cache:
+    key: py27-django18
+    paths:
+    - .tox/py27-django18
+  script:
+  - tox -e py27-django18
+
+py27-django19:
+  image: "python:2.7"
+  cache:
+    key: py27-django19
+    paths:
+    - .tox/py27-django19
+  script:
+  - tox -e py27-django19
+
+py27-django110:
+  image: "python:2.7"
+  cache:
+    key: py27-django110
+    paths:
+    - .tox/py27-django110
+  script:
+  - tox -e py27-django110
+
+py34-django17:
+  image: "python:3.4"
+  cache:
+    key: py34-django17
+    paths:
+    - .tox/py34-django17
+  script:
+  - tox -e py34-django17
+
+py34-django18:
+  image: "python:3.4"
+  cache:
+    key: py34-django18
+    paths:
+    - .tox/py34-django18
+  script:
+  - tox -e py34-django18
+
+py34-django19:
+  image: "python:3.4"
+  cache:
+    key: py34-django19
+    paths:
+    - .tox/py34-django19
+  script:
+  - tox -e py34-django19
+
+py34-django110:
+  image: "python:3.4"
+  cache:
+    key: py34-django110
+    paths:
+    - .tox/py34-django110
+  script:
+  - tox -e py34-django110
+
+py35-django18:
+  image: "python:3.5"
+  cache:
+    key: py35-django18
+    paths:
+    - .tox/py35-django18
+  script:
+  - tox -e py35-django18
+
+py35-django19:
+  image: "python:3.5"
+  cache:
+    key: py35-django19
+    paths:
+    - .tox/py35-django19
+  script:
+  - tox -e py35-django19
+
+py35-django110:
+  image: "python:3.5"
+  cache:
+    key: py35-django110
+    paths:
+    - .tox/py35-django110
+  script:
+  - tox -e py35-django110
+
+coverage:
+  image: "python:2.7"
+  cache:
+    key: coverage
+    paths:
+    - .tox/coverage
+  script:
+  - tox -e coverage

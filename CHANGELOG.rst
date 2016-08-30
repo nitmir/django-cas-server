@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 * Add Django 1.10 support
+* Add support of gitlab continuous integration
 
 Fixed
 -----

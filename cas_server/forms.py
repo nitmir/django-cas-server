@@ -12,6 +12,7 @@
 from .default_settings import settings
 
 from django import forms
+from django.forms import widgets
 from django.utils.translation import ugettext_lazy as _
 
 import cas_server.utils as utils
@@ -27,13 +28,13 @@ class BootsrapForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootsrapForm, self).__init__(*args, **kwargs)
         for field in self.fields.values():
-            # Only tweak the fiel if it will be displayed
-            if not isinstance(field.widget, forms.HiddenInput):
+            # Only tweak the field if it will be displayed
+            if not isinstance(field.widget, widgets.HiddenInput):
                 attrs = {}
-                if not isinstance(field.widget, forms.CheckboxInput):
+                if isinstance(field.widget, (widgets.Input, widgets.Select, widgets.Textarea)):
                     attrs['class'] = "form-control"
-                    if field.label:  # pragma: no branch (currently all field are hidden or labeled)
-                        attrs["placeholder"] = field.label
+                if isinstance(field.widget, (widgets.Input, widgets.Textarea)) and field.label:
+                    attrs["placeholder"] = field.label
                 if field.required:
                     attrs["required"] = "required"
                 field.widget.attrs.update(attrs)

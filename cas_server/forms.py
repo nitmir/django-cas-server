@@ -100,7 +100,10 @@ class UserCredential(BaseLogin):
          Form used on the login page to retrive user credentials
      """
     #: The user username
-    username = forms.CharField(label=_('username'))
+    username = forms.CharField(
+        label=_('username'),
+        widget=forms.TextInput(attrs={'autofocus': 'autofocus'})
+    )
     #: The user password
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
     #: A checkbox to ask to be warn before emiting a ticket for another service

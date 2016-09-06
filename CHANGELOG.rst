@@ -13,6 +13,12 @@ Added
 -----
 * Add autofocus to the username input on the login page
 
+Fixed
+-----
+* Really pick the last version on Pypi for new version checking.
+  We were only sorting version string lexicographically and it would have break when
+  we reach version 0.10.N or 0.N.10
+
 
 v0.7.2 - 2016-08-31
 ===================

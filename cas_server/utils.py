@@ -653,7 +653,8 @@ def check_password(method, password, hashed_password, charset):
 
 def decode_version(version):
     """
-        decode a version string following version semantic http://semver.org/ input a tuple of int
+        decode a version string following version semantic http://semver.org/ input a tuple of int.
+        It will work as long as we do not use pre release versions.
 
         :param unicode version: A dotted version
         :return: A tuple a int
@@ -683,9 +684,7 @@ def last_version():
         try:
             req = requests.get(settings.CAS_NEW_VERSION_JSON_URL)
             data = json.loads(req.text)
-            versions = list(data["releases"].keys())
-            versions.sort()
-            version = versions[-1]
+            version = data["info"]["version"]
             last_version._cache = (time.time(), version, True)
             return version
         except (

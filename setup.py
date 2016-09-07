@@ -16,7 +16,7 @@ if __name__ == '__main__':
         packages=[
             'cas_server', 'cas_server.migrations',
             'cas_server.management', 'cas_server.management.commands',
-            'cas_server.tests'
+            'cas_server.tests', 'cas_server.templatetags'
         ],
         include_package_data=True,
         license='GPLv3',

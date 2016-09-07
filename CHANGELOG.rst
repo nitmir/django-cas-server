@@ -18,6 +18,9 @@ Fixed
 * Really pick the last version on Pypi for new version checking.
   We were only sorting version string lexicographically and it would have break when
   we reach version 0.10.N or 0.N.10
+* Only check for valid username/password if username and password POST fields are posted.
+  This fix a bug where posting without it raise a exception are None where passed for
+  username/password verification.
 
 
 v0.7.2 - 2016-08-31

@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v0.7.3 - 2016-09-07
+===================
+
+Added
+-----
+* Add autofocus to the username input on the login page
+
+Fixed
+-----
+* Really pick the last version on Pypi for new version checking.
+  We were only sorting version string lexicographically and it would have break when
+  we reach version 0.10.N or 0.N.10
+* Only check for valid username/password if username and password POST fields are posted.
+  This fix a bug where posting without it raise a exception are None where passed for
+  username/password verification.
+
+
 v0.7.2 - 2016-08-31
 ===================
 

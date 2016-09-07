@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Fixed
+-----
+* Add templatetags to Pypi package
+
+
 v0.7.3 - 2016-09-07
 ===================
 

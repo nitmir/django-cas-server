@@ -638,8 +638,8 @@ You could for example do as bellow::
 .. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
     :target: https://www.codacy.com/app/valentin-samir/django-cas-server
 
-.. |coverage| image:: https://badges.genua.fr/codacy/coverage/255c21623d6946ef8802fa7995b61366/master.svg
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
+.. |coverage| image:: https://badges.genua.fr/local/coverage/?project=django-cas-server&branch=master
+    :target: https://badges.genua.fr/local/coverage/django-cas-server/master
 
 .. |doc| image:: https://badges.genua.fr/local/readthedocs/?version=latest
     :target: http://django-cas-server.readthedocs.io

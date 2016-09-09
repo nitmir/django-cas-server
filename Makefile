@@ -62,7 +62,7 @@ run_server: test_project
 
 run_tests: test_venv
 	python setup.py check --restructuredtext --stric
-	test_venv/bin/py.test -rw -x --cov=cas_server --cov-report html
+	test_venv/bin/py.test -rw -x --cov=cas_server --cov-report html --cov-report term
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
 test_venv/bin/sphinx-build: test_venv

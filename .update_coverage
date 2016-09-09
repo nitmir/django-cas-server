@@ -27,7 +27,7 @@ if [[ "$BRANCH" = "HEAD" ]] || [ -z "$BRANCH" ]; then
     exit 0
 fi
 
-curl https://badges.genua.fr/local/coverage/ \
+curl https://badges.genua.fr/coverage/ \
     -F "secret=$COVERAGE_TOKEN" \
     -F "tar=@$BASEDIR/coverage.tar.gz" \
     -F "project=$PROJECT_NAME" \

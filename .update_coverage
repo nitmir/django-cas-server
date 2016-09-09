@@ -1,0 +1,37 @@
+#!/bin/bash
+BASEDIR="$1"
+PROJECT_NAME="$2"
+
+cd "$BASEDIR/htmlcov/"; tar czf "$BASEDIR/coverage.tar.gz" ./
+
+
+cd "$BASEDIR"
+
+# build by gitlab CI
+if [ -n "$CI_BUILD_REF_NAME" ]; then
+    BRANCH="$CI_BUILD_REF_NAME"
+# build by travis
+elif [ -n "$TRAVIS_BRANCH" ]; then
+    # if this a pull request ?
+    if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+        BRANCH="pull-request-$TRAVIS_PULL_REQUEST"
+    else
+        BRANCH="$TRAVIS_BRANCH"
+    fi
+else
+    BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+fi
+
+if [[ "$BRANCH" = "HEAD" ]] || [ -z "$BRANCH" ]; then
+    echo "bad branch name '$BRANCH', ignoring it"
+    exit 0
+fi
+
+curl https://badges.genua.fr/local/coverage/ \
+    -F "secret=$COVERAGE_TOKEN" \
+    -F "tar=@$BASEDIR/coverage.tar.gz" \
+    -F "project=$PROJECT_NAME" \
+    -F "branch=$BRANCH"
+
+rm "$BASEDIR/coverage.tar.gz"
+

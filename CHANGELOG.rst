@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Added
+-----
+* Add a test for login with missing parameter (username or password or both)
+
+
 v0.7.4 - 2016-09-07
 ===================
 

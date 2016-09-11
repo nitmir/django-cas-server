@@ -2,30 +2,47 @@
 BASEDIR="$1"
 PROJECT_NAME="$2"
 
-cd "$BASEDIR/htmlcov/"; tar czf "$BASEDIR/coverage.tar.gz" ./
-
-
-cd "$BASEDIR"
+TITLE="Coverage report of $PROJECT_NAME"
 
 # build by gitlab CI
 if [ -n "$CI_BUILD_REF_NAME" ]; then
     BRANCH="$CI_BUILD_REF_NAME"
+    TITLE="$TITLE, $BRANCH branch"
 # build by travis
 elif [ -n "$TRAVIS_BRANCH" ]; then
     # if this a pull request ?
     if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
         BRANCH="pull-request-$TRAVIS_PULL_REQUEST"
+        TITLE="$TITLE, pull request n°$BRANCH"
     else
         BRANCH="$TRAVIS_BRANCH"
+        TITLE="$TITLE, $BRANCH branch"
     fi
 else
     BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    TITLE="$TITLE, $BRANCH branch"
 fi
 
 if [[ "$BRANCH" = "HEAD" ]] || [ -z "$BRANCH" ]; then
     echo "bad branch name '$BRANCH', ignoring it"
     exit 0
 fi
+
+
+VENV="$(mktemp -d)"
+HTMLREPORT="$(mktemp -d)"
+virtualenv "$VENV"
+"$VENV/bin/pip" install coverage
+"$VENV/bin/coverage" html --title "$TITLE" --directory "$HTMLREPORT"
+rm -rf "$VENV"
+
+
+cd "$HTMLREPORT"; tar czf "$BASEDIR/coverage.tar.gz" ./
+
+cd "$BASEDIR"
+
+rm -rf "$HTMLREPORT"
+
 
 curl https://badges.genua.fr/coverage/ \
     -F "secret=$COVERAGE_TOKEN" \

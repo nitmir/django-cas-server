@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-24 17:18+0200\n"
-"PO-Revision-Date: 2016-08-24 17:18+0200\n"
+"POT-Creation-Date: 2016-09-18 11:29+0200\n"
+"PO-Revision-Date: 2016-09-18 11:30+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.9\n"
 
 #: apps.py:25 templates/cas_server/base.html:7
 #: templates/cas_server/base.html:26
@@ -34,37 +34,37 @@ msgstr ""
 "identifiant et votre mot de passe chaque fois que vous changez de site, "
 "jusqu'à ce que votre session expire ou que vous vous déconnectiez."
 
-#: forms.py:84
+#: forms.py:85
 msgid "Identity provider"
 msgstr "fournisseur d'identité"
 
-#: forms.py:88 forms.py:107
+#: forms.py:89 forms.py:111
 msgid "Warn me before logging me into other sites."
 msgstr "Prévenez-moi avant d'accéder à d'autres services."
 
-#: forms.py:92
+#: forms.py:93
 msgid "Remember the identity provider"
 msgstr "Se souvenir du fournisseur d'identité"
 
-#: forms.py:102 models.py:594
+#: forms.py:104 models.py:594
 msgid "username"
 msgstr "nom d'utilisateur"
 
-#: forms.py:104
+#: forms.py:108
 msgid "password"
 msgstr "mot de passe"
 
-#: forms.py:126
+#: forms.py:131
 msgid "The credentials you provided cannot be determined to be authentic."
 msgstr "Les informations transmises n'ont pas permis de vous authentifier."
 
-#: forms.py:178
+#: forms.py:183
 msgid "User not found in the temporary database, please try to reconnect"
 msgstr ""
 "Utilisateur non trouvé dans la base de donnée temporaire, essayez de vous "
 "reconnecter"
 
-#: forms.py:192
+#: forms.py:197
 msgid "service"
 msgstr "service"
 
@@ -331,7 +331,7 @@ msgstr "Connexion"
 msgid "Connect to the service"
 msgstr "Se connecter au service"
 
-#: utils.py:736
+#: utils.py:744
 #, python-format
 msgid "\"%(value)s\" is not a valid regular expression"
 msgstr "\"%(value)s\" n'est pas une expression rationnelle valide"
@@ -339,7 +339,7 @@ msgstr "\"%(value)s\" n'est pas une expression rationnelle valide"
 #: views.py:185
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from the Central "
-"Authentication Service. For security reasons, exit your web browser."
+"Authentication Service. For security reasons, close your web browser."
 msgstr ""
 "<h3>Déconnexion réussie</h3>Vous vous êtes déconnecté(e) du Service Central "
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
@@ -349,7 +349,7 @@ msgstr ""
 #, python-format
 msgid ""
 "<h3>Logout successful</h3>You have successfully logged out from %s sessions "
-"of the Central Authentication Service. For security reasons, exit your web "
+"of the Central Authentication Service. For security reasons, close your web "
 "browser."
 msgstr ""
 "<h3>Déconnexion réussie</h3>Vous vous êtes déconnecté(e) de %s sessions du "
@@ -359,7 +359,7 @@ msgstr ""
 #: views.py:198
 msgid ""
 "<h3>Logout successful</h3>You were already logged out from the Central "
-"Authentication Service. For security reasons, exit your web browser."
+"Authentication Service. For security reasons, close your web browser."
 msgstr ""
 "<h3>Déconnexion réussie</h3>Vous étiez déjà déconnecté(e) du Service Central "
 "d'Authentification. Pour des raisons de sécurité, veuillez fermer votre "
@@ -375,7 +375,7 @@ msgstr ""
 "ticket %(ticket)s: %(error)r"
 
 #: views.py:500
-msgid "Invalid login ticket, please retry to login"
+msgid "Invalid login ticket, please try to log in again"
 msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
 
 #: views.py:692

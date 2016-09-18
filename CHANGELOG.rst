@@ -13,6 +13,10 @@ Added
 -----
 * Add a test for login with missing parameter (username or password or both)
 
+Fixed
+-----
+* Allow both unicode and bytes dotted string in utils.import_attr
+
 
 v0.7.4 - 2016-09-07
 ===================

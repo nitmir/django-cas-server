@@ -69,7 +69,7 @@ class CASFederateValidateUser(object):
 
     def verify_ticket(self, ticket):
         """
-            test ``ticket`` agains the CAS provider, if valid, create a
+            test ``ticket`` against the CAS provider, if valid, create a
             :class:`FederatedUser<cas_server.models.FederatedUser>` matching provider returned
             username and attributes.
 

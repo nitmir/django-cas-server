@@ -49,7 +49,7 @@ class AuthUser(object):
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :raises NotImplementedError: always. The method need to be implemented by subclasses
         """
@@ -74,7 +74,7 @@ class DummyAuthUser(AuthUser):  # pragma: no cover
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: always ``False``
@@ -102,7 +102,7 @@ class TestAuthUser(AuthUser):
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: ``True`` if :attr:`username<AuthUser.username>` is valid and
@@ -149,7 +149,7 @@ class MysqlAuthUser(DBAuthUser):  # pragma: no cover
     """
         DEPRECATED, use :class:`SqlAuthUser` instead.
 
-        A mysql authentication class: authenticate user agains a mysql database
+        A mysql authentication class: authenticate user against a mysql database
 
         :param unicode username: A username, stored in the :attr:`username<AuthUser.username>`
             class attribute. Valid value are fetched from the MySQL database set with
@@ -188,7 +188,7 @@ class MysqlAuthUser(DBAuthUser):  # pragma: no cover
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: ``True`` if :attr:`username<AuthUser.username>` is valid and ``password`` is
@@ -208,7 +208,7 @@ class MysqlAuthUser(DBAuthUser):  # pragma: no cover
 
 class SqlAuthUser(DBAuthUser):  # pragma: no cover
     """
-        A SQL authentication class: authenticate user agains a SQL database. The SQL database
+        A SQL authentication class: authenticate user against a SQL database. The SQL database
         must be configures in settings.py as ``settings.DATABASES['cas_server']``.
 
         :param unicode username: A username, stored in the :attr:`username<AuthUser.username>`
@@ -238,7 +238,7 @@ class SqlAuthUser(DBAuthUser):  # pragma: no cover
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: ``True`` if :attr:`username<AuthUser.username>` is valid and ``password`` is
@@ -308,7 +308,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: ``True`` if :attr:`username<AuthUser.username>` is valid and ``password`` is
@@ -347,7 +347,7 @@ class DjangoAuthUser(AuthUser):  # pragma: no cover
 
     def test_password(self, password):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: a clear text password as submited by the user.
             :return: ``True`` if :attr:`user` is valid and ``password`` is
@@ -426,7 +426,7 @@ class CASFederateAuth(AuthUser):
 
     def test_password(self, ticket):
         """
-            Tests ``password`` agains the user password.
+            Tests ``password`` against the user-supplied password.
 
             :param unicode password: The CAS tickets just used to validate the user authentication
                 against its CAS backend.

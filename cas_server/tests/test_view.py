@@ -825,7 +825,7 @@ class LogoutTestCase(TestCase):
     @override_settings(CAS_ENABLE_AJAX_AUTH=True)
     def test_ajax_logout(self):
         """
-            test ajax logout. These methode are here, but I do not really see an use case for
+            test ajax logout. These methods are here, but I do not really see an use case for
             javascript logout
         """
         # get a client that is authenticated
@@ -1728,7 +1728,7 @@ class ProxyTestCase(TestCase, BaseServicePattern, XmlContent):
         self.assert_error(
             response,
             "UNAUTHORIZED_SERVICE",
-            'the service %s do not allow proxy ticket' % params['service']
+            'the service %s does not allow proxy tickets' % params['service']
         )
 
         self.service_pattern.proxy = True
@@ -1974,7 +1974,7 @@ class SamlValidateTestCase(TestCase, BaseServicePattern, XmlContent):
         self.assert_error(
             response,
             "AuthnFailed",
-            'TARGET %s do not match ticket service' % bad_target
+            'TARGET %s does not match ticket service' % bad_target
         )
 
     def test_saml_bad_xml(self):

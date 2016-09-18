@@ -433,7 +433,7 @@ class ServicePattern(models.Model):
     """
         Bases: :class:`django.db.models.Model`
 
-        Allowed services pattern agains services are tested to
+        Allowed services pattern against services are tested to
     """
     class Meta:
         ordering = ("pos", )

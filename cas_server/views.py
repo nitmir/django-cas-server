@@ -191,7 +191,7 @@ class LogoutView(View, LogoutMixin):
                     "<h3>Logout successful</h3>"
                     "You have successfully logged out from %s sessions of the Central "
                     "Authentication Service. "
-                    "For security reasons, exit your web browser."
+                    "For security reasons, close your web browser."
                 ) % session_nb
             else:
                 logout_msg = _(
@@ -229,7 +229,7 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(CsrfExemptView):
     """
-        view to authenticated user agains a backend CAS then CAS_FEDERATE is True
+        view to authenticated user against a backend CAS then CAS_FEDERATE is True
 
         csrf is disabled for allowing SLO requests reception.
     """
@@ -801,7 +801,7 @@ class LoginView(View, LogoutMixin):
             else:
                 return utils.redirect_params("cas_server:login", params=self.request.GET)
 
-        # if login agains a service
+        # if login against a service
         if self.service:
             return self.service_login()
         # else display the logged template

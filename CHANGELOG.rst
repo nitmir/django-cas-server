@@ -16,6 +16,7 @@ Added
 Fixed
 -----
 * Allow both unicode and bytes dotted string in utils.import_attr
+* Fix some spelling and grammar on log messages. (thanks to Allie Micka)
 
 
 v0.7.4 - 2016-09-07

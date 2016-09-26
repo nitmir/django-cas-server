@@ -114,6 +114,7 @@ class CsrfExemptView(View):
 
             :param django.http.HttpRequest request: The current request object
         """
+        setattr(request, '_dont_enforce_csrf_checks', True)
         return super(CsrfExemptView, self).dispatch(request, *args, **kwargs)
 
 

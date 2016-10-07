@@ -12,6 +12,9 @@ Unreleased
 Added
 -----
 * Add a test for login with missing parameter (username or password or both)
+* Add ldap auth using bind method (use the user credentials to bind the the ldap server and let the
+  server check the credentials)
+* Add CAS_TGT_VALIDITY parameter: Max time after with the user MUST reauthenticate.
 
 Fixed
 -----

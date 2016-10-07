@@ -506,6 +506,7 @@ class LoginView(View, LogoutMixin):
                 username=self.request.session['username'],
                 session_key=self.request.session.session_key
             )[0]
+            self.user.last_login = timezone.now()
             self.user.save()
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
             if settings.CAS_FEDERATE:

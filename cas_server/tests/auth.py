@@ -9,7 +9,7 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # (c) 2016 Valentin Samir
-
+"""Some test authentication classes for the CAS"""
 from cas_server import auth
 
 

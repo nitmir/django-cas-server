@@ -20,6 +20,7 @@ Fixed
 -----
 * Allow both unicode and bytes dotted string in utils.import_attr
 * Fix some spelling and grammar on log messages. (thanks to Allie Micka)
+* Fix froms css class error on success/error due to a scpaless block
 
 Changed
 -------

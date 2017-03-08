@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
-Unreleased
-==========
+v0.8.0 - 2017-03-08
+===================
 
 Added
 -----

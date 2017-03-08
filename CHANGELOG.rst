@@ -6,6 +6,28 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v0.8.0 - 2017-03-08
+===================
+
+Added
+-----
+* Add a test for login with missing parameter (username or password or both)
+* Add ldap auth using bind method (use the user credentials to bind the the ldap server and let the
+  server check the credentials)
+* Add CAS_TGT_VALIDITY parameter: Max time after with the user MUST reauthenticate.
+
+Fixed
+-----
+* Allow both unicode and bytes dotted string in utils.import_attr
+* Fix some spelling and grammar on log messages. (thanks to Allie Micka)
+* Fix froms css class error on success/error due to a scpaless block
+* Disable pip cache then installing with make install
+
+Changed
+-------
+* Update french translation
+
+
 v0.7.4 - 2016-09-07
 ===================
 

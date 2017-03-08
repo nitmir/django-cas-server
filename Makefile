@@ -6,7 +6,7 @@ build:
 
 install: dist
 	pip -V
-	pip install --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
+	pip install --no-cache-dir --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
 
 uninstall:
 	pip uninstall django-cas-server || true

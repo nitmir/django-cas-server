@@ -186,6 +186,17 @@ class UserModels(object):
         return client
 
     @staticmethod
+    def tgt_expired_user(sec):
+        """return a user logged since sec seconds"""
+        client = get_auth_client()
+        new_date = timezone.now() - timedelta(seconds=(sec))
+        models.User.objects.filter(
+            username=settings.CAS_TEST_USER,
+            session_key=client.session.session_key
+        ).update(last_login=new_date)
+        return client
+
+    @staticmethod
     def get_user(client):
         """return the user associated with an authenticated client"""
         return models.User.objects.get(

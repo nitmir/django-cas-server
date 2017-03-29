@@ -321,7 +321,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 correct, ``False`` otherwise.
             :rtype: bool
         """
-        if settings.CAS_LDAP_PASSWORD_CHECK == "bind":
+        if self.user and settings.CAS_LDAP_PASSWORD_CHECK == "bind":
             try:
                 conn = ldap3.Connection(
                     settings.CAS_LDAP_SERVER,

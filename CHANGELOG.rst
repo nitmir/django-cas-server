@@ -14,6 +14,12 @@ Added
 -----
 * Dutch translation
 
+Fixed
+-----
+* Then using the LDAP auth backend with ``bind`` method for password check, do not try to bind
+  if the user dn was not found. This was causing the exception
+  ``'NoneType' object has no attribute 'getitem'`` describe in #21
+
 
 v0.8.0 - 2017-03-08
 ===================

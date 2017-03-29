@@ -835,26 +835,29 @@ class LoginView(View, LogoutMixin):
                     # clean messages before leaving django
                     list(messages.get_messages(self.request))
                     return HttpResponseRedirect(self.service)
-                if self.request.session.get("authenticated") and self.renew:
-                    messages.add_message(
-                        self.request,
-                        messages.WARNING,
-                        _(u"Authentication renewal required by service %(name)s (%(url)s).") %
-                        {'name': service_pattern.name, 'url': self.service}
-                    )
-                else:
-                    messages.add_message(
-                        self.request,
-                        messages.WARNING,
-                        _(u"Authentication required by service %(name)s (%(url)s).") %
-                        {'name': service_pattern.name, 'url': self.service}
-                    )
+
+                if settings.CAS_SHOW_SERVICE_MESSAGES:
+                    if self.request.session.get("authenticated") and self.renew:
+                        messages.add_message(
+                            self.request,
+                            messages.WARNING,
+                            _(u"Authentication renewal required by service %(name)s (%(url)s).") %
+                            {'name': service_pattern.name, 'url': self.service}
+                        )
+                    else:
+                        messages.add_message(
+                            self.request,
+                            messages.WARNING,
+                            _(u"Authentication required by service %(name)s (%(url)s).") %
+                            {'name': service_pattern.name, 'url': self.service}
+                        )
             except ServicePattern.DoesNotExist:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    _(u'Service %s not allowed') % self.service
-                )
+                if settings.CAS_SHOW_SERVICE_MESSAGES:
+                    messages.add_message(
+                        self.request,
+                        messages.ERROR,
+                        _(u'Service %s not allowed') % self.service
+                    )
         if self.ajax:
             data = {
                 "status": "error",

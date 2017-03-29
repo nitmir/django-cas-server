@@ -295,7 +295,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
             ) in response.content
         )
 
-    @override_settings(CAS_SHOW_SERVER_MESSAGES=False)
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
     def test_view_login_get_allowed_service_no_message(self):
         """Request a ticket for an allowed service by an unauthenticated client"""
         # get a bare new http client
@@ -324,7 +324,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         # we warn the user that https://www.example.net is not an allowed service url
         self.assertTrue(b"Service https://www.example.net not allowed" in response.content)
 
-    @override_settings(CAS_SHOW_SERVER_MESSAGES=False)
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
     def test_view_login_get_denied_service_no_message(self):
         """Request a ticket for an denied service by an unauthenticated client"""
         # get a bare new http client
@@ -535,7 +535,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         # renewing authentication is done in the validate and serviceValidate views tests
         self.assertEqual(ticket.renew, True)
 
-    @override_settings(CAS_SHOW_SERVER_MESSAGES=False)
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
     def test_renew_message_disabled(self):
         """test the authentication renewal request from a service"""
         # use the default test service

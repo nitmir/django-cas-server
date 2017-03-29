@@ -13,6 +13,9 @@ Unreleased
 Added
 -----
 * Dutch translation
+* Support for ldap3 version 2 or more (changes in the API)
+  All exception are now in ldap3.core.exceptions, methodes for fetching attritutes and
+  dn are renamed.
 
 Fixed
 -----

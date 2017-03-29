@@ -27,6 +27,7 @@ except ImportError:
 
 try:  # pragma: no cover
     import ldap3
+    import ldap3.core.exceptions
 except ImportError:
     ldap3 = None
 
@@ -297,9 +298,19 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                     settings.CAS_LDAP_USER_QUERY % ldap3.utils.conv.escape_bytes(username),
                     attributes=ldap3.ALL_ATTRIBUTES
                 ) and len(conn.entries) == 1:
-                    user = conn.entries[0].entry_get_attributes_dict()
-                    # store the user dn
-                    user["dn"] = conn.entries[0].entry_get_dn()
+                    # try the new ldap3>=2 API
+                    try:
+                        user = conn.entries[0].entry_attributes_as_dict
+                        # store the user dn
+                        user["dn"] = conn.entries[0].entry_dn
+                    # fallback to ldap3<2 API
+                    except (
+                        ldap3.core.exceptions.LDAPKeyError,  # ldap3<1 exception
+                        ldap3.core.exceptions.LDAPAttributeError  # ldap3<2 exception
+                    ):
+                        user = conn.entries[0].entry_get_attributes_dict()
+                        # store the user dn
+                        user["dn"] = conn.entries[0].entry_get_dn()
                     if user.get(settings.CAS_LDAP_USERNAME_ATTR):
                         self.user = user
                         super(LdapAuthUser, self).__init__(user[settings.CAS_LDAP_USERNAME_ATTR][0])
@@ -308,7 +319,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 else:
                     super(LdapAuthUser, self).__init__(username)
                 break
-            except ldap3.LDAPCommunicationError:
+            except ldap3.core.exceptions.LDAPCommunicationError:
                 if retry_nb == 2:
                     raise
 
@@ -336,8 +347,18 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                         settings.CAS_LDAP_USER_QUERY % ldap3.utils.conv.escape_bytes(self.username),
                         attributes=ldap3.ALL_ATTRIBUTES
                     ) and len(conn.entries) == 1:
-                        attributes = conn.entries[0].entry_get_attributes_dict()
-                        attributes["dn"] = conn.entries[0].entry_get_dn()
+                        # try the ldap3>=2 API
+                        try:
+                            attributes = conn.entries[0].entry_attributes_as_dict
+                            # store the user dn
+                            attributes["dn"] = conn.entries[0].entry_dn
+                        # fallback to ldap<2 API
+                        except (
+                            ldap3.core.exceptions.LDAPKeyError,  # ldap3<1 exception
+                            ldap3.core.exceptions.LDAPAttributeError  # ldap3<2 exception
+                        ):
+                            attributes = conn.entries[0].entry_get_attributes_dict()
+                            attributes["dn"] = conn.entries[0].entry_get_dn()
                         # cache the attributes locally as we wont have access to the user password
                         # later.
                         user = UserAttributes.objects.get_or_create(username=self.username)[0]
@@ -346,7 +367,10 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 finally:
                     conn.unbind()
                 return True
-            except (ldap3.LDAPBindError, ldap3.LDAPCommunicationError):
+            except (
+                ldap3.core.exceptions.LDAPBindError,
+                ldap3.core.exceptions.LDAPCommunicationError
+            ):
                 return False
         elif self.user and self.user.get(settings.CAS_LDAP_PASSWORD_ATTR):
             return check_password(

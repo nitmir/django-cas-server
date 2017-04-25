@@ -273,7 +273,7 @@ class User(models.Model):
     #: The session key of the current authenticated user
     session_key = models.CharField(max_length=40, blank=True, null=True)
     #: The username of the current authenticated user
-    username = models.CharField(max_length=30)
+    username = models.CharField(max_length=250)
     #: Last time the authenticated user has do something (auth, fetch ticket, etc…)
     date = models.DateTimeField(auto_now=True)
     #: last time the user logged

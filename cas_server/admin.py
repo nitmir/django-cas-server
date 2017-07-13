@@ -9,10 +9,12 @@
 #
 # (c) 2015-2016 Valentin Samir
 """module for the admin interface of the app"""
+from .default_settings import settings
+
 from django.contrib import admin
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket, User, ServicePattern
 from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterAttributValue
-from .models import FederatedIendityProvider
+from .models import FederatedIendityProvider, FederatedUser, UserAttributes
 from .forms import TicketForm
 
 
@@ -167,6 +169,33 @@ class FederatedIendityProviderAdmin(admin.ModelAdmin):
     list_display = ('verbose_name', 'suffix', 'display')
 
 
-admin.site.register(User, UserAdmin)
+class FederatedUserAdmin(admin.ModelAdmin):
+    """
+        Bases: :class:`django.contrib.admin.ModelAdmin`
+
+        :class:`FederatedUser<cas_server.models.FederatedUser>` in admin
+        interface
+    """
+    #: Fields to display on a object.
+    fields = ('username', 'provider', 'last_update')
+    #: Fields to display on the list of class:`FederatedUserAdmin` objects.
+    list_display = ('username', 'provider', 'last_update')
+
+
+class UserAttributesAdmin(admin.ModelAdmin):
+    """
+        Bases: :class:`django.contrib.admin.ModelAdmin`
+
+        :class:`UserAttributes<cas_server.models.UserAttributes>` in admin
+        interface
+    """
+    #: Fields to display on a object.
+    fields = ('username', '_attributs')
+
+
 admin.site.register(ServicePattern, ServicePatternAdmin)
 admin.site.register(FederatedIendityProvider, FederatedIendityProviderAdmin)
+if settings.DEBUG:  # pragma: no branch (we always test with DEBUG True)
+    admin.site.register(User, UserAdmin)
+    admin.site.register(FederatedUser, FederatedUserAdmin)
+    admin.site.register(UserAttributes, UserAttributesAdmin)

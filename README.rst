@@ -268,6 +268,11 @@ Authentication settings
   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
   reduce it to something like ``86400`` seconds (1 day).
 
+* ``CAS_TGT_VALIDITY``: Max time after with the user MUST reauthenticate. Let it to `None` for no
+  max time.This can be used to force refreshing cached informations only available upon user
+  authentication like the user attributes in federation mode or with the ldap auth in bind mode.
+  The default is ``None``.
+
 * ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificate authorities file. Usually on linux
   the local CAs are in ``/etc/ssl/certs/ca-certificates.crt``. The default is ``True`` which
   tell requests to use its internal certificat authorities. Settings it to ``False`` should
@@ -416,6 +421,14 @@ Only usefull if you are using the ldap authentication backend:
     The hashed password in the database is compare to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
+  * ``"bind``, the user credentials are used to bind to the ldap database and retreive the user
+    attribute. In this mode, the settings ``CAS_LDAP_PASSWORD_ATTR`` and ``CAS_LDAP_PASSWORD_CHARSET``
+    are ignored, and it is the ldap server that perform password check. The counterpart is that
+    the user attributes are only available upon user password check and so are cached for later
+    use. All the other modes directly fetch the user attributes from the database whenever there
+    are needed. This mean that is you use this mode, they can be some difference between the
+    attributes in database and the cached ones if changes happend in the database after the user
+    authentiate. See the parameter ``CAS_TGT_VALIDITY`` to force user to reauthenticate periodically.
 
   The default is ``"ldap"``.
 * ``CAS_LDAP_PASSWORD_CHARSET``: Charset the LDAP users passwords was hash with. This is needed to
@@ -585,6 +598,10 @@ to the provider CAS to authenticate. This provider transmit to ``django-cas-serv
 username and attributes. The user is now logged in on ``django-cas-server`` and can use
 services using ``django-cas-server`` as CAS.
 
+In federation mode, the user attributes are cached upon user authentication. See the settings
+``CAS_TGT_VALIDITY`` to force users to reauthenticate periodically and allow ``django-cas-server``
+to refresh cached attributes.
+
 The list of allowed identity providers is defined using the django admin application.
 With the development server started, visit http://127.0.0.1:8000/admin/ to add identity providers.
 
@@ -638,8 +655,8 @@ You could for example do as bellow::
 .. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
     :target: https://www.codacy.com/app/valentin-samir/django-cas-server
 
-.. |coverage| image:: https://badges.genua.fr/local/coverage/?project=django-cas-server&branch=master
-    :target: https://badges.genua.fr/local/coverage/django-cas-server/master
+.. |coverage| image:: https://intranet.genua.fr/coverage/badge/django-cas-server/master.svg
+    :target: https://badges.genua.fr/coverage/django-cas-server/master
 
 .. |doc| image:: https://badges.genua.fr/local/readthedocs/?version=latest
     :target: http://django-cas-server.readthedocs.io

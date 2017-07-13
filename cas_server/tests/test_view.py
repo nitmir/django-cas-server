@@ -132,6 +132,37 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         # The LoginTicket is conssumed and should no longer be valid
         self.assertTrue(params['lt'] not in client.session['lt'])
 
+    def test_login_post_missing_params(self):
+        """Test a login attempt with missing POST parameters (username or password or both)"""
+        # we get a client who fetch a frist time the login page and the login form default
+        # parameters
+        client, params = get_login_page_params()
+        # we set only set username
+        params["username"] = settings.CAS_TEST_USER
+        # we post a login attempt
+        response = client.post('/login', params)
+        # as the LT is not valid, login should fail
+        self.assert_login_failed(client, response)
+
+        # we get a client who fetch a frist time the login page and the login form default
+        # parameters
+        client, params = get_login_page_params()
+        # we set only set password
+        params["password"] = settings.CAS_TEST_PASSWORD
+        # we post a login attempt
+        response = client.post('/login', params)
+        # as the LT is not valid, login should fail
+        self.assert_login_failed(client, response)
+
+        # we get a client who fetch a frist time the login page and the login form default
+        # parameters
+        client, params = get_login_page_params()
+        # we set neither username nor password
+        # we post a login attempt
+        response = client.post('/login', params)
+        # as the LT is not valid, login should fail
+        self.assert_login_failed(client, response)
+
     def test_login_view_post_goodpass_goodlt_warn(self):
         """Test a successul login requesting to be warned before creating services tickets"""
         # get a client and initial login params
@@ -794,7 +825,7 @@ class LogoutTestCase(TestCase):
     @override_settings(CAS_ENABLE_AJAX_AUTH=True)
     def test_ajax_logout(self):
         """
-            test ajax logout. These methode are here, but I do not really see an use case for
+            test ajax logout. These methods are here, but I do not really see an use case for
             javascript logout
         """
         # get a client that is authenticated
@@ -1697,7 +1728,7 @@ class ProxyTestCase(TestCase, BaseServicePattern, XmlContent):
         self.assert_error(
             response,
             "UNAUTHORIZED_SERVICE",
-            'the service %s do not allow proxy ticket' % params['service']
+            'the service %s does not allow proxy tickets' % params['service']
         )
 
         self.service_pattern.proxy = True
@@ -1943,7 +1974,7 @@ class SamlValidateTestCase(TestCase, BaseServicePattern, XmlContent):
         self.assert_error(
             response,
             "AuthnFailed",
-            'TARGET %s do not match ticket service' % bad_target
+            'TARGET %s does not match ticket service' % bad_target
         )
 
     def test_saml_bad_xml(self):

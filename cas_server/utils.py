@@ -117,14 +117,18 @@ def import_attr(path):
         transform a python dotted path to the attr
 
         :param path: A dotted path to a python object or a python object
-        :type path: :obj:`unicode` or anything
+        :type path: :obj:`unicode` or :obj:`str` or anything
         :return: The python object pointed by the dotted path or the python object unchanged
     """
-    if not isinstance(path, str):
+    # if we got a str, decode it to unicode (normally it should only contain ascii)
+    if isinstance(path, six.binary_type):
+        path = path.decode("utf-8")
+    # if path is not an unicode, return it unchanged (may be it is already the attribute to import)
+    if not isinstance(path, six.text_type):
         return path
-    if "." not in path:
+    if u"." not in path:
         ValueError("%r should be of the form `module.attr` and we just got `attr`" % path)
-    module, attr = path.rsplit('.', 1)
+    module, attr = path.rsplit(u'.', 1)
     try:
         return getattr(import_module(module), attr)
     except ImportError:

@@ -58,6 +58,10 @@ CAS_SLO_MAX_PARALLEL_REQUESTS = 10
 CAS_SLO_TIMEOUT = 5
 #: Shared to transmit then using the view :class:`cas_server.views.Auth`
 CAS_AUTH_SHARED_SECRET = ''
+#: Max time after with the user MUST reauthenticate. Let it to `None` for no max time.
+#: This can be used to force refreshing cached informations only available upon user authentication
+#: like the user attributes in federation mode or with the ldap auth in bind mode.
+CAS_TGT_VALIDITY = None
 
 
 #: Number of seconds the service tickets and proxy tickets are valid. This is the maximal time

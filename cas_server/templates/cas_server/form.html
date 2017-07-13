@@ -6,13 +6,13 @@
 </div>
 {% endfor %}
 {% for field in form %}{% if not field|is_hidden %}
-<div class="form-group{% spaceless %}
+<div class="form-group
   {% if not form.non_field_errors %}
     {% if field.errors %} has-error
     {% elif form.cleaned_data %} has-success
     {% endif %}
   {% endif %}"
-{% endspaceless %}>{% spaceless %}
+>{% spaceless %}
   {% if field|is_checkbox %}
     <div class="checkbox"><label for="{{field.auto_id}}">{{field}}{{field.label}}</label></div>
   {% else %}

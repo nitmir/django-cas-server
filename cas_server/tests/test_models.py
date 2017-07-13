@@ -115,6 +115,24 @@ class FederateSLOTestCase(TestCase, UserModels):
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
+class UserAttributesTestCase(TestCase, UserModels):
+    """test for the user attributes cache model"""
+    def test_clean_old_entries(self):
+        """test the clean_old_entries methode"""
+        client = get_auth_client()
+        user = self.get_user(client)
+        models.UserAttributes.objects.create(username=settings.CAS_TEST_USER)
+
+        # test that attribute cache is removed for non existant users
+        self.assertEqual(len(models.UserAttributes.objects.all()), 1)
+        models.UserAttributes.clean_old_entries()
+        self.assertEqual(len(models.UserAttributes.objects.all()), 1)
+        user.delete()
+        models.UserAttributes.clean_old_entries()
+        self.assertEqual(len(models.UserAttributes.objects.all()), 0)
+
+
+@override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')
 class UserTestCase(TestCase, UserModels):
     """tests for the user models"""
     def setUp(self):
@@ -137,6 +155,24 @@ class UserTestCase(TestCase, UserModels):
         self.assertTrue(
             self.get_user(client).date < (
                 timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE)
+            )
+        )
+        # delete old inactive users
+        models.User.clean_old_entries()
+        # assert the user has being well delete
+        self.assertEqual(len(models.User.objects.all()), 0)
+
+    @override_settings(CAS_TGT_VALIDITY=3600)
+    def test_clean_old_entries_tgt_expired(self):
+        """test clean_old_entiers with CAS_TGT_VALIDITY set"""
+        # get an authenticated client
+        client = self.tgt_expired_user(settings.CAS_TGT_VALIDITY + 60)
+        # assert the user exists before being cleaned
+        self.assertEqual(len(models.User.objects.all()), 1)
+        # assert the last lofin date is before the expiry date
+        self.assertTrue(
+            self.get_user(client).last_login < (
+                timezone.now() - timedelta(seconds=settings.CAS_TGT_VALIDITY)
             )
         )
         # delete old inactive users
@@ -176,6 +212,24 @@ class UserTestCase(TestCase, UserModels):
         self.assertEqual(len(models.User.objects.all()), 1)
         self.assertFalse(models.ServiceTicket.objects.all())
         self.assertTrue(client2.session.get("authenticated"))
+
+    @override_settings(CAS_AUTH_CLASS='cas_server.tests.auth.TestCachedAttributesAuthUser')
+    def test_cached_attributs(self):
+        """
+            Test gettting user attributes from cache for auth method that do not support direct
+            fetch (link the ldap bind auth methode)
+        """
+        client = get_auth_client()
+        user = self.get_user(client)
+        # if no cache is defined, the attributes are empty
+        self.assertEqual(user.attributs, {})
+        user_attr = models.UserAttributes.objects.create(username=settings.CAS_TEST_USER)
+        # if a cache is defined but without atrributes, also empty
+        self.assertEqual(user.attributs, {})
+        user_attr.attributs = settings.CAS_TEST_ATTRIBUTES
+        user_attr.save()
+        # attributes are what is found in the cache
+        self.assertEqual(user.attributs, settings.CAS_TEST_ATTRIBUTES)
 
 
 @override_settings(CAS_AUTH_CLASS='cas_server.auth.TestAuthUser')

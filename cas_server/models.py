@@ -163,6 +163,8 @@ class FederatedUser(JsonAttributes):
     """
     class Meta:
         unique_together = ("username", "provider")
+        verbose_name = _("Federated user")
+        verbose_name_plural = _("Federated users")
     #: The user username returned by the CAS backend on successful ticket validation
     username = models.CharField(max_length=124)
     #: A foreign key to :class:`FederatedIendityProvider`
@@ -234,6 +236,30 @@ class FederateSLO(models.Model):
 
 
 @python_2_unicode_compatible
+class UserAttributes(JsonAttributes):
+    """
+        Bases: :class:`JsonAttributes`
+
+        Local cache of the user attributes, used then needed
+    """
+    class Meta:
+        verbose_name = _("User attributes cache")
+        verbose_name_plural = _("User attributes caches")
+    #: The username of the user for which we cache attributes
+    username = models.CharField(max_length=155, unique=True)
+
+    def __str__(self):
+        return self.username
+
+    @classmethod
+    def clean_old_entries(cls):
+        """Remove :class:`UserAttributes` for which no more :class:`User` exists."""
+        for user in cls.objects.all():
+            if User.objects.filter(username=user.username).count() == 0:
+                user.delete()
+
+
+@python_2_unicode_compatible
 class User(models.Model):
     """
         Bases: :class:`django.db.models.Model`
@@ -250,6 +276,8 @@ class User(models.Model):
     username = models.CharField(max_length=30)
     #: Last time the authenticated user has do something (auth, fetch ticket, etc…)
     date = models.DateTimeField(auto_now=True)
+    #: last time the user logged
+    last_login = models.DateTimeField(auto_now_add=True)
 
     def delete(self, *args, **kwargs):
         """
@@ -269,9 +297,12 @@ class User(models.Model):
             Remove :class:`User` objects inactive since more that
             :django:setting:`SESSION_COOKIE_AGE` and send corresponding SingleLogOut requests.
         """
-        users = cls.objects.filter(
-            date__lt=(timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE))
-        )
+        filter = Q(date__lt=(timezone.now() - timedelta(seconds=settings.SESSION_COOKIE_AGE)))
+        if settings.CAS_TGT_VALIDITY is not None:
+            filter |= Q(
+                last_login__lt=(timezone.now() - timedelta(seconds=settings.CAS_TGT_VALIDITY))
+            )
+        users = cls.objects.filter(filter)
         for user in users:
             user.logout()
         users.delete()
@@ -288,9 +319,22 @@ class User(models.Model):
     def attributs(self):
         """
             Property.
-            A fresh :class:`dict` for the user attributes, using ``settings.CAS_AUTH_CLASS``
+            A fresh :class:`dict` for the user attributes, using ``settings.CAS_AUTH_CLASS`` if
+            possible, and if not, try to fallback to cached attributes (actually only used for ldap
+            auth class with bind password check mthode).
         """
-        return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
+        try:
+            return utils.import_attr(settings.CAS_AUTH_CLASS)(self.username).attributs()
+        except NotImplementedError:
+            try:
+                user = UserAttributes.objects.get(username=self.username)
+                attributes = user.attributs
+                if attributes is not None:
+                    return attributes
+                else:
+                    return {}
+            except UserAttributes.DoesNotExist:
+                return {}
 
     def __str__(self):
         return u"%s - %s" % (self.username, self.session_key)
@@ -433,7 +477,7 @@ class ServicePattern(models.Model):
     """
         Bases: :class:`django.db.models.Model`
 
-        Allowed services pattern agains services are tested to
+        Allowed services pattern against services are tested to
     """
     class Meta:
         ordering = ("pos", )

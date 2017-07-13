@@ -1,0 +1,432 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-29 12:24+0200\n"
+"PO-Revision-Date: 2017-03-29 13:06+0020\n"
+"Last-Translator: Joriks Kraaikamp <jor.ik@maykinmedia.nl>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: Mobetta 0.0.2\n"
+
+#: apps.py:25 templates/cas_server/base.html:7
+#: templates/cas_server/base.html:26
+msgid "Central Authentication Service"
+msgstr "Centrale Authenticatie Service"
+
+#: default_settings.py:201
+msgid ""
+"The Central Authentication Service grants you access to most of our websites"
+" by authenticating only once, so you don't need to type your credentials "
+"again unless your session expires or you logout."
+msgstr ""
+"De Centrale Authenticatie Service geeft je toegang tot onze sites door 1 "
+"keer in te loggen, behalve als je sessie is verlopen of als je hebt "
+"uitgelogd."
+
+#: forms.py:85
+msgid "Identity provider"
+msgstr "Identiteit provider"
+
+#: forms.py:89 forms.py:111
+msgid "Warn me before logging me into other sites."
+msgstr "Waarschuw me voor het inloggen op andere websites."
+
+#: forms.py:93
+msgid "Remember the identity provider"
+msgstr "Onthoudt deze identiteit provider"
+
+#: forms.py:104 models.py:638
+msgid "username"
+msgstr "gebruikersnaam"
+
+#: forms.py:108
+msgid "password"
+msgstr "wachtwoord"
+
+#: forms.py:131
+msgid "The credentials you provided cannot be determined to be authentic."
+msgstr "De inloggegevens waren niet correct."
+
+#: forms.py:183
+msgid "User not found in the temporary database, please try to reconnect"
+msgstr ""
+"De gebruiker is niet gevonden in de tijdelijke database, probeer het opnieuw"
+
+#: forms.py:197
+msgid "service"
+msgstr "dienst"
+
+#: management/commands/cas_clean_federate.py:20
+msgid "Clean old federated users"
+msgstr "Schoon oude gefedereerde gebruikers op"
+
+#: management/commands/cas_clean_sessions.py:22
+msgid "Clean deleted sessions"
+msgstr "Schoon verwijderde sessies op"
+
+#: management/commands/cas_clean_tickets.py:22
+msgid "Clean old tickets"
+msgstr "Schoon oude tickets op"
+
+#: models.py:71
+msgid "identity provider"
+msgstr "identiteit provider"
+
+#: models.py:72
+msgid "identity providers"
+msgstr "Identiteit providers"
+
+#: models.py:78
+msgid "suffix"
+msgstr "achtervoegsel"
+
+#: models.py:80
+msgid ""
+"Suffix append to backend CAS returned username: ``returned_username`` @ "
+"``suffix``."
+msgstr ""
+"Achtervoegsel toevoegen aan de gebruikersnaam door CAS backend: "
+"``teruggegeven_gebruikersnaam`` @ ``achtervoegsel``."
+
+#: models.py:87
+msgid "server url"
+msgstr "server url"
+
+#: models.py:97
+msgid "CAS protocol version"
+msgstr "CAS protocol versie"
+
+#: models.py:99
+msgid ""
+"Version of the CAS protocol to use when sending requests the the backend "
+"CAS."
+msgstr ""
+"Versie van het CAS protocol wanneer we een request sturen van de CAS "
+"backend."
+
+#: models.py:106
+msgid "verbose name"
+msgstr "uitgebreide naam"
+
+#: models.py:107
+msgid "Name for this identity provider displayed on the login page."
+msgstr "Naam van de identiteit provider weergegeven op de login pagina."
+
+#: models.py:113 models.py:490
+msgid "position"
+msgstr "positie"
+
+#: models.py:127
+msgid "display"
+msgstr "weergave"
+
+#: models.py:128
+msgid "Display the provider on the login page."
+msgstr "geef de provider weer op de login pagina."
+
+#: models.py:166
+msgid "Federated user"
+msgstr "Gefedereerde gebruiker"
+
+#: models.py:167
+msgid "Federated users"
+msgstr "Gefedereerde gebruikers"
+
+#: models.py:246
+msgid "User attributes cache"
+msgstr "Gebruiker attributen cache"
+
+#: models.py:247
+msgid "User attributes caches"
+msgstr "Gebruiker attributen caches"
+
+#: models.py:271
+msgid "User"
+msgstr "Gebruiker"
+
+#: models.py:272
+msgid "Users"
+msgstr "Gebruikers"
+
+#: models.py:364
+#, python-format
+msgid "Error during service logout %s"
+msgstr "Een error is opgetreden tijdens het uitloggen %s"
+
+#: models.py:484
+msgid "Service pattern"
+msgstr "Service patroon"
+
+#: models.py:485
+msgid "Services patterns"
+msgstr "Service patronen"
+
+#: models.py:491
+msgid "service patterns are sorted using the position attribute"
+msgstr "service patronen worden gesorteerd aan de hand van de positie."
+
+#: models.py:499 models.py:664
+msgid "name"
+msgstr "naam"
+
+#: models.py:500
+msgid "A name for the service"
+msgstr "Een naam voor de service"
+
+#: models.py:508 models.py:707 models.py:737
+msgid "pattern"
+msgstr "patroon"
+
+#: models.py:510
+msgid ""
+"A regular expression matching services. Will usually looks like "
+"'^https://some\\.server\\.com/path/.*$'.As it is a regular expression, "
+"special character must be escaped with a '\\'."
+msgstr ""
+"A reguliere expressie die de matched met de services. Ziet er vaak zou uit: "
+"'^https://some\\.server\\.com/path/.*$'. Omdat het een reguliere expressie "
+"is, moeten speciale characters worden geescaped met een '\\'."
+
+#: models.py:521
+msgid "user field"
+msgstr "gebruiker veld"
+
+#: models.py:522
+msgid "Name of the attribute to transmit as username, empty = login"
+msgstr ""
+"Naam van het attribuut om verstuurd te worden al gebruikersnaam, leeg = "
+"login"
+
+#: models.py:527
+msgid "restrict username"
+msgstr "beperk gebruikersnamen"
+
+#: models.py:528
+msgid "Limit username allowed to connect to the list provided bellow"
+msgstr ""
+"Beperk de gebruikersnamen die deze provider mogen gebruiken met de list "
+"hieronder."
+
+#: models.py:533
+msgid "proxy"
+msgstr "proxy"
+
+#: models.py:534
+msgid "Proxy tickets can be delivered to the service"
+msgstr "Proxy tickets kunnen worden aangeleverd aan de service"
+
+#: models.py:540
+msgid "proxy callback"
+msgstr "proxy callback"
+
+#: models.py:541
+msgid "can be used as a proxy callback to deliver PGT"
+msgstr "kan gebruikt worden als proxy callback voor geleverde PGT"
+
+#: models.py:548
+msgid "single log out"
+msgstr "eenmalig afmelden"
+
+#: models.py:549
+msgid "Enable SLO for the service"
+msgstr "Activeer eenmalig afmelden voor de service"
+
+#: models.py:557
+msgid "single log out callback"
+msgstr "eenmalig afmelden callback"
+
+#: models.py:558
+msgid ""
+"URL where the SLO request will be POST. empty = service url\n"
+"This is usefull for non HTTP proxied services."
+msgstr ""
+"De URL waar de 'eenmalige afmelding' request naar wordt gepost. empty = service url\n"
+"Dit is handig voor niet HTTP geproxide services."
+
+#: models.py:639
+msgid "username allowed to connect to the service"
+msgstr ""
+"gebruikersnamen die zijn toegestaan om een connectie te maken via deze "
+"service."
+
+#: models.py:665
+msgid "name of an attribute to send to the service, use * for all attributes"
+msgstr ""
+"naam van een attribuut dat naar de service verstuurd wordt. Gebruik * voor "
+"alle attributen."
+
+#: models.py:672 models.py:745
+msgid "replace"
+msgstr "vervangen"
+
+#: models.py:673
+msgid ""
+"name under which the attribute will be show to the service. empty = default "
+"name of the attribut"
+msgstr ""
+"onder deze naam wordt het attribuut naar de service verstuurd. leeg = "
+"attribuut naam"
+
+#: models.py:700 models.py:731
+msgid "attribute"
+msgstr "attribuut"
+
+#: models.py:701
+msgid "Name of the attribute which must verify pattern"
+msgstr "Naam van het attribuut dat het patroon moet valideren."
+
+#: models.py:708
+msgid "a regular expression"
+msgstr "een reguliere expressie"
+
+#: models.py:732
+msgid "Name of the attribute for which the value must be replace"
+msgstr "Naam van het attribuut waarvoor de waarde moet worden vervangen"
+
+#: models.py:738
+msgid "An regular expression maching whats need to be replaced"
+msgstr "Een reguliere expressie dat matched wat vervangen moet worden"
+
+#: models.py:746
+msgid "replace expression, groups are capture by \\1, \\2 …"
+msgstr "vervang expressie, groepen zijn vast te leggen door \\1. \\2 ..."
+
+#: templates/cas_server/base.html:43
+#, python-format
+msgid ""
+"A new version of the application is available. This instance runs "
+"%(VERSION)s and the last version is %(LAST_VERSION)s. Please consider "
+"upgrading."
+msgstr ""
+"Een nieuwe versie van de applicatie is beschikbaar. Deze applicatie draait "
+"op versie %(VERSION)s en de nieuwste versie is %(LAST_VERSION)s. Denk na "
+"over het uitvoegen van een upgrade."
+
+#: templates/cas_server/logged.html:4
+msgid ""
+"<h3>Log In Successful</h3>You have successfully logged into the Central "
+"Authentication Service.<br/>For security reasons, please Log Out and Exit "
+"your web browser when you are done accessing services that require "
+"authentication!"
+msgstr ""
+"<h3>Succesvol ingelogd.</h3>Je bent succesvol ingelogd op het CAS.<br/>Voor "
+"veiligheids-redenen, log uit en sluit de webbrowsers wanneer je klaar bent "
+"met de service!"
+
+#: templates/cas_server/logged.html:8
+msgid "Log me out from all my sessions"
+msgstr "Meld me af bij alle sessies"
+
+#: templates/cas_server/logged.html:14
+msgid "Forget the identity provider"
+msgstr "Vergeet de identiteits-provider"
+
+#: templates/cas_server/logged.html:18
+msgid "Logout"
+msgstr "Afmelden"
+
+#: templates/cas_server/login.html:6
+msgid "Please log in"
+msgstr "Log alstublieft in"
+
+#: templates/cas_server/login.html:14
+msgid "Login"
+msgstr "Log in"
+
+#: templates/cas_server/warn.html:9
+msgid "Connect to the service"
+msgstr "Verbind met de service"
+
+#: utils.py:744
+#, python-format
+msgid "\"%(value)s\" is not a valid regular expression"
+msgstr "\"%(value)s\" is geen geldige reguliere expressie"
+
+#: views.py:185
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from the Central "
+"Authentication Service. For security reasons, close your web browser."
+msgstr ""
+"<h3>Succesvol afgemeld.</h3>Je bent succesvol afgemeld van de CAS.<br/>Voor "
+"veiligheids-redenen, sluit de webbrowser!"
+
+#: views.py:191
+#, python-format
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from %s sessions "
+"of the Central Authentication Service. For security reasons, close your web "
+"browser."
+msgstr ""
+"<h3>Succesvol afgemeld.</h3>Je bent succesvol afgemeld van de %s "
+"sessie.<br/>Voor veiligheids-redenen, sluit de webbrowser!"
+
+#: views.py:198
+msgid ""
+"<h3>Logout successful</h3>You were already logged out from the Central "
+"Authentication Service. For security reasons, close your web browser."
+msgstr ""
+"<h3>Succesvol afgemeld.</h3>Je was al afgemeld van de CAS.<br/>Voor "
+"veiligheids-redenen, sluit de webbrowser!"
+
+#: views.py:378
+#, python-format
+msgid ""
+"Invalid response from your identity provider CAS upon ticket %(ticket)s "
+"validation: %(error)r"
+msgstr ""
+"Ongeldig response van de identiteit provider bij ticket %(ticket)s "
+"validatie: %(error)s"
+
+#: views.py:500
+msgid "Invalid login ticket, please try to log in again"
+msgstr "Ongeldig login ticket. probeer het alstublieft opnieuw"
+
+#: views.py:693
+#, python-format
+msgid "Authentication has been required by service %(name)s (%(url)s)"
+msgstr "service %(name)s (%(url)s) vraagt om authenticatie"
+
+#: views.py:731
+#, python-format
+msgid "Service %(url)s not allowed."
+msgstr "Service %(url)s is niet toegestaan."
+
+#: views.py:738
+msgid "Username not allowed"
+msgstr "Gebruikersnaam niet teogestaan"
+
+#: views.py:745
+msgid "User characteristics not allowed"
+msgstr "Gebruikers karakteristieken niet toegestaan."
+
+#: views.py:752
+#, python-format
+msgid "The attribute %(field)s is needed to use that service"
+msgstr "Het attribuut %(field)s is nodig voor die service"
+
+#: views.py:842
+#, python-format
+msgid "Authentication renewal required by service %(name)s (%(url)s)."
+msgstr ""
+"Service %(name)s (%(url)s) vraagt om vernieuwing van de authenticatie."
+
+#: views.py:849
+#, python-format
+msgid "Authentication required by service %(name)s (%(url)s)."
+msgstr "Service %(name)s (%(url)s) vraagt om authenticatie"
+
+#: views.py:856
+#, python-format
+msgid "Service %s not allowed"
+msgstr "Service %s niet toegestaan"

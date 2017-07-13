@@ -61,7 +61,7 @@ class LogoutMixin(object):
         username = self.request.session.get("username")
         if username:
             if all_session:
-                logger.info("Logging out user %s from all of they sessions." % username)
+                logger.info("Logging out user %s from all sessions." % username)
             else:
                 logger.info("Logging out user %s." % username)
         users = []
@@ -144,7 +144,7 @@ class LogoutView(View, LogoutMixin):
 
     def get(self, request, *args, **kwargs):
         """
-            methode called on GET request on this view
+            method called on GET request on this view
 
             :param django.http.HttpRequest request: The current request object
         """
@@ -185,20 +185,20 @@ class LogoutView(View, LogoutMixin):
                 logout_msg = _(
                     "<h3>Logout successful</h3>"
                     "You have successfully logged out from the Central Authentication Service. "
-                    "For security reasons, exit your web browser."
+                    "For security reasons, close your web browser."
                 )
             elif session_nb > 1:
                 logout_msg = _(
                     "<h3>Logout successful</h3>"
                     "You have successfully logged out from %s sessions of the Central "
                     "Authentication Service. "
-                    "For security reasons, exit your web browser."
+                    "For security reasons, close your web browser."
                 ) % session_nb
             else:
                 logout_msg = _(
                     "<h3>Logout successful</h3>"
                     "You were already logged out from the Central Authentication Service. "
-                    "For security reasons, exit your web browser."
+                    "For security reasons, close your web browser."
                 )
 
             # depending of settings, redirect to the login page with a logout message or display
@@ -230,7 +230,7 @@ class LogoutView(View, LogoutMixin):
 
 class FederateAuth(CsrfExemptView):
     """
-        view to authenticated user agains a backend CAS then CAS_FEDERATE is True
+        view to authenticated user against a backend CAS then CAS_FEDERATE is True
 
         csrf is disabled for allowing SLO requests reception.
     """
@@ -262,7 +262,7 @@ class FederateAuth(CsrfExemptView):
         """
         # if settings.CAS_FEDERATE is not True redirect to the login page
         if not settings.CAS_FEDERATE:
-            logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
+            logger.warning("CAS_FEDERATE is False, set it to True to use federation")
             return redirect("cas_server:login")
         # POST with a provider suffix, this is probably an SLO request. csrf is disabled for
         # allowing SLO requests reception
@@ -306,13 +306,13 @@ class FederateAuth(CsrfExemptView):
         """
         # if settings.CAS_FEDERATE is not True redirect to the login page
         if not settings.CAS_FEDERATE:
-            logger.warning("CAS_FEDERATE is False, set it to True to use the federated mode")
+            logger.warning("CAS_FEDERATE is False, set it to True to use federation")
             return redirect("cas_server:login")
         renew = bool(request.GET.get('renew') and request.GET['renew'] != "False")
         # Is the user is already authenticated, no need to request authentication to the user
         # identity provider.
         if self.request.session.get("authenticated") and not renew:
-            logger.warning("User already authenticated, dropping federate authentication request")
+            logger.warning("User already authenticated, dropping federated authentication request")
             return redirect("cas_server:login")
         try:
             # get the identity provider from its suffix
@@ -321,7 +321,7 @@ class FederateAuth(CsrfExemptView):
             auth = self.get_cas_client(request, provider, renew)
             # if no ticket submited, redirect to the identity provider CAS login page
             if 'ticket' not in request.GET:
-                logger.info("Trying to authenticate again %s" % auth.provider.server_url)
+                logger.info("Trying to authenticate %s again" % auth.provider.server_url)
                 return HttpResponseRedirect(auth.get_login_url())
             else:
                 ticket = request.GET['ticket']
@@ -361,8 +361,8 @@ class FederateAuth(CsrfExemptView):
                     else:
                         logger.info(
                             (
-                                "Got a invalid ticket %s from %s for service %s. "
-                                "Retrying to authenticate"
+                                "Got an invalid ticket %s from %s for service %s. "
+                                "Retrying authentication"
                             ) % (
                                 ticket,
                                 auth.provider.server_url,
@@ -486,7 +486,7 @@ class LoginView(View, LogoutMixin):
 
     def post(self, request, *args, **kwargs):
         """
-            methode called on POST request on this view
+            method called on POST request on this view
 
             :param django.http.HttpRequest request: The current request object
         """
@@ -498,7 +498,7 @@ class LoginView(View, LogoutMixin):
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                _(u"Invalid login ticket, please retry to login")
+                _(u"Invalid login ticket, please try to log in again")
             )
         elif ret == self.USER_LOGIN_OK:
             # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
@@ -507,6 +507,7 @@ class LoginView(View, LogoutMixin):
                 username=self.request.session['username'],
                 session_key=self.request.session.session_key
             )[0]
+            self.user.last_login = timezone.now()
             self.user.save()
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
             if settings.CAS_FEDERATE:
@@ -555,7 +556,7 @@ class LoginView(View, LogoutMixin):
         """
         if not self.check_lt():
             self.init_form(self.request.POST)
-            logger.warning("Receive an invalid login ticket")
+            logger.warning("Received an invalid login ticket")
             return self.INVALID_LOGIN_TICKET
         elif not self.request.session.get("authenticated") or self.renew:
             # authentication request receive, initialize the form to use
@@ -570,10 +571,10 @@ class LoginView(View, LogoutMixin):
                 logger.info("User %s successfully authenticated" % self.request.session["username"])
                 return self.USER_LOGIN_OK
             else:
-                logger.warning("A logging attemps failed")
+                logger.warning("A login attempt failed")
                 return self.USER_LOGIN_FAILURE
         else:
-            logger.warning("Receuve a logging attempt whereas the user is already logged")
+            logger.warning("Received a login attempt for an already-active user")
             return self.USER_ALREADY_LOGGED
 
     def init_get(self, request):
@@ -601,7 +602,7 @@ class LoginView(View, LogoutMixin):
 
     def get(self, request, *args, **kwargs):
         """
-            methode called on GET request on this view
+            method called on GET request on this view
 
             :param django.http.HttpRequest request: The current request object
         """
@@ -668,7 +669,7 @@ class LoginView(View, LogoutMixin):
 
     def service_login(self):
         """
-            Perform login agains a service
+            Perform login against a service
 
             :return:
                 * The rendering of the ``settings.CAS_WARN_TEMPLATE`` if the user asked to be
@@ -802,7 +803,7 @@ class LoginView(View, LogoutMixin):
             else:
                 return utils.redirect_params("cas_server:login", params=self.request.GET)
 
-        # if login agains a service
+        # if login against a service
         if self.service:
             return self.service_login()
         # else display the logged template
@@ -950,7 +951,7 @@ class Auth(CsrfExemptView):
     @staticmethod
     def post(request):
         """
-            methode called on POST request on this view
+            method called on POST request on this view
 
             :param django.http.HttpRequest request: The current request object
             :return: ``HttpResponse(u"yes\\n")`` if the POSTed tuple (username, password, service)
@@ -1006,7 +1007,7 @@ class Validate(View):
     @staticmethod
     def get(request):
         """
-            methode called on GET request on this view
+            method called on GET request on this view
 
             :param django.http.HttpRequest request: The current request object
             :return:
@@ -1117,7 +1118,7 @@ class ValidateService(View):
 
     def get(self, request):
         """
-            methode called on GET request on this view
+            method called on GET request on this view
 
             :param django.http.HttpRequest request: The current request object:
             :return: The rendering of ``cas_server/serviceValidate.xml`` if no errors is raised,
@@ -1285,7 +1286,7 @@ class Proxy(View):
 
     def get(self, request):
         """
-            methode called on GET request on this view
+            method called on GET request on this view
 
             :param django.http.HttpRequest request: The current request object:
             :return: The returned value of :meth:`process_proxy` if no error is raised,
@@ -1324,7 +1325,7 @@ class Proxy(View):
             if not pattern.proxy:
                 raise ValidateError(
                     u'UNAUTHORIZED_SERVICE',
-                    u'the service %s do not allow proxy ticket' % self.target_service
+                    u'the service %s does not allow proxy tickets' % self.target_service
                 )
             # is the proxy granting ticket valid
             ticket = ProxyGrantingTicket.get(self.pgt)
@@ -1388,7 +1389,7 @@ class SamlValidate(CsrfExemptView):
 
     def post(self, request):
         """
-            methode called on POST request on this view
+            method called on POST request on this view
 
             :param django.http.HttpRequest request: The current request object
             :return: the rendering of ``cas_server/samlValidate.xml`` if no error is raised,
@@ -1418,7 +1419,7 @@ class SamlValidate(CsrfExemptView):
                 )
             )
             logger.debug(
-                "SamlValidate: User attributs are:\n%s" % pprint.pformat(self.ticket.attributs)
+                "SamlValidate: User attributes are:\n%s" % pprint.pformat(self.ticket.attributs)
             )
 
             return render(
@@ -1447,7 +1448,7 @@ class SamlValidate(CsrfExemptView):
             if ticket.service != self.target:
                 raise SamlValidateError(
                     u'AuthnFailed',
-                    u'TARGET %s do not match ticket service' % self.target
+                    u'TARGET %s does not match ticket service' % self.target
                 )
             return ticket
         except (IndexError, KeyError):

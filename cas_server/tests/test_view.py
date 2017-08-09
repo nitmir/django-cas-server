@@ -295,6 +295,24 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
             ) in response.content
         )
 
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
+    def test_view_login_get_allowed_service_no_message(self):
+        """Request a ticket for an allowed service by an unauthenticated client"""
+        # get a bare new http client
+        client = Client()
+        # we are not authenticated and are asking for a ticket for https://www.example.com
+        # which is a valid service matched by self.service_pattern
+        response = client.get("/login?service=https://www.example.com")
+        # the login page should be displayed
+        self.assertEqual(response.status_code, 200)
+        # we warn the user why it need to authenticated
+        self.assertFalse(
+            (
+                b"Authentication required by service "
+                b"example (https://www.example.com)"
+            ) in response.content
+        )
+
     def test_view_login_get_denied_service(self):
         """Request a ticket for an denied service by an unauthenticated client"""
         # get a bare new http client
@@ -305,6 +323,18 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertEqual(response.status_code, 200)
         # we warn the user that https://www.example.net is not an allowed service url
         self.assertTrue(b"Service https://www.example.net not allowed" in response.content)
+
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
+    def test_view_login_get_denied_service_no_message(self):
+        """Request a ticket for an denied service by an unauthenticated client"""
+        # get a bare new http client
+        client = Client()
+        # we are not authenticated and are asking for a ticket for https://www.example.net
+        # which is NOT a valid service
+        response = client.get("/login?service=https://www.example.net")
+        self.assertEqual(response.status_code, 200)
+        # we warn the user that https://www.example.net is not an allowed service url
+        self.assertFalse(b"Service https://www.example.net not allowed" in response.content)
 
     def test_view_login_get_auth_allowed_service(self):
         """Request a ticket for an allowed service by an authenticated client"""
@@ -483,6 +513,40 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         # we are ask to reauthenticate and tell the user why
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
+            (
+                b"Authentication renewal required by "
+                b"service example (https://www.example.com)"
+            ) in response.content
+        )
+        # get the form default parameter
+        params = copy_form(response.context["form"])
+        # set valid username/password
+        params["username"] = settings.CAS_TEST_USER
+        params["password"] = settings.CAS_TEST_PASSWORD
+        # the renew parameter from the form should be True
+        self.assertEqual(params["renew"], True)
+        # post the authentication request
+        response = client.post("/login", params)
+        # the request succed, a ticket is created and we are redirected to the service url
+        self.assertEqual(response.status_code, 302)
+        ticket_value = response['Location'].split('ticket=')[-1]
+        ticket = models.ServiceTicket.objects.get(value=ticket_value)
+        # the created ticket is marked has being gottent after a renew. Futher testing about
+        # renewing authentication is done in the validate and serviceValidate views tests
+        self.assertEqual(ticket.renew, True)
+
+    @override_settings(CAS_SHOW_SERVICE_MESSAGES=False)
+    def test_renew_message_disabled(self):
+        """test the authentication renewal request from a service"""
+        # use the default test service
+        service = "https://www.example.com"
+        # get a client that is already authenticated
+        client = get_auth_client()
+        # ask for a ticket for the service but aks for authentication renewal
+        response = client.get("/login", {'service': service, 'renew': 'on'})
+        # we are ask to reauthenticate and tell the user why
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
             (
                 b"Authentication renewal required by "
                 b"service example (https://www.example.com)"

@@ -6,6 +6,27 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+
+Unreleased
+==========
+
+Added
+-----
+* Dutch translation
+* Support for ldap3 version 2 or more (changes in the API)
+  All exception are now in ldap3.core.exceptions, methodes for fetching attritutes and
+  dn are renamed.
+* Possibility to disable service message boxes on the login pages
+
+Fixed
+-----
+* Then using the LDAP auth backend with ``bind`` method for password check, do not try to bind
+  if the user dn was not found. This was causing the exception
+  ``'NoneType' object has no attribute 'getitem'`` describe in #21
+* Increase the max size of usernames (30 chars to 250)
+
+
+
 v0.8.0 - 2017-03-08
 ===================
 

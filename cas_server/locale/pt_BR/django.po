@@ -1,0 +1,398 @@
+# SOME DESCRIPTIVE TITLE. 
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-22 08:18-0300\n"
+"PO-Revision-Date: 2017-08-29 18:09+0200\n"
+"Language-Team: Roberto Morati <robertomorati@gmail.com>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: cas_server/apps.py:25 cas_server/templates/cas_server/base.html:7
+#: cas_server/templates/cas_server/base.html:26
+msgid "Central Authentication Service"
+msgstr "Central de Autenticação de Serviços"
+
+#: cas_server/default_settings.py:201
+msgid ""
+"The Central Authentication Service grants you access to most of our websites by "
+"authenticating only once, so you don't need to type your credentials again unless your "
+"session expires or you logout."
+msgstr ""
+"A Central de Autenticação de Serviços garante seu acesso à maioria dos nossos sitespor "
+"meio de uma única autenticação, então você não precisa digitar suas "
+"credenciaisnovamente, ao menos que sua sessão expire ou seu logout."
+
+#: cas_server/forms.py:85
+msgid "Identity provider"
+msgstr "Provedor de identidade"
+
+#: cas_server/forms.py:89 cas_server/forms.py:111
+msgid "Warn me before logging me into other sites."
+msgstr "Avise-me antes de me registrar em outros sites"
+
+#: cas_server/forms.py:93
+msgid "Remember the identity provider"
+msgstr "Relembrar o provedor de identidade"
+
+#: cas_server/forms.py:104 cas_server/models.py:638
+msgid "username"
+msgstr "usuário"
+
+#: cas_server/forms.py:108
+msgid "password"
+msgstr "senha"
+
+#: cas_server/forms.py:131
+msgid "The credentials you provided cannot be determined to be authentic."
+msgstr "As credenciais que você forneceu não podem ser determinadas como autênticas."
+
+#: cas_server/forms.py:183
+msgid "User not found in the temporary database, please try to reconnect"
+msgstr "Usuário não encontrado na base de dados temporária, por favor, tente se reconectar"
+
+#: cas_server/forms.py:197
+msgid "service"
+msgstr ""
+
+#: cas_server/management/commands/cas_clean_federate.py:20
+msgid "Clean old federated users"
+msgstr ""
+
+#: cas_server/management/commands/cas_clean_sessions.py:22
+msgid "Clean deleted sessions"
+msgstr ""
+
+#: cas_server/management/commands/cas_clean_tickets.py:22
+msgid "Clean old tickets"
+msgstr ""
+
+#: cas_server/models.py:71
+msgid "identity provider"
+msgstr "provedor de identidade"
+
+#: cas_server/models.py:72
+msgid "identity providers"
+msgstr "provedores de identidade"
+
+#: cas_server/models.py:78
+msgid "suffix"
+msgstr ""
+
+#: cas_server/models.py:80
+msgid "Suffix append to backend CAS returned username: ``returned_username`` @ ``suffix``."
+msgstr ""
+
+#: cas_server/models.py:87
+msgid "server url"
+msgstr ""
+
+#: cas_server/models.py:97
+msgid "CAS protocol version"
+msgstr ""
+
+#: cas_server/models.py:99
+msgid "Version of the CAS protocol to use when sending requests the the backend CAS."
+msgstr ""
+
+#: cas_server/models.py:106
+msgid "verbose name"
+msgstr ""
+
+#: cas_server/models.py:107
+msgid "Name for this identity provider displayed on the login page."
+msgstr "Nome para exibir o provedor de identidade na página de login."
+
+#: cas_server/models.py:113 cas_server/models.py:490
+msgid "position"
+msgstr ""
+
+#: cas_server/models.py:127
+msgid "display"
+msgstr ""
+
+#: cas_server/models.py:128
+msgid "Display the provider on the login page."
+msgstr ""
+
+#: cas_server/models.py:166
+msgid "Federated user"
+msgstr ""
+
+#: cas_server/models.py:167
+msgid "Federated users"
+msgstr ""
+
+#: cas_server/models.py:246
+msgid "User attributes cache"
+msgstr ""
+
+#: cas_server/models.py:247
+msgid "User attributes caches"
+msgstr ""
+
+#: cas_server/models.py:271
+msgid "User"
+msgstr ""
+
+#: cas_server/models.py:272
+msgid "Users"
+msgstr ""
+
+#: cas_server/models.py:364
+#, python-format
+msgid "Error during service logout %s"
+msgstr ""
+
+#: cas_server/models.py:484
+msgid "Service pattern"
+msgstr ""
+
+#: cas_server/models.py:485
+msgid "Services patterns"
+msgstr ""
+
+#: cas_server/models.py:491
+msgid "service patterns are sorted using the position attribute"
+msgstr ""
+
+#: cas_server/models.py:499 cas_server/models.py:664
+msgid "name"
+msgstr ""
+
+#: cas_server/models.py:500
+msgid "A name for the service"
+msgstr ""
+
+#: cas_server/models.py:508 cas_server/models.py:707 cas_server/models.py:737
+msgid "pattern"
+msgstr ""
+
+#: cas_server/models.py:510
+msgid ""
+"A regular expression matching services. Will usually looks like '^https://some\\.server"
+"\\.com/path/.*$'.As it is a regular expression, special character must be escaped with a "
+"'\\'."
+msgstr ""
+
+#: cas_server/models.py:521
+msgid "user field"
+msgstr ""
+
+#: cas_server/models.py:522
+msgid "Name of the attribute to transmit as username, empty = login"
+msgstr ""
+
+#: cas_server/models.py:527
+msgid "restrict username"
+msgstr ""
+
+#: cas_server/models.py:528
+msgid "Limit username allowed to connect to the list provided bellow"
+msgstr ""
+
+#: cas_server/models.py:533
+msgid "proxy"
+msgstr ""
+
+#: cas_server/models.py:534
+msgid "Proxy tickets can be delivered to the service"
+msgstr ""
+
+#: cas_server/models.py:540
+msgid "proxy callback"
+msgstr ""
+
+#: cas_server/models.py:541
+msgid "can be used as a proxy callback to deliver PGT"
+msgstr ""
+
+#: cas_server/models.py:548
+msgid "single log out"
+msgstr ""
+
+#: cas_server/models.py:549
+msgid "Enable SLO for the service"
+msgstr ""
+
+#: cas_server/models.py:558
+msgid ""
+"URL where the SLO request will be POST. empty = service url\n"
+"This is usefull for non HTTP proxied services."
+msgstr ""
+
+#: cas_server/models.py:639
+msgid "username allowed to connect to the service"
+msgstr ""
+
+#: cas_server/models.py:665
+msgid "name of an attribute to send to the service, use * for all attributes"
+msgstr ""
+
+#: cas_server/models.py:672 cas_server/models.py:745
+msgid "replace"
+msgstr ""
+
+#: cas_server/models.py:673
+msgid ""
+"name under which the attribute will be show to the service. empty = default name of the "
+"attribut"
+msgstr ""
+
+#: cas_server/models.py:700 cas_server/models.py:731
+msgid "attribute"
+msgstr ""
+
+#: cas_server/models.py:701
+msgid "Name of the attribute which must verify pattern"
+msgstr ""
+
+#: cas_server/models.py:708
+msgid "a regular expression"
+msgstr ""
+
+#: cas_server/models.py:732
+msgid "Name of the attribute for which the value must be replace"
+msgstr ""
+
+#: cas_server/models.py:738
+msgid "An regular expression maching whats need to be replaced"
+msgstr ""
+
+#: cas_server/models.py:746
+msgid "replace expression, groups are capture by \\1, \\2 …"
+msgstr ""
+
+#: cas_server/templates/cas_server/base.html:43
+#, python-format
+msgid ""
+"A new version of the application is available. This instance runs %(VERSION)s and the "
+"last version is %(LAST_VERSION)s. Please consider upgrading."
+msgstr ""
+"Uma nova versão da aplicação está disponível. Está instância usa a versão %(VERSION)s e "
+"a última versão é %(LAST_VERSION)s. Por favor, considere a atualização."
+
+#: cas_server/templates/cas_server/logged.html:4
+msgid ""
+"<h3>Log In Successful</h3>You have successfully logged into the Central Authentication "
+"Service.<br/>For security reasons, please Log Out and Exit your web browser when you are "
+"done accessing services that require authentication!"
+msgstr ""
+"<h3>Log In realizado com sucesso</h3>Você foi conectado com sucesso a Central de "
+"Autenticação de Serviços.<br/>Por razões de segurança, faça o Log Out e saia do seu "
+"navegador quando você terminar de acessar os serviços que exigem auntenticação!"
+
+#: cas_server/templates/cas_server/logged.html:8
+msgid "Log me out from all my sessions"
+msgstr "Desconecte-me de todas as sessões"
+
+#: cas_server/templates/cas_server/logged.html:14
+msgid "Forget the identity provider"
+msgstr "Esquecer o provedor de identidade"
+
+#: cas_server/templates/cas_server/logged.html:18
+msgid "Logout"
+msgstr ""
+
+#: cas_server/templates/cas_server/login.html:6
+msgid "Please log in"
+msgstr "Por favor, faça log in"
+
+#: cas_server/templates/cas_server/login.html:14
+msgid "Login"
+msgstr ""
+
+#: cas_server/templates/cas_server/warn.html:9
+msgid "Connect to the service"
+msgstr ""
+
+#: cas_server/utils.py:744
+#, python-format
+msgid "\"%(value)s\" is not a valid regular expression"
+msgstr ""
+
+#: cas_server/views.py:185
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from the Central "
+"Authentication Service. For security reasons, close your web browser."
+msgstr ""
+"<h3>Logout realizado com sucesso</h3>Você foi desconectado com sucesso da Central de "
+"Autenticação de Serviços. Por razões de segurança, feche seu navegador."
+
+#: cas_server/views.py:191
+#, python-format
+msgid ""
+"<h3>Logout successful</h3>You have successfully logged out from %s sessions of the "
+"Central Authentication Service. For security reasons, close your web browser."
+msgstr ""
+"<h3>Logout realizado com sucesso</h3>Você foi desconectado com sucesso da %s sessão da "
+"Centralde Autenticação de Serviços. Por razões de segurança, feche seu navegador."
+
+#: cas_server/views.py:198
+msgid ""
+"<h3>Logout successful</h3>You were already logged out from the Central Authentication "
+"Service. For security reasons, close your web browser."
+msgstr ""
+"<h3>Logout realizado com sucesso</h3>Você já está desconectado da Central de "
+"Autenticação de Serviços. Por razões de segurança, feche seu navegador."
+
+#: cas_server/views.py:378
+#, python-format
+msgid ""
+"Invalid response from your identity provider CAS upon ticket %(ticket)s validation: "
+"%(error)r"
+msgstr ""
+"Resposta inválida do provedor de identidade CAS sobre o ticket %(ticket)svalidação: "
+"%(error)r"
+
+#: cas_server/views.py:500
+msgid "Invalid login ticket, please try to log in again"
+msgstr "Ticket de login inválido, por favor tente novamente"
+
+#: cas_server/views.py:693
+#, python-format
+msgid "Authentication has been required by service %(name)s (%(url)s)"
+msgstr "Autenticação requerida pelo serviço %(name)s (%(url)s)"
+
+#: cas_server/views.py:731
+#, python-format
+msgid "Service %(url)s not allowed."
+msgstr "Serviço %(url)s não permitido"
+
+#: cas_server/views.py:738
+msgid "Username not allowed"
+msgstr "Usuário não permitido"
+
+#: cas_server/views.py:745
+msgid "User characteristics not allowed"
+msgstr "Características de usuário não permitida"
+
+#: cas_server/views.py:752
+#, python-format
+msgid "The attribute %(field)s is needed to use that service"
+msgstr "O atributo %(field)s é necessário para usar o serviço"
+
+#: cas_server/views.py:842
+#, python-format
+msgid "Authentication renewal required by service %(name)s (%(url)s)."
+msgstr "Renovação da autenticação requerida pelo serviço %(name)s (%(url)s)."
+
+#: cas_server/views.py:849
+#, python-format
+msgid "Authentication required by service %(name)s (%(url)s)."
+msgstr "Autenticação requerida pelo serviço %(name)s (%(url)s)."
+
+#: cas_server/views.py:856
+#, python-format
+msgid "Service %s not allowed"
+msgstr "Serviço %s não permitido"

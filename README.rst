@@ -218,7 +218,8 @@ Template settings
         }
 
   if you omit some keys of the dictionnary, the default value for these keys is used.
-
+* ``CAS_SHOW_SERVICE_MESSAGES``: Messages displayed about the state of the service on the login page.
+  The default is ``True``.
 * ``CAS_INFO_MESSAGES``: Messages displayed in info-boxes on the html pages of the default templates.
   It is a dictionnary mapping message name to a message dict. A message dict has 3 keys:
 

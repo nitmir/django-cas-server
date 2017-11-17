@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.safestring import mark_safe
 
 import re
 import logging
@@ -181,24 +182,24 @@ class LogoutView(View, LogoutMixin):
         else:
             # build logout message depending of the number of sessions the user logs out
             if session_nb == 1:
-                logout_msg = _(
+                logout_msg = mark_safe(_(
                     "<h3>Logout successful</h3>"
                     "You have successfully logged out from the Central Authentication Service. "
                     "For security reasons, close your web browser."
-                )
+                ))
             elif session_nb > 1:
-                logout_msg = _(
+                logout_msg = mark_safe(_(
                     "<h3>Logout successful</h3>"
-                    "You have successfully logged out from %s sessions of the Central "
+                    "You have successfully logged out from %d sessions of the Central "
                     "Authentication Service. "
                     "For security reasons, close your web browser."
-                ) % session_nb
+                ) % session_nb)
             else:
-                logout_msg = _(
+                logout_msg = mark_safe(_(
                     "<h3>Logout successful</h3>"
                     "You were already logged out from the Central Authentication Service. "
                     "For security reasons, close your web browser."
-                )
+                ))
 
             # depending of settings, redirect to the login page with a logout message or display
             # the logout page. The default is to display tge logout page.
@@ -835,26 +836,29 @@ class LoginView(View, LogoutMixin):
                     # clean messages before leaving django
                     list(messages.get_messages(self.request))
                     return HttpResponseRedirect(self.service)
-                if self.request.session.get("authenticated") and self.renew:
-                    messages.add_message(
-                        self.request,
-                        messages.WARNING,
-                        _(u"Authentication renewal required by service %(name)s (%(url)s).") %
-                        {'name': service_pattern.name, 'url': self.service}
-                    )
-                else:
-                    messages.add_message(
-                        self.request,
-                        messages.WARNING,
-                        _(u"Authentication required by service %(name)s (%(url)s).") %
-                        {'name': service_pattern.name, 'url': self.service}
-                    )
+
+                if settings.CAS_SHOW_SERVICE_MESSAGES:
+                    if self.request.session.get("authenticated") and self.renew:
+                        messages.add_message(
+                            self.request,
+                            messages.WARNING,
+                            _(u"Authentication renewal required by service %(name)s (%(url)s).") %
+                            {'name': service_pattern.name, 'url': self.service}
+                        )
+                    else:
+                        messages.add_message(
+                            self.request,
+                            messages.WARNING,
+                            _(u"Authentication required by service %(name)s (%(url)s).") %
+                            {'name': service_pattern.name, 'url': self.service}
+                        )
             except ServicePattern.DoesNotExist:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    _(u'Service %s not allowed') % self.service
-                )
+                if settings.CAS_SHOW_SERVICE_MESSAGES:
+                    messages.add_message(
+                        self.request,
+                        messages.ERROR,
+                        _(u'Service %s not allowed') % self.service
+                    )
         if self.ajax:
             data = {
                 "status": "error",

@@ -185,6 +185,8 @@ CAS_NEW_VERSION_EMAIL_WARNING = True
 #: You should not change it.
 CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
 
+#: If the service message should be displayed on the login page
+CAS_SHOW_SERVICE_MESSAGES = True
 
 #: Messages displayed in a info-box on the html pages of the default templates.
 #: ``CAS_INFO_MESSAGES`` is a :class:`dict` mapping message name to a message :class:`dict`.

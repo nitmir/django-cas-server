@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.7, 1.8 and 1.9
+* Supports Django 1.7, 1.8, 1.9, 1.10 and 1.11
 * Supports Python 2.7, 3.x
 
 Dependencies

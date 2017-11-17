@@ -35,6 +35,7 @@ if __name__ == '__main__':
             'Framework :: Django :: 1.8',
             'Framework :: Django :: 1.9',
             'Framework :: Django :: 1.10',
+            'Framework :: Django :: 1.11',
             'Intended Audience :: Developers',
             'Intended Audience :: System Administrators',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -45,6 +46,7 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
             'Topic :: Software Development :: Libraries :: Python Modules',
             'Topic :: Internet :: WWW/HTTP',
             'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
@@ -59,7 +61,7 @@ if __name__ == '__main__':
         },
         keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
         install_requires=[
-            'Django >= 1.7,<1.11', 'requests >= 2.4', 'requests_futures >= 0.9.5',
+            'Django >= 1.7,<1.12', 'requests >= 2.4', 'requests_futures >= 0.9.5',
             'lxml >= 3.4', 'six >= 1'
         ],
         url="https://github.com/nitmir/django-cas-server",

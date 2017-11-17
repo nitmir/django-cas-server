@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
    :depth: 2
 
 
+Unreleased
+==========
+
+Added
+-----
+* Support for python 3.6 and Django 1.11
+
+
 v0.9.0 - 2017-11-17
 ===================
 
@@ -26,7 +34,6 @@ Fixed
   ``'NoneType' object has no attribute 'getitem'`` describe in #21
 * Increase the max size of usernames (30 chars to 250)
 * Fix XSS js injection
-
 
 
 v0.8.0 - 2017-03-08

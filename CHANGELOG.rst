@@ -25,6 +25,7 @@ Fixed
   if the user dn was not found. This was causing the exception
   ``'NoneType' object has no attribute 'getitem'`` describe in #21
 * Increase the max size of usernames (30 chars to 250)
+* Fix XSS js injection
 
 
 

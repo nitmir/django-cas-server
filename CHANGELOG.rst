@@ -7,8 +7,8 @@ All notable changes to this project will be documented in this file.
    :depth: 2
 
 
-Unreleased
-==========
+v0.9.0 - 2017-11-17
+===================
 
 Added
 -----

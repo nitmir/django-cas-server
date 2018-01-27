@@ -13,7 +13,6 @@
 from .default_settings import settings, SessionStore
 
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
@@ -24,6 +23,10 @@ from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 import re
 import logging

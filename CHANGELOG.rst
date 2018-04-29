@@ -15,6 +15,21 @@ Added
 * Support for python 3.6 and Django 1.11
 * Support for Django 2.0
 
+Fixes
+----
+
+* Add missing attributes authenticationDate, longTermAuthenticationRequestTokenUsed and
+  isFromNewLogin from service validation response
+* Catch error from calling django.contrib.staticfiles.templatetags.staticfiles.static
+  in non-debug mode before collectstatic in cas_server.default_settings.py
+
+Deprecated
+----------
+
+* Support for Django <1.11 is dropped, it should still works for this version.
+  Next versions will most probably be not compatible with Django <1.11
+* Support for python 3.4 is dropped, it should still works for this version.
+  Next versions may or may not works with python 3.4.
 
 v0.9.0 - 2017-11-17
 ===================

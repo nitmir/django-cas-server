@@ -641,7 +641,11 @@ class Username(models.Model):
     #: ForeignKey to a :class:`ServicePattern`. :class:`Username` instances for a
     #: :class:`ServicePattern` are accessible thought its :attr:`ServicePattern.usernames`
     #: attribute.
-    service_pattern = models.ForeignKey(ServicePattern, related_name="usernames", on_delete=models.CASCADE)
+    service_pattern = models.ForeignKey(
+        ServicePattern,
+        related_name="usernames",
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.value
@@ -676,7 +680,11 @@ class ReplaceAttributName(models.Model):
     #: ForeignKey to a :class:`ServicePattern`. :class:`ReplaceAttributName` instances for a
     #: :class:`ServicePattern` are accessible thought its :attr:`ServicePattern.attributs`
     #: attribute.
-    service_pattern = models.ForeignKey(ServicePattern, related_name="attributs", on_delete=models.CASCADE)
+    service_pattern = models.ForeignKey(
+        ServicePattern,
+        related_name="attributs",
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         if not self.replace:
@@ -711,7 +719,11 @@ class FilterAttributValue(models.Model):
     #: ForeignKey to a :class:`ServicePattern`. :class:`FilterAttributValue` instances for a
     #: :class:`ServicePattern` are accessible thought its :attr:`ServicePattern.filters`
     #: attribute.
-    service_pattern = models.ForeignKey(ServicePattern, related_name="filters", on_delete=models.CASCADE)
+    service_pattern = models.ForeignKey(
+        ServicePattern,
+        related_name="filters",
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return u"%s %s" % (self.attribut, self.pattern)
@@ -748,7 +760,11 @@ class ReplaceAttributValue(models.Model):
     #: ForeignKey to a :class:`ServicePattern`. :class:`ReplaceAttributValue` instances for a
     #: :class:`ServicePattern` are accessible thought its :attr:`ServicePattern.replacements`
     #: attribute.
-    service_pattern = models.ForeignKey(ServicePattern, related_name="replacements", on_delete=models.CASCADE)
+    service_pattern = models.ForeignKey(
+        ServicePattern,
+        related_name="replacements",
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return u"%s %s %s" % (self.attribut, self.pattern, self.replace)
@@ -771,7 +787,11 @@ class Ticket(JsonAttributes):
     service = models.TextField()
     #: ForeignKey to a :class:`ServicePattern`. The :class:`ServicePattern` corresponding to
     #: :attr:`service`. Use :meth:`ServicePattern.validate` to find it.
-    service_pattern = models.ForeignKey(ServicePattern, related_name="%(class)s", on_delete=models.CASCADE)
+    service_pattern = models.ForeignKey(
+        ServicePattern,
+        related_name="%(class)s",
+        on_delete=models.CASCADE
+    )
     #: Date of the ticket creation
     creation = models.DateTimeField(auto_now_add=True)
     #: A boolean. ``True`` if the user has just renew his authentication

@@ -1907,7 +1907,9 @@ class SamlValidateTestCase(TestCase, BaseServicePattern, XmlContent):
             "//samla:AttributeStatement/samla:Attribute",
             namespaces={'samla': "urn:oasis:names:tc:SAML:1.0:assertion"}
         )
-        ignore_attrs = {"authenticationDate", "longTermAuthenticationRequestTokenUsed", "isFromNewLogin"} - set(original_attributes.keys())
+        ignore_attrs = {
+            "authenticationDate", "longTermAuthenticationRequestTokenUsed", "isFromNewLogin"
+        } - set(original_attributes.keys())
         attrs = set()
         for attr in attributes:
             if not attr.attrib['AttributeName'] in ignore_attrs:

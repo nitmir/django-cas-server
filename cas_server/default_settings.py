@@ -17,10 +17,20 @@ from django.utils.translation import ugettext_lazy as _
 from importlib import import_module
 
 
-#: URL to the logo showed in the up left corner on the default templates.
-CAS_LOGO_URL = static("cas_server/logo.png")
-#: URL to the favicon (shortcut icon) used by the default templates. Default is a key icon.
-CAS_FAVICON_URL = static("cas_server/favicon.ico")
+try:
+    #: URL to the logo showed in the up left corner on the default templates.
+    CAS_LOGO_URL = static("cas_server/logo.png")
+    #: URL to the favicon (shortcut icon) used by the default templates. Default is a key icon.
+    CAS_FAVICON_URL = static("cas_server/favicon.ico")
+# is settings.DEBUG is False and collectstatics has not been run yet, the static function will
+# raise a ValueError because the file is not found.
+except ValueError:
+    #: URL to the logo showed in the up left corner on the default templates.
+    CAS_LOGO_URL = None
+    #: URL to the favicon (shortcut icon) used by the default templates. Default is a key icon.
+    CAS_FAVICON_URL = None
+
+
 #: Show the powered by footer if set to ``True``
 CAS_SHOW_POWERED = True
 #: URLs to css and javascript external components.

@@ -16,7 +16,7 @@ Added
 * Support for Django 2.0
 
 Fixes
-----
+-----
 
 * Add missing attributes authenticationDate, longTermAuthenticationRequestTokenUsed and
   isFromNewLogin from service validation response
@@ -30,6 +30,12 @@ Deprecated
   Next versions will most probably be not compatible with Django <1.11
 * Support for python 3.4 is dropped, it should still works for this version.
   Next versions may or may not works with python 3.4.
+
+Other
+-----
+
+* Migrations have been squashed for Django 2.0 support. Be sur to apply all migration before
+  updating to this version
 
 v0.9.0 - 2017-11-17
 ===================

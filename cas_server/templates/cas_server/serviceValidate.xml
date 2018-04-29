@@ -2,8 +2,14 @@
   <cas:authenticationSuccess>
     <cas:user>{{username}}</cas:user>
     <cas:attributes>
+      <cas:authenticationDate>{{auth_date}}</cas:authenticationDate>
+      <cas:longTermAuthenticationRequestTokenUsed>false</cas:longTermAuthenticationRequestTokenUsed>{# we do not support long-term (Remember-Me) auth #}
+      <cas:isFromNewLogin>{{is_new_login}}</cas:isFromNewLogin>
 {% for key, value in attributes %}      <cas:{{key}}>{{value}}</cas:{{key}}>
 {% endfor %}    </cas:attributes>
+    <cas:attribute name="authenticationDate" value="{{auth_date}}"/>
+    <cas:attribute name="longTermAuthenticationRequestTokenUsed" value="false"/>
+    <cas:attribute name="isFromNewLogin" value="{{is_new_login}}"/>
 {% for key, value in attributes %}    <cas:attribute name="{{key}}" value="{{value}}"/>
 {% endfor %}{% if proxyGrantingTicket %}    <cas:proxyGrantingTicket>{{proxyGrantingTicket}}</cas:proxyGrantingTicket>
 {% endif %}{% if  proxies %}    <cas:proxies>

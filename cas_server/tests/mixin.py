@@ -149,15 +149,23 @@ class XmlContent(object):
             namespaces={'cas': "http://www.yale.edu/tp/cas"}
         )
         self.assertEqual(len(attributes), 1)
+        ignore_attrs = {"authenticationDate", "longTermAuthenticationRequestTokenUsed", "isFromNewLogin"}
+        ignored_attrs = 0
         attrs1 = set()
         for attr in attributes[0]:
-            attrs1.add((attr.tag[len("http://www.yale.edu/tp/cas")+2:], attr.text))
+            name = attr.tag[len("http://www.yale.edu/tp/cas")+2:]
+            if not name in ignore_attrs:
+                attrs1.add((name, attr.text))
+            else:
+                ignored_attrs += 1
 
         attributes = root.xpath("//cas:attribute", namespaces={'cas': "http://www.yale.edu/tp/cas"})
-        self.assertEqual(len(attributes), len(attrs1))
+        self.assertEqual(len(attributes), len(attrs1) + ignored_attrs)
         attrs2 = set()
         for attr in attributes:
-            attrs2.add((attr.attrib['name'], attr.attrib['value']))
+            name = attr.attrib['name']
+            if not name in ignore_attrs:
+                attrs2.add((name, attr.attrib['value']))
         original = set()
         for key, value in original_attributes.items():
             if isinstance(value, list):

@@ -1153,7 +1153,9 @@ class ValidateService(View):
                 params = {
                     'username': self.ticket.username(),
                     'attributes': self.ticket.attributs_flat(),
-                    'proxies': proxies
+                    'proxies': proxies,
+                    'auth_date': self.ticket.user.last_login.replace(microsecond=0).isoformat(),
+                    'is_new_login': 'true' if self.ticket.renew else 'false'
                 }
                 # if pgtUrl is set, require https or localhost
                 if self.pgt_url and (
@@ -1415,7 +1417,10 @@ class SamlValidate(CsrfExemptView):
                 'Recipient': self.target,
                 'ResponseID': utils.gen_saml_id(),
                 'username': self.ticket.username(),
-                'attributes': self.ticket.attributs_flat()
+                'attributes': self.ticket.attributs_flat(),
+                'auth_date': self.ticket.user.last_login.replace(microsecond=0).isoformat(),
+                'is_new_login': 'true' if self.ticket.renew else 'false'
+
             }
             logger.info(
                 "SamlValidate: ticket %s validated for user %s on service %s." % (

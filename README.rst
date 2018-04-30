@@ -645,7 +645,7 @@ You could for example do as bellow::
     :target: https://travis-ci.org/nitmir/django-cas-server
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
-    :target: https://pypi.python.org/pypi/django-cas-server
+    :target: https://pypi.org/project/django-cas-server/
 
 .. |github_version| image:: https://badges.genua.fr/github/tag/nitmir/django-cas-server.svg?label=github
     :target: https://github.com/nitmir/django-cas-server/releases/latest

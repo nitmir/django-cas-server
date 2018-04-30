@@ -1097,7 +1097,7 @@ Upgrade using:
     * pip install -U django-cas-server
     * fetching the last release on
       https://github.com/nitmir/django-cas-server/ or on
-      https://pypi.python.org/pypi/django-cas-server
+      https://pypi.org/project/django-cas-server/
 
 After upgrade, do not forget to run:
     * ./manage.py migrate

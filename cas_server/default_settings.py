@@ -193,7 +193,7 @@ CAS_NEW_VERSION_HTML_WARNING = True
 CAS_NEW_VERSION_EMAIL_WARNING = True
 #: URL to the pypi json of the application. Used to retreive the version number of the last version.
 #: You should not change it.
-CAS_NEW_VERSION_JSON_URL = "https://pypi.python.org/pypi/django-cas-server/json"
+CAS_NEW_VERSION_JSON_URL = "https://pypi.org/pypi/django-cas-server/json"
 
 #: If the service message should be displayed on the login page
 CAS_SHOW_SERVICE_MESSAGES = True

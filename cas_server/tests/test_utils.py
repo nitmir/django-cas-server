@@ -226,7 +226,7 @@ class UtilsTestCase(TestCase):
         """
         try:
             # first check if pypi is available
-            utils.requests.get("https://pypi.python.org/simple/django-cas-server/")
+            utils.requests.get("https://pypi.org/simple/django-cas-server/")
         except utils.requests.exceptions.RequestException:
             warnings.warn(
                 (

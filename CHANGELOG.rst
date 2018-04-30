@@ -36,6 +36,7 @@ Other
 
 * Migrations have been squashed for Django 2.0 support. Be sur to apply all migration before
   updating to this version
+* Update PyPi url from https://pypi.python.org to https://pypi.org
 
 v0.9.0 - 2017-11-17
 ===================

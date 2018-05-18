@@ -11,7 +11,6 @@
 # (c) 2015-2016 Valentin Samir
 """urls for the app"""
 from django.conf.urls import url
-from django.views.generic import RedirectView
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
 from cas_server import views
@@ -19,9 +18,8 @@ from cas_server import views
 app_name = "cas_server"
 
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(pattern_name="cas_server:login", permanent=False)),
     url(
-        '^login$',
+        '^(login)?$',
         sensitive_post_parameters('password')(
             views.LoginView.as_view()
         ),

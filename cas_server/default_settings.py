@@ -47,6 +47,8 @@ CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
 
 #: A dotted path to a class or a class implementing cas_server.auth.AuthUser.
 CAS_AUTH_CLASS = 'cas_server.auth.DjangoAuthUser'
+#: Whether to automatically authenticate an already logged in Django user.
+CAS_DJANGO_AUTOLOGIN = False
 #: Path to certificate authorities file. Usually on linux the local CAs are in
 #: /etc/ssl/certs/ca-certificates.crt. ``True`` tell requests to use its internal certificat
 #: authorities.

@@ -626,6 +626,23 @@ class LoginView(View, LogoutMixin):
         """
         # generate a new LT
         self.gen_lt()
+        if settings.CAS_DJANGO_AUTOLOGIN and self.request.user.is_authenticated:
+            self.request.session.set_expiry(0)
+            self.request.session["username"] = self.request.user.username
+            self.request.session["warn"] = False
+            self.request.session["authenticated"] = True
+            self.renewed = True
+            self.warned = True
+            self.user = models.User.objects.get_or_create(
+                username=self.request.session['username'],
+                session_key=self.request.session.session_key
+            )[0]
+            self.user.last_login = timezone.now()
+            self.user.save()
+            logger.info("User %s was successfully auto-authenticated" % (
+                    self.request.session["username"],
+                    ))
+            return self.USER_AUTHENTICATED
         if not self.request.session.get("authenticated") or self.renew:
             # authentication will be needed, initialize the form to use
             self.init_form()

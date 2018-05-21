@@ -14,6 +14,7 @@ Added
 -----
 * Support for python 3.6 and Django 1.11
 * Support for Django 2.0
+* Keep query string then redirecting from / to /login
 
 Fixes
 -----

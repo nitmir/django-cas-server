@@ -10,7 +10,7 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'cas_server', '0001_squashed_0021_auto_20150611_2102'), (b'cas_server', '0002_auto_20151212_1300'), (b'cas_server', '0003_auto_20151212_1721'), (b'cas_server', '0004_auto_20151218_1032'), (b'cas_server', '0005_auto_20160616_1018'), (b'cas_server', '0006_auto_20160706_1727'), (b'cas_server', '0007_auto_20160723_2252'), (b'cas_server', '0008_newversionwarning'), (b'cas_server', '0009_auto_20160814_0619'), (b'cas_server', '0010_auto_20160824_2112'), (b'cas_server', '0011_auto_20161007_1258'), (b'cas_server', '0012_auto_20170328_1610'), (b'cas_server', '0013_auto_20170329_1748')]
+    replaces = [('cas_server', '0001_squashed_0021_auto_20150611_2102'), ('cas_server', '0002_auto_20151212_1300'), ('cas_server', '0003_auto_20151212_1721'), ('cas_server', '0004_auto_20151218_1032'), ('cas_server', '0005_auto_20160616_1018'), ('cas_server', '0006_auto_20160706_1727'), ('cas_server', '0007_auto_20160723_2252'), ('cas_server', '0008_newversionwarning'), ('cas_server', '0009_auto_20160814_0619'), ('cas_server', '0010_auto_20160824_2112'), ('cas_server', '0011_auto_20161007_1258'), ('cas_server', '0012_auto_20170328_1610'), ('cas_server', '0013_auto_20170329_1748')]
 
     initial = True
 

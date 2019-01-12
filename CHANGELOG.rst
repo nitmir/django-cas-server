@@ -23,6 +23,7 @@ Fixes
   isFromNewLogin from service validation response
 * Catch error from calling django.contrib.staticfiles.templatetags.staticfiles.static
   in non-debug mode before collectstatic in cas_server.default_settings.py
+* Invalid escape sequence in regular expression
 
 Deprecated
 ----------

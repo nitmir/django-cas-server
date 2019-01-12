@@ -30,7 +30,7 @@ class BaseServicePattern(object):
         cls.service = "https://www.example.com"
         cls.service_pattern = models.ServicePattern.objects.create(
             name="example",
-            pattern="^https://www\.example\.com(/.*)?$",
+            pattern=r"^https://www\.example\.com(/.*)?$",
             proxy=proxy,
         )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=cls.service_pattern)
@@ -39,14 +39,14 @@ class BaseServicePattern(object):
         cls.service_restrict_user_fail = "https://restrict_user_fail.example.com"
         cls.service_pattern_restrict_user_fail = models.ServicePattern.objects.create(
             name="restrict_user_fail",
-            pattern="^https://restrict_user_fail\.example\.com(/.*)?$",
+            pattern=r"^https://restrict_user_fail\.example\.com(/.*)?$",
             restrict_users=True,
             proxy=proxy,
         )
         cls.service_restrict_user_success = "https://restrict_user_success.example.com"
         cls.service_pattern_restrict_user_success = models.ServicePattern.objects.create(
             name="restrict_user_success",
-            pattern="^https://restrict_user_success\.example\.com(/.*)?$",
+            pattern=r"^https://restrict_user_success\.example\.com(/.*)?$",
             restrict_users=True,
             proxy=proxy,
         )
@@ -59,7 +59,7 @@ class BaseServicePattern(object):
         cls.service_filter_fail = "https://filter_fail.example.com"
         cls.service_pattern_filter_fail = models.ServicePattern.objects.create(
             name="filter_fail",
-            pattern="^https://filter_fail\.example\.com(/.*)?$",
+            pattern=r"^https://filter_fail\.example\.com(/.*)?$",
             proxy=proxy,
         )
         models.FilterAttributValue.objects.create(
@@ -70,7 +70,7 @@ class BaseServicePattern(object):
         cls.service_filter_fail_alt = "https://filter_fail_alt.example.com"
         cls.service_pattern_filter_fail_alt = models.ServicePattern.objects.create(
             name="filter_fail_alt",
-            pattern="^https://filter_fail_alt\.example\.com(/.*)?$",
+            pattern=r"^https://filter_fail_alt\.example\.com(/.*)?$",
             proxy=proxy,
         )
         models.FilterAttributValue.objects.create(
@@ -81,7 +81,7 @@ class BaseServicePattern(object):
         cls.service_filter_success = "https://filter_success.example.com"
         cls.service_pattern_filter_success = models.ServicePattern.objects.create(
             name="filter_success",
-            pattern="^https://filter_success\.example\.com(/.*)?$",
+            pattern=r"^https://filter_success\.example\.com(/.*)?$",
             proxy=proxy,
         )
         models.FilterAttributValue.objects.create(
@@ -94,21 +94,21 @@ class BaseServicePattern(object):
         cls.service_field_needed_fail = "https://field_needed_fail.example.com"
         cls.service_pattern_field_needed_fail = models.ServicePattern.objects.create(
             name="field_needed_fail",
-            pattern="^https://field_needed_fail\.example\.com(/.*)?$",
+            pattern=r"^https://field_needed_fail\.example\.com(/.*)?$",
             user_field="uid",
             proxy=proxy,
         )
         cls.service_field_needed_success = "https://field_needed_success.example.com"
         cls.service_pattern_field_needed_success = models.ServicePattern.objects.create(
             name="field_needed_success",
-            pattern="^https://field_needed_success\.example\.com(/.*)?$",
+            pattern=r"^https://field_needed_success\.example\.com(/.*)?$",
             user_field="alias",
             proxy=proxy,
         )
         cls.service_field_needed_success_alt = "https://field_needed_success_alt.example.com"
         cls.service_pattern_field_needed_success = models.ServicePattern.objects.create(
             name="field_needed_success_alt",
-            pattern="^https://field_needed_success_alt\.example\.com(/.*)?$",
+            pattern=r"^https://field_needed_success_alt\.example\.com(/.*)?$",
             user_field="nom",
             proxy=proxy,
         )

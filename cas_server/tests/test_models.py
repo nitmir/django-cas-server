@@ -140,7 +140,7 @@ class UserTestCase(TestCase, UserModels):
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             single_log_out=True
         )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
@@ -241,7 +241,7 @@ class TicketTestCase(TestCase, UserModels, BaseServicePattern):
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             single_log_out=True
         )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)

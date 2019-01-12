@@ -1160,7 +1160,7 @@ class ValidateService(View):
                 # if pgtUrl is set, require https or localhost
                 if self.pgt_url and (
                     self.pgt_url.startswith("https://") or
-                    re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
+                    re.match(r"^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
                 ):
                     return self.process_pgturl(params)
                 else:

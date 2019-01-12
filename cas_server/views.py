@@ -13,7 +13,6 @@
 from .default_settings import settings, SessionStore
 
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
@@ -24,6 +23,10 @@ from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 import re
 import logging
@@ -1150,12 +1153,14 @@ class ValidateService(View):
                 params = {
                     'username': self.ticket.username(),
                     'attributes': self.ticket.attributs_flat(),
-                    'proxies': proxies
+                    'proxies': proxies,
+                    'auth_date': self.ticket.user.last_login.replace(microsecond=0).isoformat(),
+                    'is_new_login': 'true' if self.ticket.renew else 'false'
                 }
                 # if pgtUrl is set, require https or localhost
                 if self.pgt_url and (
                     self.pgt_url.startswith("https://") or
-                    re.match("^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
+                    re.match(r"^http://(127\.0\.0\.1|localhost)(:[0-9]+)?(/.*)?$", self.pgt_url)
                 ):
                     return self.process_pgturl(params)
                 else:
@@ -1412,7 +1417,10 @@ class SamlValidate(CsrfExemptView):
                 'Recipient': self.target,
                 'ResponseID': utils.gen_saml_id(),
                 'username': self.ticket.username(),
-                'attributes': self.ticket.attributs_flat()
+                'attributes': self.ticket.attributs_flat(),
+                'auth_date': self.ticket.user.last_login.replace(microsecond=0).isoformat(),
+                'is_new_login': 'true' if self.ticket.renew else 'false'
+
             }
             logger.info(
                 "SamlValidate: ticket %s validated for user %s on service %s." % (

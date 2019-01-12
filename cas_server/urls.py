@@ -19,7 +19,10 @@ from cas_server import views
 app_name = "cas_server"
 
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(pattern_name="cas_server:login", permanent=False)),
+    url(
+        r'^$',
+        RedirectView.as_view(pattern_name="cas_server:login", permanent=False, query_string=True)
+    ),
     url(
         '^login$',
         sensitive_post_parameters('password')(

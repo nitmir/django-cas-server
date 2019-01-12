@@ -12,7 +12,6 @@
 """Some util function for the app"""
 from .default_settings import settings
 
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
@@ -20,6 +19,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 import re
 import random

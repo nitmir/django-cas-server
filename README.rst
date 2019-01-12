@@ -21,15 +21,15 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.7, 1.8 and 1.9
-* Supports Python 2.7, 3.x
+* Supports Django 1.11 and 2.0
+* Supports Python 2.7, 3.5+
 
 Dependencies
 ============
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.7.1 < 1.11
+* Django >= 1.11 < 2.1
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -645,7 +645,7 @@ You could for example do as bellow::
     :target: https://travis-ci.org/nitmir/django-cas-server
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
-    :target: https://pypi.python.org/pypi/django-cas-server
+    :target: https://pypi.org/project/django-cas-server/
 
 .. |github_version| image:: https://badges.genua.fr/github/tag/nitmir/django-cas-server.svg?label=github
     :target: https://github.com/nitmir/django-cas-server/releases/latest

@@ -263,8 +263,10 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
             if self.test_params():
                 template = loader.get_template('cas_server/serviceValidate.xml')
                 context = Context({
-                    'username': self.server.username,
-                    'attributes': self.server.attributes
+                    'username': self.server.username.decode('utf-8'),
+                    'attributes': self.server.attributes,
+                    'auth_date': timezone.now().replace(microsecond=0).isoformat(),
+                    'is_new_login': 'true',
                 })
                 self.wfile.write(return_bytes(template.render(context), "utf8"))
             else:
@@ -299,8 +301,10 @@ class DummyCAS(BaseHTTPServer.BaseHTTPRequestHandler):
                     'expireInstant': (timezone.now() + timedelta(seconds=60)).isoformat(),
                     'Recipient': self.server.service,
                     'ResponseID': utils.gen_saml_id(),
-                    'username': self.server.username,
+                    'username': self.server.username.decode('utf-8'),
                     'attributes': self.server.attributes,
+                    'auth_date': timezone.now().replace(microsecond=0).isoformat(),
+                    'is_new_login': 'true',
                 })
                 self.wfile.write(return_bytes(template.render(context), "utf8"))
             else:

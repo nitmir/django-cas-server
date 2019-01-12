@@ -206,7 +206,7 @@ class CASClientV2(CASClientBase, ReturnUnicode):
     def parse_attributes_xml_element(cls, element, charset):
         attributes = dict()
         for attribute in element:
-            tag = cls.self.u(attribute.tag, charset).split(u"}").pop()
+            tag = cls.u(attribute.tag, charset).split(u"}").pop()
             if tag in attributes:
                 if isinstance(attributes[tag], list):
                     attributes[tag].append(cls.u(attribute.text, charset))

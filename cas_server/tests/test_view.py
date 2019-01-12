@@ -710,7 +710,7 @@ class LogoutTestCase(TestCase):
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             single_log_out=True
         )
         # return all user attributes
@@ -984,7 +984,7 @@ class AuthTestCase(TestCase):
         self.service = 'https://www.example.com'
         models.ServicePattern.objects.create(
             name="example",
-            pattern="^https://www\.example\.com(/.*)?$"
+            pattern=r"^https://www\.example\.com(/.*)?$"
         )
 
     @override_settings(CAS_AUTH_SHARED_SECRET='test')
@@ -1120,7 +1120,7 @@ class ValidateTestCase(TestCase):
         self.service = 'https://www.example.com'
         self.service_pattern = models.ServicePattern.objects.create(
             name="example",
-            pattern="^https://www\.example\.com(/.*)?$"
+            pattern=r"^https://www\.example\.com(/.*)?$"
         )
         models.ReplaceAttributName.objects.create(name="*", service_pattern=self.service_pattern)
         # setting up a test service and pattern using a multi valued user attribut as username
@@ -1128,14 +1128,14 @@ class ValidateTestCase(TestCase):
         self.service_user_field = "https://user_field.example.com"
         self.service_pattern_user_field = models.ServicePattern.objects.create(
             name="user field",
-            pattern="^https://user_field\.example\.com(/.*)?$",
+            pattern=r"^https://user_field\.example\.com(/.*)?$",
             user_field="alias"
         )
         # setting up a test service and pattern using a single valued user attribut as username
         self.service_user_field_alt = "https://user_field_alt.example.com"
         self.service_pattern_user_field_alt = models.ServicePattern.objects.create(
             name="user field alt",
-            pattern="^https://user_field_alt\.example\.com(/.*)?$",
+            pattern=r"^https://user_field_alt\.example\.com(/.*)?$",
             user_field="nom"
         )
 
@@ -1272,7 +1272,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.service = 'http://127.0.0.1:45678'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^https?://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             # allow to request PGT by the service
             proxy_callback=True,
             # allow to request PT for the service
@@ -1285,14 +1285,14 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.service_user_field = "https://user_field.example.com"
         self.service_pattern_user_field = models.ServicePattern.objects.create(
             name="user field",
-            pattern="^https://user_field\.example\.com(/.*)?$",
+            pattern=r"^https://user_field\.example\.com(/.*)?$",
             user_field="alias"
         )
         # test service pattern using the attribute nom as username
         self.service_user_field_alt = "https://user_field_alt.example.com"
         self.service_pattern_user_field_alt = models.ServicePattern.objects.create(
             name="user field alt",
-            pattern="^https://user_field_alt\.example\.com(/.*)?$",
+            pattern=r"^https://user_field_alt\.example\.com(/.*)?$",
             user_field="nom"
         )
 
@@ -1300,7 +1300,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.service_one_attribute = "https://one_attribute.example.com"
         self.service_pattern_one_attribute = models.ServicePattern.objects.create(
             name="one_attribute",
-            pattern="^https://one_attribute\.example\.com(/.*)?$"
+            pattern=r"^https://one_attribute\.example\.com(/.*)?$"
         )
         models.ReplaceAttributName.objects.create(
             name="nom",
@@ -1311,7 +1311,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.service_replace_attribute_list = "https://replace_attribute_list.example.com"
         self.service_pattern_replace_attribute_list = models.ServicePattern.objects.create(
             name="replace_attribute_list",
-            pattern="^https://replace_attribute_list\.example\.com(/.*)?$",
+            pattern=r"^https://replace_attribute_list\.example\.com(/.*)?$",
         )
         models.ReplaceAttributValue.objects.create(
             attribut="alias",
@@ -1327,7 +1327,7 @@ class ValidateServiceTestCase(TestCase, XmlContent):
         self.service_replace_attribute = "https://replace_attribute.example.com"
         self.service_pattern_replace_attribute = models.ServicePattern.objects.create(
             name="replace_attribute",
-            pattern="^https://replace_attribute\.example\.com(/.*)?$",
+            pattern=r"^https://replace_attribute\.example\.com(/.*)?$",
         )
         models.ReplaceAttributValue.objects.create(
             attribut="nom",
@@ -1683,7 +1683,7 @@ class ProxyTestCase(TestCase, BaseServicePattern, XmlContent):
         self.service = 'http://127.0.0.1'
         self.service_pattern = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^http://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^http://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             proxy=True,
             proxy_callback=True
         )
@@ -1857,7 +1857,7 @@ class SamlValidateTestCase(TestCase, BaseServicePattern, XmlContent):
         self.service_pgt = 'http://127.0.0.1'
         self.service_pattern_pgt = models.ServicePattern.objects.create(
             name="localhost",
-            pattern="^http://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
+            pattern=r"^http://127\.0\.0\.1(:[0-9]+)?(/.*)?$",
             proxy=True,
             proxy_callback=True
         )
@@ -1907,9 +1907,13 @@ class SamlValidateTestCase(TestCase, BaseServicePattern, XmlContent):
             "//samla:AttributeStatement/samla:Attribute",
             namespaces={'samla': "urn:oasis:names:tc:SAML:1.0:assertion"}
         )
+        ignore_attrs = {
+            "authenticationDate", "longTermAuthenticationRequestTokenUsed", "isFromNewLogin"
+        } - set(original_attributes.keys())
         attrs = set()
         for attr in attributes:
-            attrs.add((attr.attrib['AttributeName'], attr.getchildren()[0].text))
+            if not attr.attrib['AttributeName'] in ignore_attrs:
+                attrs.add((attr.attrib['AttributeName'], attr.getchildren()[0].text))
         original = set()
         for key, value in original_attributes.items():
             if isinstance(value, list):

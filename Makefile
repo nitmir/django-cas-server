@@ -37,8 +37,8 @@ dist:
 	python setup.py sdist
 
 test_venv/bin/python:
-	virtualenv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django<1.11'
+	python3 -m venv test_venv
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=2.0,<2.1'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas

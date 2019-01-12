@@ -7,6 +7,39 @@ All notable changes to this project will be documented in this file.
    :depth: 2
 
 
+v1.0.0 - 2019-01-12
+===================
+
+Added
+-----
+* Support for python 3.6 and Django 1.11
+* Support for Django 2.0
+* Keep query string then redirecting from / to /login
+
+Fixes
+-----
+
+* Add missing attributes authenticationDate, longTermAuthenticationRequestTokenUsed and
+  isFromNewLogin from service validation response
+* Catch error from calling django.contrib.staticfiles.templatetags.staticfiles.static
+  in non-debug mode before collectstatic in cas_server.default_settings.py
+* Invalid escape sequence in regular expression
+
+Deprecated
+----------
+
+* Support for Django <1.11 is dropped, it should still works for this version.
+  Next versions will most probably be not compatible with Django <1.11
+* Support for python 3.4 is dropped, it should still works for this version.
+  Next versions may or may not works with python 3.4.
+
+Other
+-----
+
+* Migrations have been squashed for Django 2.0 support. Be sur to apply all migration before
+  updating to this version
+* Update PyPi url from https://pypi.python.org to https://pypi.org
+
 v0.9.0 - 2017-11-17
 ===================
 
@@ -26,7 +59,6 @@ Fixed
   ``'NoneType' object has no attribute 'getitem'`` describe in #21
 * Increase the max size of usernames (30 chars to 250)
 * Fix XSS js injection
-
 
 
 v0.8.0 - 2017-03-08

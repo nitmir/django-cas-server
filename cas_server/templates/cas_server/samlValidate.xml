@@ -29,6 +29,15 @@
               </ConfirmationMethod>
             </SubjectConfirmation>
           </Subject>
+          <Attribute AttributeName="authenticationDate" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+            <AttributeValue>{{auth_date}}</AttributeValue>
+          </Attribute>
+          <Attribute AttributeName="longTermAuthenticationRequestTokenUsed" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+            <AttributeValue>false</AttributeValue>{# we do not support long-term (Remember-Me) auth #}
+          </Attribute>
+          <Attribute AttributeName="isFromNewLogin" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+            <AttributeValue>{{is_new_login}}</AttributeValue>
+          </Attribute>
 {% for name, value in attributes %}          <Attribute AttributeName="{{name}}" AttributeNamespace="http://www.ja-sig.org/products/cas/">
             <AttributeValue>{{value}}</AttributeValue>
           </Attribute>

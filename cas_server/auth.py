@@ -277,6 +277,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 settings.CAS_LDAP_SERVER,
                 settings.CAS_LDAP_USER,
                 settings.CAS_LDAP_PASSWORD,
+                client_strategy="RESTARTABLE",
                 auto_bind=True
             )
             cls._conn = conn

@@ -6,12 +6,20 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Fixes
+-----
+
+* Set ldap3 client_strategy from sync to sync-restartable
 
 v1.0.0 - 2019-01-12
 ===================
 
 Added
 -----
+
 * Support for python 3.6 and Django 1.11
 * Support for Django 2.0
 * Keep query string then redirecting from / to /login

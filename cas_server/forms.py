@@ -31,7 +31,10 @@ class BootsrapForm(forms.Form):
             # Only tweak the field if it will be displayed
             if not isinstance(field.widget, widgets.HiddenInput):
                 attrs = {}
-                if isinstance(field.widget, (widgets.Input, widgets.Select, widgets.Textarea)):
+                if (
+                    isinstance(field.widget, (widgets.Input, widgets.Select, widgets.Textarea)) and
+                    not isinstance(field.widget, (widgets.CheckboxInput,))
+                ):
                     attrs['class'] = "form-control"
                 if isinstance(field.widget, (widgets.Input, widgets.Textarea)) and field.label:
                     attrs["placeholder"] = field.label

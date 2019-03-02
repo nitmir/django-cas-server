@@ -6,12 +6,27 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v1.1.0 - 2019-03-02
+===================
+
+Added
+-----
+
+* Support for Django 2.1
+
+Fixes
+-----
+
+* Checkbox position on the login page
+* Set ldap3 client_strategy from sync to sync-restartable
+* Deprecation warning for {% load staticfiles %} and django.contrib.staticfiles
 
 v1.0.0 - 2019-01-12
 ===================
 
 Added
 -----
+
 * Support for python 3.6 and Django 1.11
 * Support for Django 2.0
 * Keep query string then redirecting from / to /login

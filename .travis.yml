@@ -15,6 +15,10 @@ matrix:
     env: TOX_ENV=py35-django20
   - python: "3.6"
     env: TOX_ENV=py36-django20
+  - python: "3.5"
+    env: TOX_ENV=py35-django21
+  - python: "3.6"
+    env: TOX_ENV=py36-django21
   - python: "2.7"
     env: TOX_ENV=coverage
 cache:

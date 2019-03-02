@@ -11,7 +11,7 @@
 # (c) 2015-2016 Valentin Samir
 """Default values for the app's settings"""
 from django.conf import settings
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from django.utils.translation import ugettext_lazy as _
 
 from importlib import import_module

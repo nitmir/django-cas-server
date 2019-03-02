@@ -17,8 +17,9 @@ Added
 Fixes
 -----
 
-* Fix checkbox position on the login page
+* Checkbox position on the login page
 * Set ldap3 client_strategy from sync to sync-restartable
+* Deprecation warning for {% load staticfiles %} and django.contrib.staticfiles
 
 v1.0.0 - 2019-01-12
 ===================

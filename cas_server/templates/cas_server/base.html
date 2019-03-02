@@ -1,4 +1,4 @@
-{% load i18n %}{% load staticfiles %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+{% load i18n %}{% load static %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
 <html{% if LANGUAGE_CODE %} lang="{{LANGUAGE_CODE}}"{% endif %}>
     <head>
         <meta charset="utf-8">

@@ -35,10 +35,8 @@ except ValueError:
 CAS_SHOW_POWERED = True
 #: URLs to css and javascript external components.
 CAS_COMPONENT_URLS = {
-    "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
-    "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
-    "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
-    "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+    "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+    "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
     "jquery": "//code.jquery.com/jquery.min.js",
 }
 #: Path to the template showed on /login then the user is not autenticated.

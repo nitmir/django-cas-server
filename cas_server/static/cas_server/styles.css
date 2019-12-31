@@ -1,75 +1,34 @@
 html, body {
-    height: 100%;
-}
-body {
-  padding-top: 40px;
-  padding-bottom: 0;
+  height: 100%;
   background-color: #eee;
 }
-
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-  margin-bottom: 10px;
-}
-.form-signin .checkbox {
-  font-weight: normal;
-}
-.form-signin .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
-}
-.form-signin .form-control:focus {
-  z-index: 2;
-}
-.form-signin input[type="text"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+.cover-container {
+  max-width: 50em;
 }
 
+/* Page title */
 #app-name {
-    text-align: center;
+  color: #000;
+  text-shadow: 0 .05rem .2rem rgba(255, 255, 255, .5);
 }
 #app-name img {
-     width:110px;
+  width: 110px;
+  margin-right: 1rem;
 }
-
-/* Wrapper for page content to push down footer */
-#wrap {
-    min-height: 100%;
-    height: auto;
-    height: 100%;
-    /* Negative indent footer by it's height */
-    margin: 0 auto -40px;
-}
-#footer {
-    height: 40px;
-    text-align: center;
-}
-#footer p {
-  padding-top: 10px;
-}
-
 @media screen and (max-width: 680px) {
-    #app-name {
-        margin: 0;
-    }
-    #app-name img {
-        display: block;
-        margin: auto;
-    }
-    body {
-      padding-top: 0;
-      padding-bottom: 0;
-    }
+  #app-name img {
+      display: block;
+      margin: auto;
+  }
+}
+
+/* Add icons to login form */
+/* Font-Awesome attribution is already done inside SVG files */
+.form-signin input[type="text"] {
+  background: right 1rem top 50% / 5% no-repeat url('fa-user.svg');
+  padding-right: 3rem;
+}
+.form-signin input[type="password"] {
+  background: right 1rem top 50% / 5% no-repeat url('fa-lock.svg');
+  padding-right: 3rem;
 }

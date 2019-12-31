@@ -206,14 +206,12 @@ Template settings
   Default is a key icon. Set it to ``False`` to disable it.
 * ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
-  having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
-  ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
+  having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``, ``"jquery"``.
+  The default is::
 
         {
-            "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
-            "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
-            "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
-            "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+            "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+            "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
             "jquery": "//code.jquery.com/jquery.min.js",
         }
 

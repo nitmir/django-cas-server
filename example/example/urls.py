@@ -8,6 +8,11 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # (c) 2019 Alexandre Iooss
+"""
+Router for the example project
+
+It also routes Django Admin, AdminDocs and Auth
+"""
 
 from django.conf.urls import include, url
 from django.contrib import admin

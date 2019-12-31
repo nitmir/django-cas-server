@@ -17,16 +17,17 @@ import os
 
 from django.utils.translation import gettext_lazy as _
 
-# Compatibility with Bootstrap 3
-from django.contrib.messages import constants as messages
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'CHANGE_ME_PLEASE_I_AM_VERY_IMPORTANT'
+# Customize these settings in settings_local.py file
+try:
+    from settings_local import *
+except ImportError:
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = 'CHANGE_ME_PLEASE_I_AM_VERY_IMPORTANT'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -152,9 +153,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
-
-# Customize these settings in a seperate config file
-try:
-    from settings_local import *
-except ImportError:
-    pass

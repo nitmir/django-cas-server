@@ -1,9 +1,9 @@
 language: python
 matrix:
   include:
-  - python: "2.7"
+  - python: "3.7"
     env: TOX_ENV=flake8
-  - python: "2.7"
+  - python: "3.7"
     env: TOX_ENV=check_rst
   - python: "2.7"
     env: TOX_ENV=py27-django111
@@ -19,7 +19,7 @@ matrix:
     env: TOX_ENV=py35-django21
   - python: "3.6"
     env: TOX_ENV=py36-django21
-  - python: "2.7"
+  - python: "3.7"
     env: TOX_ENV=coverage
 cache:
   directories:

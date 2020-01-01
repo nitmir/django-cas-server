@@ -1,5 +1,7 @@
 #!/bin/bash
-BASEDIR="$1"
+set -x
+set -e
+BASEDIR="$(realpath "$1")"
 PROJECT_NAME="$2"
 
 TITLE="Coverage report of $PROJECT_NAME"
@@ -31,7 +33,7 @@ fi
 
 VENV="$(mktemp -d)"
 HTMLREPORT="$(mktemp -d)"
-virtualenv "$VENV"
+virtualenv -p python3 "$VENV"
 "$VENV/bin/pip" install coverage
 "$VENV/bin/coverage" html --title "$TITLE" --directory "$HTMLREPORT"
 rm -rf "$VENV"
@@ -43,12 +45,14 @@ cd "$BASEDIR"
 
 rm -rf "$HTMLREPORT"
 
-
+set +x
+echo "curl https://badges.genua.fr/coverage/ ..."
 curl https://badges.genua.fr/coverage/ \
     -F "secret=$COVERAGE_TOKEN" \
     -F "tar=@$BASEDIR/coverage.tar.gz" \
     -F "project=$PROJECT_NAME" \
     -F "branch=$BRANCH"
 
+set -x
 rm "$BASEDIR/coverage.tar.gz"
 

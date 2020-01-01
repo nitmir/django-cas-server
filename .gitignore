@@ -14,6 +14,7 @@ docs/django.inv
 
 .tox
 test_venv
+cas_venv
 .coverage
 htmlcov/
 tox_logs/

@@ -31,35 +31,29 @@
         </header>
         {% if auto_submit %}</noscript>{% endif %}
 
-        <div class="row justify-content-center">
-          <main class="card border-dark" style="max-width: 30rem;">
-            {% if auto_submit %}<noscript>{% endif %}
-            <div class="card-header text-center">
-              {% block ante_messages %}{% endblock %}
-            </div>
-            {% if auto_submit %}</noscript>{% endif %}
-            <div class="card-body">
-              {% for message in messages %}
-                  <div {% spaceless %}
-                      {% if message.level == message_levels.DEBUG %}
-                          class="alert alert-warning"
-                      {% elif message.level == message_levels.INFO %}
-                          class="alert alert-info"
-                      {% elif message.level == message_levels.SUCCESS %}
-                          class="alert alert-success"
-                      {% elif message.level == message_levels.WARNING %}
-                          class="alert alert-warning"
-                      {% else %}
-                          class="alert alert-danger"
-                      {% endif %}
-                  {% endspaceless %}>
-                      <p>{{message}}</p>
-                  </div>
-              {% endfor %}
-              {% block content %}{% endblock %}
-            </div>
-          </main>
-        </div>
+        <main class="card border-dark mx-auto" style="max-width: 30rem;">
+          {% block ante_messages %}{% endblock %}
+          <div class="card-body">
+            {% for message in messages %}
+              <div {% spaceless %}
+                  {% if message.level == message_levels.DEBUG %}
+                      class="alert alert-warning"
+                  {% elif message.level == message_levels.INFO %}
+                      class="alert alert-info"
+                  {% elif message.level == message_levels.SUCCESS %}
+                      class="alert alert-success"
+                  {% elif message.level == message_levels.WARNING %}
+                      class="alert alert-warning"
+                  {% else %}
+                      class="alert alert-danger"
+                  {% endif %}
+              {% endspaceless %}>
+                  <p>{{message}}</p>
+              </div>
+            {% endfor %}
+            {% block content %}{% endblock %}
+          </div>
+        </main>
 
         {% if settings.CAS_SHOW_POWERED %}
         <footer class="mt-auto">

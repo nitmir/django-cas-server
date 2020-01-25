@@ -1,0 +1,33 @@
+{% load cas_server %}
+
+{% for error in form.non_field_errors %}
+  <div class="alert alert-danger alert-dismissable">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {{error}}
+  </div>
+{% endfor %}
+
+{% for field in form %}{% if not field|is_hidden %}
+<div class="form-group
+  {% if not form.non_field_errors %}
+    {% if field.errors %} has-error
+    {% elif form.cleaned_data %} has-success
+    {% endif %}
+  {% endif %}"
+>{% spaceless %}
+  {% if field|is_checkbox %}
+    <div class="form-check">
+      <span class="form-check-input mt-0">{{field}}</span>
+      <label class="form-check-label" for="{{field.auto_id}}">
+        {{field.label}}
+      </label>
+    </div>
+  {% else %}
+    <label class="control-label" for="{{field.auto_id}}">{{field.label|capfirst}}</label>
+    {{field}}
+  {% endif %}
+  {% for error in field.errors %}
+    <span class="help-block">{{error}}</span>
+  {% endfor %}
+{% endspaceless %}</div>
+{% else %}{{field}}{% endif %}{% endfor %}

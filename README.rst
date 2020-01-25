@@ -207,13 +207,16 @@ Template settings
 * ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
 * ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
   having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
-  ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
+  ``bootstrap4_css``, ``bootstrap4_js``, ``"html5shiv"``, ``"respond"``, ``"jquery"``.
+  The default is::
 
         {
             "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
             "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
             "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
             "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+            "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+            "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
             "jquery": "//code.jquery.com/jquery.min.js",
         }
 
@@ -245,16 +248,18 @@ Template settings
 * ``CAS_INFO_MESSAGES_ORDER``: A list of message names. Order in which info-box messages are
   displayed. Use an empty list to disable messages display. The default is ``[]``.
 * ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
-  is not autenticated.  The default is ``"cas_server/login.html"``.
+  is not autenticated.  The default is ``"cas_server/bs4/login.html"``.
 * ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then
   the user is authenticated and has asked to be warned before being connected
-  to a service. The default is ``"cas_server/warn.html"``.
+  to a service. The default is ``"cas_server/bs4/warn.html"``.
 * ``CAS_LOGGED_TEMPLATE``: Path to the template showed on ``/login`` then to user is
-  authenticated. The default is ``"cas_server/logged.html"``.
+  authenticated. The default is ``"cas_server/bs4/logged.html"``.
 * ``CAS_LOGOUT_TEMPLATE``: Path to the template showed on ``/logout`` then to user
-  is being disconnected. The default is ``"cas_server/logout.html"``
+  is being disconnected. The default is ``"cas_server/bs4/logout.html"``
 * ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to ``/login`` after they
   logged out instead of displaying ``CAS_LOGOUT_TEMPLATE``. The default is ``False``.
+
+Note that the old bootstrap3 template is available in ``cas_server/bs3/``
 
 
 Authentication settings

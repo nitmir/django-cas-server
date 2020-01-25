@@ -1,0 +1,21 @@
+{% extends "cas_server/bs4/base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="alert alert-success" role="alert">{% blocktrans %}<h3>Log In Successful</h3>You have successfully logged into the Central Authentication Service.<br/>For security reasons, please Log Out and Exit your web browser when you are done accessing services that require authentication!{% endblocktrans %}</div>
+<form class="form-signin" method="get" action="logout">
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="all" value="1">{% trans "Log me out from all my sessions" %}
+    </label>
+  </div>
+  {% if settings.CAS_FEDERATE and request.COOKIES.remember_provider %}
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="forget_provider" value="1">{% trans "Forget the identity provider" %}
+    </label>
+  </div>
+  {% endif %}
+  <button class="btn btn-danger btn-block btn-lg" type="submit">{% trans "Logout" %}</button>
+</form>
+{% endblock %}
+

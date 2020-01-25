@@ -1,0 +1,33 @@
+{% extends "cas_server/bs4/base.html" %}
+{% load i18n %}
+
+{% block ante_messages %}
+  {% if auto_submit %}<noscript>{% endif %}
+  <div class="card-header text-center">
+    <h2 class="form-signin-heading">{% trans "Please log in" %}</h2>
+  </div>
+  {% if auto_submit %}</noscript>{% endif %}
+{% endblock %}
+
+{% block content %}
+  <form class="form-signin" method="post" id="login_form"{% if post_url %} action="{{post_url}}"{% endif %}>
+    {% csrf_token %}
+    {% include "cas_server/bs4/form.html" %}
+    {% if auto_submit %}<noscript>{% endif %}
+    <button class="btn btn-primary btn-block btn-lg" type="submit">{% trans "Login" %}</button>
+    {% if auto_submit %}</noscript>{% endif %}
+  </form>
+{% endblock %}
+
+{% block javascript_inline %}
+jQuery(function( $ ){
+  $("#id_warn").click(function(e){
+    if($("#id_warn").is(':checked')){
+      createCookie("warn", "on", 10 * 365);
+    } else {
+      eraseCookie("warn");
+    }
+  });
+});
+{% if auto_submit %}document.getElementById('login_form').submit(); // SUBMIT FORM{% endif %}
+{% endblock %}

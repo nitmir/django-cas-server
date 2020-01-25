@@ -1,11 +1,11 @@
-{% extends "cas_server/base.html" %}
+{% extends "cas_server/bs4/base.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block content %}
       <form class="form-signin" method="post">
 {% csrf_token %}
-{% include "cas_server/form.html" %}
+{% include "cas_server/bs4/form.html" %}
 <button class="btn btn-primary btn-block btn-lg" type="submit">{% trans "Connect to the service" %}</button>
       </form>
 {% endblock %}

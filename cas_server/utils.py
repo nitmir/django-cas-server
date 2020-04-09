@@ -593,7 +593,9 @@ class LdapHashUserPassword(object):
         if scheme in cls.schemes_nosalt:
             return b""
         elif scheme == b'{CRYPT}':
-            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
+            if b'$' in hashed_passord:
+                return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
+            return hashed_passord.split(b'}', 1)[-1]
         else:
             try:
                 hashed_passord = base64.b64decode(hashed_passord[len(scheme):])

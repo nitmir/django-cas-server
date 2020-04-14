@@ -259,7 +259,7 @@ def update_url(url, params):
             value = value.encode('utf-8')
         params[key] = value
     url_parts = list(urlparse(url))
-    query = dict(parse_qsl(url_parts[4]))
+    query = dict(parse_qsl(url_parts[4], keep_blank_values=True))
     query.update(params)
     # make the params order deterministic
     query = list(query.items())

@@ -7,6 +7,5 @@ tox>=1.8.1
 pytest>=2.6.4
 pytest-django>=2.8.0
 pytest-pythonpath>=0.3
-pytest-warnings
 pytest-cov>=2.2.1
 mock>=1

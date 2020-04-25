@@ -18,11 +18,12 @@ from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
 try:
     from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
 except ImportError:
     from django.core.urlresolvers import reverse
+    from django.utils.translation import ugettext_lazy as _
 
 import re
 import random

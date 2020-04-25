@@ -24,7 +24,11 @@ try:
     from django.utils.encoding import python_2_unicode_compatible
     from django.utils.translation import ugettext as _
 except ImportError:
-    def python_2_unicode_compatible(f): return f
+    def python_2_unicode_compatible(func):
+        """
+        We use Django >= 3.0 with Python >= 3.4, we don't need Python 2 compatibility.
+        """
+        return func
     from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 try:

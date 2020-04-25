@@ -13,10 +13,15 @@ from .default_settings import settings
 
 from django import forms
 from django.forms import widgets
-from django.utils.translation import ugettext_lazy as _
 
 import cas_server.utils as utils
 import cas_server.models as models
+
+import sys
+if sys.version_info < (3, ):
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.translation import gettext_lazy as _
 
 
 class BootsrapForm(forms.Form):

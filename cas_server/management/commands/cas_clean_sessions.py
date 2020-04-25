@@ -11,9 +11,14 @@
 # (c) 2016 Valentin Samir
 """Clean deleted sessions management command"""
 from django.core.management.base import BaseCommand
-from django.utils.translation import ugettext_lazy as _
 
 from ... import models
+
+import sys
+if sys.version_info < (3,):
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.translation import gettext_lazy as _
 
 
 class Command(BaseCommand):

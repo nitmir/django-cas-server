@@ -29,7 +29,7 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 2.1
+* Django >= 1.11 <= 3.0
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4

@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11 and 2.0
+* Supports Django 1.11, 2.2 and 3.0
 * Supports Python 2.7, 3.5+
 
 Dependencies
@@ -29,7 +29,7 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 <= 3.0
+* Django >= 1.11 < 3.1
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -50,28 +50,28 @@ Here is a table with the name of python packages and the corresponding packages 
 them on debian like systems and centos like systems.
 You should try as much as possible to use system packages as they are automatically updated when
 you update your system. You can then install Not Available (N/A)
-packages on your system using pip inside a virtualenv as described in the `Installation`_ section.
-For use with python3, just replace python(2) in the table by python3.
+packages on your system using pip3 inside a virtualenv as described in the `Installation`_ section.
+For use with python2, just replace python3(6) in the table by python.
 
-+------------------+-------------------------+---------------------+
-| python package   | debian like systems     | centos like systems |
-+==================+=========================+=====================+
-| Django           | python-django           | python-django       |
-+------------------+-------------------------+---------------------+
-| requests         | python-requests         | python-requests     |
-+------------------+-------------------------+---------------------+
-| requests_futures | python-requests-futures | N/A                 |
-+------------------+-------------------------+---------------------+
-| lxml             | python-lxml             | python-lxml         |
-+------------------+-------------------------+---------------------+
-| six              | python-six              | python-six          |
-+------------------+-------------------------+---------------------+
-| ldap3            | python-ldap3            | python-ldap3        |
-+------------------+-------------------------+---------------------+
-| psycopg2         | python-psycopg2         | python-psycopg2     |
-+------------------+-------------------------+---------------------+
-| mysql-python     | python-mysqldb          | python2-mysql       |
-+------------------+-------------------------+---------------------+
++------------------+--------------------------+---------------------+
+| python package   | debian like systems      | centos like systems |
++==================+==========================+=====================+
+| Django           | python3-django           | python36-django     |
++------------------+--------------------------+---------------------+
+| requests         | python3-requests         | python36-requests   |
++------------------+--------------------------+---------------------+
+| requests_futures | python3-requests-futures | N/A                 |
++------------------+--------------------------+---------------------+
+| lxml             | python3-lxml             | python36-lxml       |
++------------------+--------------------------+---------------------+
+| six              | python3-six              | python36-six        |
++------------------+--------------------------+---------------------+
+| ldap3            | python3-ldap3            | python36-ldap3      |
++------------------+--------------------------+---------------------+
+| psycopg2         | python3-psycopg2         | python36-psycopg2   |
++------------------+--------------------------+---------------------+
+| mysql-python     | python3-mysqldb          | python36-mysql      |
++------------------+--------------------------+---------------------+
 
 Installation
 ============
@@ -84,23 +84,18 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python-django python-requests python-six python-lxml python-requests-futures
+    $ sudo apt-get install python3-django python3-requests python3-six python3-lxml python3-requests-futures
 
    On debian jessie, you can use the version of python-django available in the
    `backports <https://backports.debian.org/Instructions/>`_.
 
-   On centos like systems::
+   On centos like systems with epel enabled::
 
-    $ sudo yum install python-django python-requests python-six python-lxml
+    $ sudo yum install python36-django python36-requests python36-six python36-lxml
 
 3. Create a virtualenv::
 
-    $ virtualenv --system-site-packages cas_venv
-    Running virtualenv with interpreter /var/www/html/cas-server/bin/python2
-    Using real prefix '/usr'
-    New python executable in cas/bin/python2
-    Also creating executable in cas/bin/python
-    Installing setuptools, pip...done.
+    $ virtualenv -p python3 --system-site-packages cas_venv
 
 4. And `activate it <https://virtualenv.pypa.io/en/stable/userguide/#activate-script>`__::
 

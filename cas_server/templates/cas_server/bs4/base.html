@@ -1,0 +1,91 @@
+{% load i18n %}{% load static %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html{% if LANGUAGE_CODE %} lang="{{LANGUAGE_CODE}}"{% endif %}>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>{% block title %}{% trans "Central Authentication Service"  %}{% endblock %}</title>
+        <link href="{{settings.CAS_COMPONENT_URLS.bootstrap4_css}}" rel="stylesheet" crossorigin="anonymous">
+        {% if settings.CAS_FAVICON_URL %}<link rel="shortcut icon" href="{{settings.CAS_FAVICON_URL}}" />{% endif %}
+        <link href="{% static "cas_server/bs4/styles.css" %}" rel="stylesheet">
+    </head>
+    <body>
+      <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        {% if auto_submit %}<noscript>{% endif %}
+        <header class="mb-auto">
+          <h1 id="app-name" class="text-center">
+            {% if settings.CAS_LOGO_URL %}<img src="{{settings.CAS_LOGO_URL}}" alt="cas-logo" />{% endif %}
+            {% trans "Central Authentication Service" %}
+          </h1>
+          {% for msg in CAS_INFO_RENDER %}
+            <div class="alert alert-{{msg.type}}{% if msg.discardable %} alert-dismissable{% endif %}">
+              {% if msg.discardable %}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{% endif %}
+              {{msg.message}}
+            </div>
+          {% endfor %}
+          {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+            <div class="alert alert-info alert-dismissable">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <p>{% blocktrans %}A new version of the application is available. This instance runs {{VERSION}} and the last version is {{LAST_VERSION}}. Please consider upgrading.{% endblocktrans %}</p>
+            </div>
+          {% endif %}
+        </header>
+        {% if auto_submit %}</noscript>{% endif %}
+
+        <main class="card border-dark mx-auto" style="max-width: 30rem;">
+          {% block ante_messages %}{% endblock %}
+          <div class="card-body">
+            {% for message in messages %}
+              <div {% spaceless %}
+                  {% if message.level == message_levels.DEBUG %}
+                      class="alert alert-warning"
+                  {% elif message.level == message_levels.INFO %}
+                      class="alert alert-info"
+                  {% elif message.level == message_levels.SUCCESS %}
+                      class="alert alert-success"
+                  {% elif message.level == message_levels.WARNING %}
+                      class="alert alert-warning"
+                  {% else %}
+                      class="alert alert-danger"
+                  {% endif %}
+              {% endspaceless %}>
+                  <p>{{message}}</p>
+              </div>
+            {% endfor %}
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+
+        {% if settings.CAS_SHOW_POWERED %}
+        <footer class="mt-auto">
+            <p class="text-center">
+              <a class="text-muted" href="https://pypi.org/project/django-cas-server/">
+                django-cas-server powered
+              </a>
+            </p>
+        </footer>
+        {% endif %}
+      </div>
+
+      <script src="{{settings.CAS_COMPONENT_URLS.jquery}}" crossorigin="anonymous"></script>
+      <script src="{{settings.CAS_COMPONENT_URLS.bootstrap4_js}}" crossorigin="anonymous"></script>
+      <script src="{% static "cas_server/functions.js" %}"></script>
+      <script type="text/javascript">
+      {% if settings.CAS_NEW_VERSION_HTML_WARNING and upgrade_available %}
+      discard_and_remember("#alert-version", "cas-alert-version", "{{LAST_VERSION}}");
+      {% endif %}
+      {% for msg in CAS_INFO_RENDER %}
+      {% if msg.discardable %}
+      discard_and_remember("#info-{{msg.name}}", "cas-info-{{msg.name}}", "{{msg.hash}}");
+      {% endif %}
+      {% endfor %}
+      {% block javascript_inline %}{% endblock %}
+      </script>
+      {% block javascript %}{% endblock %}
+    </body>
+</html>
+<!--
+Powered by django-cas-server version {{VERSION}}
+
+Pypi: https://pypi.org/project/django-cas-server/
+github: https://github.com/nitmir/django-cas-server
+-->

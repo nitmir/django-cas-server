@@ -9,8 +9,13 @@
 #
 # (c) 2015-2016 Valentin Samir
 """django config module"""
-from django.utils.translation import ugettext_lazy as _
 from django.apps import AppConfig
+
+import sys
+if sys.version_info < (3, ):
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.translation import gettext_lazy as _
 
 
 class CasAppConfig(AppConfig):

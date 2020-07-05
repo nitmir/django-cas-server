@@ -6,8 +6,8 @@ CAS Server
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
 
-By default, the authentication process use django internal users but you can easily
-use any sources (see the `Authentication backend`_ section and auth classes in the auth.py file)
+By default, the authentication process uses django internal users but you can easily
+use any source (see the `Authentication backend`_ section and auth classes in the auth.py file)
 
 .. contents:: Table of Contents
 
@@ -16,12 +16,12 @@ Features
 
 * Support CAS version 1.0, 2.0, 3.0
 * Support Single Sign Out
-* Configuration of services via the django Admin application
+* Configuration of services via the Django Admin application
 * Fine control on which user's attributes are passed to which service
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11 and 2.0
+* Supports Django 1.11, 2.2 and 3.0
 * Supports Python 2.7, 3.5+
 
 Dependencies
@@ -29,16 +29,16 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 2.1
+* Django >= 1.11 < 3.1
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
 * six >= 1.8
 
-Minimal version of packages dependancy are just indicative and meens that ``django-cas-server`` has
+Minimal version of package dependencies are just indicative and means that ``django-cas-server`` has
 been tested with it. Previous versions of dependencies may or may not work.
 
-Additionally, denpending of the `Authentication backend`_ you plan to use, you may need the following
+Additionally, depending on the `Authentication backend`_ you plan to use, you may need the following
 python packages:
 
 * ldap3
@@ -46,32 +46,32 @@ python packages:
 * mysql-python
 
 
-Here there is a table with the name of python packages and the corresponding packages providing
+Here is a table with the name of python packages and the corresponding packages providing
 them on debian like systems and centos like systems.
-You should try as much as possible to use system packages as there are automatically updated then
+You should try as much as possible to use system packages as they are automatically updated when
 you update your system. You can then install Not Available (N/A)
-packages on your system using pip inside a virtualenv as described in the `Installation`_ section.
-For use with python3, just replace python(2) in the table by python3.
+packages on your system using pip3 inside a virtualenv as described in the `Installation`_ section.
+For use with python2, just replace python3(6) in the table by python.
 
-+------------------+-------------------------+---------------------+
-| python package   | debian like systems     | centos like systems |
-+==================+=========================+=====================+
-| Django           | python-django           | python-django       |
-+------------------+-------------------------+---------------------+
-| requests         | python-requests         | python-requests     |
-+------------------+-------------------------+---------------------+
-| requests_futures | python-requests-futures | N/A                 |
-+------------------+-------------------------+---------------------+
-| lxml             | python-lxml             | python-lxml         |
-+------------------+-------------------------+---------------------+
-| six              | python-six              | python-six          |
-+------------------+-------------------------+---------------------+
-| ldap3            | python-ldap3            | python-ldap3        |
-+------------------+-------------------------+---------------------+
-| psycopg2         | python-psycopg2         | python-psycopg2     |
-+------------------+-------------------------+---------------------+
-| mysql-python     | python-mysqldb          | python2-mysql       |
-+------------------+-------------------------+---------------------+
++------------------+--------------------------+---------------------+
+| python package   | debian like systems      | centos like systems |
++==================+==========================+=====================+
+| Django           | python3-django           | python36-django     |
++------------------+--------------------------+---------------------+
+| requests         | python3-requests         | python36-requests   |
++------------------+--------------------------+---------------------+
+| requests_futures | python3-requests-futures | N/A                 |
++------------------+--------------------------+---------------------+
+| lxml             | python3-lxml             | python36-lxml       |
++------------------+--------------------------+---------------------+
+| six              | python3-six              | python36-six        |
++------------------+--------------------------+---------------------+
+| ldap3            | python3-ldap3            | python36-ldap3      |
++------------------+--------------------------+---------------------+
+| psycopg2         | python3-psycopg2         | python36-psycopg2   |
++------------------+--------------------------+---------------------+
+| mysql-python     | python3-mysqldb          | python36-mysql      |
++------------------+--------------------------+---------------------+
 
 Installation
 ============
@@ -84,23 +84,18 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python-django python-requests python-six python-lxml python-requests-futures
+    $ sudo apt-get install python3-django python3-requests python3-six python3-lxml python3-requests-futures
 
    On debian jessie, you can use the version of python-django available in the
    `backports <https://backports.debian.org/Instructions/>`_.
 
-   On centos like systems::
+   On centos like systems with epel enabled::
 
-    $ sudo yum install python-django python-requests python-six python-lxml
+    $ sudo yum install python36-django python36-requests python36-six python36-lxml
 
 3. Create a virtualenv::
 
-    $ virtualenv --system-site-packages cas_venv
-    Running virtualenv with interpreter /var/www/html/cas-server/bin/python2
-    Using real prefix '/usr'
-    New python executable in cas/bin/python2
-    Also creating executable in cas/bin/python
-    Installing setuptools, pip...done.
+    $ virtualenv -p python3 --system-site-packages cas_venv
 
 4. And `activate it <https://virtualenv.pypa.io/en/stable/userguide/#activate-script>`__::
 
@@ -126,7 +121,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
    `PYTHONPATH <https://docs.python.org/2/using/cmdline.html#envvar-PYTHONPATH>`_
    (for instance by symlinking ``cas_server`` to the root of your django project).
 
-7. Open ``cas_project/settings.py`` in you favourite editor and follow the quick start section.
+7. Open ``cas_project/settings.py`` in your favourite editor and follow the quick start section.
 
 
 Quick start
@@ -166,15 +161,15 @@ Quick start
    ``cas_clean_tickets`` and ``cas_clean_sessions``.
 
    * ``clearsessions``:  please see `Clearing the session store <https://docs.djangoproject.com/en/stable/topics/http/sessions/#clearing-the-session-store>`_.
-   * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purge from
+   * ``cas_clean_tickets``: old tickets and timed-out tickets do not get purged from
      the database automatically. They are just marked as invalid. ``cas_clean_tickets``
-     is a clean-up management command for this purpose. It send SingleLogOut request
-     to services with timed out tickets and delete them.
+     is a clean-up management command for this purpose. It sends SingleLogOut requests
+     to services with timed out tickets and deletes them.
    * ``cas_clean_sessions``: Logout and purge users (sending SLO requests) that are
-     inactive since more than ``SESSION_COOKIE_AGE``. The default value for is ``1209600``
+     inactive more than ``SESSION_COOKIE_AGE``. The default value is ``1209600``
      seconds (2 weeks). You probably should reduce it to something like ``86400`` seconds (1 day).
 
-   You could for example do as bellow::
+   You could, for example, do as below::
 
      0   0  * * * cas-user /path/to/project/manage.py clearsessions
      */5 *  * * * cas-user /path/to/project/manage.py cas_clean_tickets
@@ -184,7 +179,7 @@ Quick start
 
 6. Start the development server and visit http://127.0.0.1:8000/admin/
    to add a first service allowed to authenticate user against the CAS
-   (you'll need the Admin app enabled). See the `Service Patterns`_ section bellow.
+   (you'll need the Admin app enabled). See the `Service Patterns`_ section below.
 
 7. Visit http://127.0.0.1:8000/cas/ to login with your django users.
 
@@ -200,34 +195,37 @@ All settings are optional. Add them to ``settings.py`` to customize ``django-cas
 Template settings
 -----------------
 
-* ``CAS_LOGO_URL``: URL to the logo showed in the up left corner on the default
-  templates. Set it to ``False`` to disable it.
+* ``CAS_LOGO_URL``: URL to the logo shown in the upper left corner on the default
+  template. Set it to ``False`` to disable it.
 * ``CAS_FAVICON_URL``: URL to the favicon (shortcut icon) used by the default templates.
   Default is a key icon. Set it to ``False`` to disable it.
 * ``CAS_SHOW_POWERED``: Set it to ``False`` to hide the powered by footer. The default is ``True``.
-* ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionnary
+* ``CAS_COMPONENT_URLS``: URLs to css and javascript external components. It is a dictionary
   having the five following keys: ``"bootstrap3_css"``, ``"bootstrap3_js"``,
-  ``"html5shiv"``, ``"respond"``, ``"jquery"``. The default is::
+  ``bootstrap4_css``, ``bootstrap4_js``, ``"html5shiv"``, ``"respond"``, ``"jquery"``.
+  The default is::
 
         {
             "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
             "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
             "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
             "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+            "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+            "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
             "jquery": "//code.jquery.com/jquery.min.js",
         }
 
-  if you omit some keys of the dictionnary, the default value for these keys is used.
+  if you omit some keys of the dictionary, the default value for these keys is used.
 * ``CAS_SHOW_SERVICE_MESSAGES``: Messages displayed about the state of the service on the login page.
   The default is ``True``.
 * ``CAS_INFO_MESSAGES``: Messages displayed in info-boxes on the html pages of the default templates.
-  It is a dictionnary mapping message name to a message dict. A message dict has 3 keys:
+  It is a dictionary mapping message name to a message dict. A message dict has 3 keys:
 
   * ``message``: A unicode message to display, potentially wrapped around ugettex_lazy
   * ``discardable``: A boolean, specify if the users can close the message info-box
-  * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+  * ``type``: One of info, success, warning, danger. The type of the info-box.
 
-  ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explain
+  ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explains
   roughly the purpose of a CAS. The default is::
 
     {
@@ -238,23 +236,25 @@ Template settings
                 u"your session expires or you logout."
             ),
             "discardable": True,
-            "type": "info",  # one of info, success, info, warning, danger
+            "type": "info",  # one of info, success, warning, danger
         },
     }
 
 * ``CAS_INFO_MESSAGES_ORDER``: A list of message names. Order in which info-box messages are
   displayed. Use an empty list to disable messages display. The default is ``[]``.
-* ``CAS_LOGIN_TEMPLATE``: Path to the template showed on ``/login`` then the user
-  is not autenticated.  The default is ``"cas_server/login.html"``.
-* ``CAS_WARN_TEMPLATE``: Path to the template showed on ``/login?service=...`` then
+* ``CAS_LOGIN_TEMPLATE``: Path to the template shown on ``/login`` when the user
+  is not autenticated.  The default is ``"cas_server/bs4/login.html"``.
+* ``CAS_WARN_TEMPLATE``: Path to the template shown on ``/login?service=...`` when
   the user is authenticated and has asked to be warned before being connected
-  to a service. The default is ``"cas_server/warn.html"``.
-* ``CAS_LOGGED_TEMPLATE``: Path to the template showed on ``/login`` then to user is
-  authenticated. The default is ``"cas_server/logged.html"``.
-* ``CAS_LOGOUT_TEMPLATE``: Path to the template showed on ``/logout`` then to user
-  is being disconnected. The default is ``"cas_server/logout.html"``
+  to a service. The default is ``"cas_server/bs4/warn.html"``.
+* ``CAS_LOGGED_TEMPLATE``: Path to the template shown on ``/login`` when the user is
+  authenticated. The default is ``"cas_server/bs4/logged.html"``.
+* ``CAS_LOGOUT_TEMPLATE``: Path to the template shown on ``/logout`` when the user
+  is being disconnected. The default is ``"cas_server/bs4/logout.html"``
 * ``CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT``: Should we redirect users to ``/login`` after they
   logged out instead of displaying ``CAS_LOGOUT_TEMPLATE``. The default is ``False``.
+
+Note that the old bootstrap3 template is available in ``cas_server/bs3/``
 
 
 Authentication settings
@@ -265,23 +265,24 @@ Authentication settings
   Available classes bundled with ``django-cas-server`` are listed below in the
   `Authentication backend`_ section.
 
-* ``SESSION_COOKIE_AGE``: This is a django settings. Here, it control the delay in seconds after
+* ``SESSION_COOKIE_AGE``: This is a django setting. Here, it controls the delay in seconds after
   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
   reduce it to something like ``86400`` seconds (1 day).
 
-* ``CAS_TGT_VALIDITY``: Max time after with the user MUST reauthenticate. Let it to `None` for no
-  max time.This can be used to force refreshing cached informations only available upon user
+* ``CAS_TGT_VALIDITY``: Max time after which the user MUST reauthenticate. Set it to `None` for no
+  max time. This can be used to force refreshing cached information only available upon user
   authentication like the user attributes in federation mode or with the ldap auth in bind mode.
   The default is ``None``.
 
 * ``CAS_PROXY_CA_CERTIFICATE_PATH``: Path to certificate authorities file. Usually on linux
   the local CAs are in ``/etc/ssl/certs/ca-certificates.crt``. The default is ``True`` which
-  tell requests to use its internal certificat authorities. Settings it to ``False`` should
-  disable all x509 certificates validation and MUST not be done in production.
-  x509 certificate validation is perform upon PGT issuance.
+  tells requests to use its internal certificate authorities. Setting it to ``False`` should
+  disable all x509 certificate validation and MUST not be done in production.
+  x509 certificate validation is performed upon PGT issuance.
 
-* ``CAS_SLO_MAX_PARALLEL_REQUESTS``: Maximum number of parallel single log out requests send.
-  If more requests need to be send, there are queued. The default is ``10``.
+* ``CAS_SLO_MAX_PARALLEL_REQUESTS``: Maximum number of parallel single log out requests sent.
+  If more requests need to be sent, they are queued. The default is ``10``.
+  
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
 
@@ -290,7 +291,7 @@ Federation settings
 
 * ``CAS_FEDERATE``: A boolean for activating the federated mode (see the `Federation mode`_
   section below). The default is ``False``.
-* ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after witch the cookie use for "remember my identity
+* ``CAS_FEDERATE_REMEMBER_TIMEOUT``: Time after which the cookie used for "remember my identity
   provider" expire. The default is ``604800``, one week. The cookie is called
   ``_remember_provider``.
 
@@ -298,7 +299,7 @@ Federation settings
 New version warnings settings
 -----------------------------
 
-* ``CAS_NEW_VERSION_HTML_WARNING``: A boolean for diplaying a warning on html pages then a new
+* ``CAS_NEW_VERSION_HTML_WARNING``: A boolean for diplaying a warning on html pages that a new
   version of the application is avaible. Once closed by a user, it is not displayed to this user
   until the next new version. The default is ``True``.
 * ``CAS_NEW_VERSION_EMAIL_WARNING``: A boolean for sending a email to ``settings.ADMINS`` when a new
@@ -319,22 +320,22 @@ Tickets validity settings
 Tickets miscellaneous settings
 ------------------------------
 
-* ``CAS_TICKET_LEN``: Default ticket length. All CAS implementation MUST support ST and PT
+* ``CAS_TICKET_LEN``: Default ticket length. All CAS implementations MUST support ST and PT
   up to 32 chars, PGT and PGTIOU up to 64 chars and it is RECOMMENDED that all tickets up
-  to 256 chars are supports. Here the default is ``64``.
+  to 256 chars are supported. Here the default is ``64``.
 * ``CAS_LT_LEN``: Length of the login tickets. Login tickets are only processed by ``django-cas-server``
-  thus there is no length restriction on it. The default is ``CAS_TICKET_LEN``.
+  thus there are no length restrictions on it. The default is ``CAS_TICKET_LEN``.
 * ``CAS_ST_LEN``: Length of the service tickets. The default is ``CAS_TICKET_LEN``.
-  You may need to lower is to ``32`` if you use some old clients.
+  You may need to lower it to ``32`` if you use some old clients.
 * ``CAS_PT_LEN``: Length of the proxy tickets. The default is ``CAS_TICKET_LEN``.
-  This length should be the same as ``CAS_ST_LEN``. You may need to lower is to ``32``
+  This length should be the same as ``CAS_ST_LEN``. You may need to lower it to ``32``
   if you use some old clients.
 * ``CAS_PGT_LEN``: Length of the proxy granting tickets. The default is ``CAS_TICKET_LEN``.
 * ``CAS_PGTIOU_LEN``: Length of the proxy granting tickets IOU. The default is ``CAS_TICKET_LEN``.
 
 * ``CAS_LOGIN_TICKET_PREFIX``: Prefix of login tickets. The default is ``"LT"``.
 * ``CAS_SERVICE_TICKET_PREFIX``: Prefix of service tickets. The default is ``"ST"``.
-  The CAS specification mandate that service tickets MUST begin with the characters ST
+  The CAS specification mandates that service tickets MUST begin with the characters ST
   so you should not change this.
 * ``CAS_PROXY_TICKET_PREFIX``: Prefix of proxy ticket. The default is ``"PT"``.
 * ``CAS_PROXY_GRANTING_TICKET_PREFIX``: Prefix of proxy granting ticket. The default is ``"PGT"``.
@@ -344,7 +345,7 @@ Tickets miscellaneous settings
 Mysql backend settings
 ----------------------
 Deprecated, see the `Sql backend settings`_.
-Only usefull if you are using the mysql authentication backend:
+Only useful if you are using the mysql authentication backend:
 
 * ``CAS_SQL_HOST``: Host for the SQL server. The default is ``"localhost"``.
 * ``CAS_SQL_USERNAME``: Username for connecting to the SQL server.
@@ -358,12 +359,12 @@ Only usefull if you are using the mysql authentication backend:
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin this $
+    should begin with $
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
     {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
-    The hashed password in the database is compare to the hexadecimal digest of the clear
+    The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
@@ -372,10 +373,10 @@ Only usefull if you are using the mysql authentication backend:
 
 Sql backend settings
 --------------------
-Only usefull if you are using the sql authentication backend. You must add a ``"cas_server"``
+Only useful if you are using the sql authentication backend. You must add a ``"cas_server"``
 database to `settings.DATABASES <https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DATABASES>`__
 as defined in the django documentation. It is then the database
-use by the sql backend.
+used by the sql backend.
 
 * ``CAS_SQL_USER_QUERY``: The query performed upon user authentication.
   The username must be in field ``username``, the password in ``password``,
@@ -384,61 +385,61 @@ use by the sql backend.
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin this $
+    should begin with $
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
     {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
-    The hashed password in the database is compare to the hexadecimal digest of the clear
+    The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
   The default is ``"crypt"``.
 * ``CAS_SQL_PASSWORD_CHARSET``: Charset the SQL users passwords was hash with. This is needed to
-  encode the user sended password before hashing it for comparison. The default is ``"utf-8"``.
+  encode the user submitted password before hashing it for comparison. The default is ``"utf-8"``.
 
 
 Ldap backend settings
 ---------------------
-Only usefull if you are using the ldap authentication backend:
+Only useful if you are using the ldap authentication backend:
 
 * ``CAS_LDAP_SERVER``: Address of the LDAP server. The default is ``"localhost"``.
 * ``CAS_LDAP_USER``: User bind address, for example ``"cn=admin,dc=crans,dc=org"`` for
   connecting to the LDAP server.
 * ``CAS_LDAP_PASSWORD``: Password for connecting to the LDAP server.
 * ``CAS_LDAP_BASE_DN``: LDAP search base DN, for example ``"ou=data,dc=crans,dc=org"``.
-* ``CAS_LDAP_USER_QUERY``: Search filter for searching user by username. User inputed usernames are
+* ``CAS_LDAP_USER_QUERY``: Search filter for searching user by username. User entered usernames are
   escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%s)"``
-* ``CAS_LDAP_USERNAME_ATTR``: Attribute used for users usernames. The default is ``"uid"``
-* ``CAS_LDAP_PASSWORD_ATTR``: Attribute used for users passwords. The default is ``"userPassword"``
+* ``CAS_LDAP_USERNAME_ATTR``: Attribute used for user's usernames. The default is ``"uid"``
+* ``CAS_LDAP_PASSWORD_ATTR``: Attribute used for user's passwords. The default is ``"userPassword"``
 * ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin this $
+    should begin with $
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
     {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
-    The hashed password in the database is compare to the hexadecimal digest of the clear
+    The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
   * ``"bind``, the user credentials are used to bind to the ldap database and retreive the user
     attribute. In this mode, the settings ``CAS_LDAP_PASSWORD_ATTR`` and ``CAS_LDAP_PASSWORD_CHARSET``
-    are ignored, and it is the ldap server that perform password check. The counterpart is that
+    are ignored, and it is the ldap server that performs the password check. The counterpart is that
     the user attributes are only available upon user password check and so are cached for later
-    use. All the other modes directly fetch the user attributes from the database whenever there
-    are needed. This mean that is you use this mode, they can be some difference between the
-    attributes in database and the cached ones if changes happend in the database after the user
-    authentiate. See the parameter ``CAS_TGT_VALIDITY`` to force user to reauthenticate periodically.
+    use. All the other modes directly fetch the user attributes from the database whenever they
+    are needed. This mean that is you use this mode, there can be some differences between the
+    attributes in database and the cached ones if changes happen in the database after the user
+    authentiates. See the parameter ``CAS_TGT_VALIDITY`` to force user to reauthenticate periodically.
 
   The default is ``"ldap"``.
-* ``CAS_LDAP_PASSWORD_CHARSET``: Charset the LDAP users passwords was hash with. This is needed to
-  encode the user sended password before hashing it for comparison. The default is ``"utf-8"``.
+* ``CAS_LDAP_PASSWORD_CHARSET``: Charset the LDAP users passwords was hashed with. This is needed to
+  encode the user submitted password before hashing it for comparison. The default is ``"utf-8"``.
 
 
 Test backend settings
 ---------------------
-Only usefull if you are using the test authentication backend:
+Only useful if you are using the test authentication backend:
 
 * ``CAS_TEST_USER``: Username of the test user. The default is ``"test"``.
 * ``CAS_TEST_PASSWORD``: Password of the test user. The default is ``"test"``.
@@ -452,19 +453,19 @@ Authentication backend
 
 ``django-cas-server`` comes with some authentication backends:
 
-* dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempt fails.
+* dummy backend ``cas_server.auth.DummyAuthUser``: all authentication attempts fail.
 * test backend ``cas_server.auth.TestAuthUser``: username, password and returned attributes
   for the user are defined by the ``CAS_TEST_*`` settings.
 * django backend ``cas_server.auth.DjangoAuthUser``: Users are authenticated against django users system.
   This is the default backend. The returned attributes are the fields available on the user model.
 * mysql backend ``cas_server.auth.MysqlAuthUser``: Deprecated, use the sql backend instead.
-  see the `Mysql backend settings`_ section. The returned attributes are those return by sql query
+  see the `Mysql backend settings`_ section. The returned attributes are those returned by sql query
   ``CAS_SQL_USER_QUERY``.
 * sql backend ``cas_server.auth.SqlAuthUser``: see the `Sql backend settings`_ section.
-  The returned attributes are those return by sql query ``CAS_SQL_USER_QUERY``.
+  The returned attributes are those returned by sql query ``CAS_SQL_USER_QUERY``.
 * ldap backend ``cas_server.auth.LdapAuthUser``: see the `Ldap backend settings`_ section.
   The returned attributes are those of the ldap node returned by the query filter ``CAS_LDAP_USER_QUERY``.
-* federated backend ``cas_server.auth.CASFederateAuth``: It is automatically used then ``CAS_FEDERATE`` is ``True``.
+* federated backend ``cas_server.auth.CASFederateAuth``: It is automatically used when ``CAS_FEDERATE`` is ``True``.
   You should not set it manually without setting ``CAS_FEDERATE`` to ``True``.
 
 
@@ -542,7 +543,7 @@ Service Patterns
 In a CAS context, ``Service`` refers to the application the client is trying to access.
 By extension we use ``service`` for the URL of such an application.
 
-By default, ``django-cas-server`` do not allow any service to use the CAS to authenticate users.
+By default, ``django-cas-server`` does not allow any service to use the CAS to authenticate users.
 In order to allow services, you need to connect to the django admin interface using a django
 superuser, and add a first service pattern.
 
@@ -555,7 +556,7 @@ A service pattern comes with 9 fields:
 * ``Pattern``: a regular expression used to match services.
 * ``User field``: the user attribute to use as username for services matching this service pattern.
   Leave it empty to use the login name.
-* ``Restrict username``: if checked, only login name defined below are allowed to get tickets
+* ``Restrict username``: if checked, only login names defined below are allowed to get tickets
   for services matching this service pattern.
 * ``Proxy``: if checked, allow the creation of Proxy Ticket for services matching this
   service pattern. Otherwise, only Service Ticket will be created.
@@ -564,25 +565,25 @@ A service pattern comes with 9 fields:
   Hence you must only check this for trusted services that need it. (For instance, a webmail needs
   Proxy Ticket to authenticate himself as the user to the imap server).
 * ``Single log out``: Check it to send Single Log Out requests to authenticated services matching
-  this service pattern. SLO requests are send to all services the user is authenticated to then
-  the user disconnect.
+  this service pattern. SLO requests are sent to all services the user is authenticated to when
+  the user disconnects.
 * ``Single log out callback``: The http(s) URL to POST the SLO requests. If empty, the service URL
   is used. This field is useful to allow non http services (imap, smtp, ftp) to handle SLO requests.
 
 A service pattern has 4 associated models:
 
 * ``Usernames``: a list of username associated with the ``Restrict username`` field
-* ``Replace attribut names``: a list of user attributes to send to the service. Choose the name
-  used for sending the attribute by setting ``Remplacement`` or leave it empty to leave it unchanged.
-* ``Replace attribut values``: a list of sent user attributes for which value needs to be tweak.
+* ``Replace attribute names``: a list of user attributes to send to the service. Choose the name
+  used for sending the attribute by setting ``Replacement`` or leave it empty to leave it unchanged.
+* ``Replace attribute values``: a list of sent user attributes for which value needs to be tweaked.
   Replace the attribute value by the string obtained by replacing the leftmost non-overlapping
   occurrences of ``pattern`` in string by ``replace``. In ``replace`` backslash escapes are processed.
-  Matched groups are captures by \1, \2, etc.
-* ``Filter attribut values``: a list of user attributes for which value needs to match a regular
+  Matched groups are captured by \1, \2, etc.
+* ``Filter attribute values``: a list of user attributes for which value needs to match a regular
   expression. For instance, service A may need an email address, and you only want user with
   an email address to connect to it. To do so, put ``email`` in ``Attribute`` and ``.*`` in ``pattern``.
 
-Then a user ask a ticket for a service, the service URL is compare against each service patterns
+When a user asks for a ticket for a service, the service URL is compared against each service pattern
 sorted by ``position``. The first service pattern that matches the service URL is chosen.
 Hence, you should give low ``position`` to very specific patterns like
 ``^https://www\.example\.com(/.*)?$`` and higher ``position`` to generic patterns like ``^https://.*``.
@@ -593,9 +594,9 @@ So the service URL ``https://www.examle.com`` will use the service pattern for
 Federation mode
 ===============
 
-``django-cas-server`` comes with a federation mode. Then ``CAS_FEDERATE`` is ``True``,
-user are invited to choose an identity provider on the login page, then, they are redirected
-to the provider CAS to authenticate. This provider transmit to ``django-cas-server`` the user
+``django-cas-server`` comes with a federation mode. When ``CAS_FEDERATE`` is ``True``,
+users are invited to choose an identity provider on the login page, then, they are redirected
+to the provider CAS to authenticate. This provider transmits to ``django-cas-server`` the user
 username and attributes. The user is now logged in on ``django-cas-server`` and can use
 services using ``django-cas-server`` as CAS.
 
@@ -635,7 +636,7 @@ Then using federate mode, you should add one command to a daily crontab: ``cas_c
 This command clean the local cache of federated user from old unused users.
 
 
-You could for example do as bellow::
+You could for example do as below::
 
   10   0  * * * cas-user /path/to/project/manage.py cas_clean_federate
 

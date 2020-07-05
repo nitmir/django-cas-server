@@ -16,12 +16,20 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from django.utils.translation import ugettext as _
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.views.generic import View
-from django.utils.encoding import python_2_unicode_compatible
+try:
+    from django.utils.encoding import python_2_unicode_compatible
+    from django.utils.translation import ugettext as _
+except ImportError:
+    def python_2_unicode_compatible(func):
+        """
+        We use Django >= 3.0 with Python >= 3.4, we don't need Python 2 compatibility.
+        """
+        return func
+    from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 try:
     from django.urls import reverse
@@ -256,7 +264,7 @@ class FederateAuth(CsrfExemptView):
         self.service_url = service_url
         return CASFederateValidateUser(provider, service_url, renew=renew)
 
-    def post(self, request, provider=None):
+    def post(self, request, provider=None, *args, **kwargs):
         """
             method called on POST request
 
@@ -1395,7 +1403,7 @@ class SamlValidate(CsrfExemptView):
     ticket = None
     root = None
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         """
             method called on POST request on this view
 

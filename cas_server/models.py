@@ -15,9 +15,17 @@ from .default_settings import settings, SessionStore
 from django.db import models
 from django.db.models import Q
 from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
+try:
+    from django.utils.encoding import python_2_unicode_compatible
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    def python_2_unicode_compatible(func):
+        """
+        We use Django >= 3.0 with Python >= 3.4, we don't need Python 2 compatibility.
+        """
+        return func
+    from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mail
 
 import re

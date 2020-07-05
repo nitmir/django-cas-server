@@ -18,11 +18,12 @@ from django.contrib.messages import constants as DEFAULT_MESSAGE_LEVELS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
 try:
     from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
 except ImportError:
     from django.core.urlresolvers import reverse
+    from django.utils.translation import ugettext_lazy as _
 
 import re
 import random
@@ -258,7 +259,7 @@ def update_url(url, params):
             value = value.encode('utf-8')
         params[key] = value
     url_parts = list(urlparse(url))
-    query = dict(parse_qsl(url_parts[4]))
+    query = dict(parse_qsl(url_parts[4], keep_blank_values=True))
     query.update(params)
     # make the params order deterministic
     query = list(query.items())
@@ -593,7 +594,9 @@ class LdapHashUserPassword(object):
         if scheme in cls.schemes_nosalt:
             return b""
         elif scheme == b'{CRYPT}':
-            return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
+            if b'$' in hashed_passord:
+                return b'$'.join(hashed_passord.split(b'$', 3)[:-1])[len(scheme):]
+            return hashed_passord.split(b'}', 1)[-1]
         else:
             try:
                 hashed_passord = base64.b64decode(hashed_passord[len(scheme):])

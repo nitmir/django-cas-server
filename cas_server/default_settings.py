@@ -12,9 +12,14 @@
 """Default values for the app's settings"""
 from django.conf import settings
 from django.templatetags.static import static
-from django.utils.translation import ugettext_lazy as _
 
 from importlib import import_module
+
+import sys
+if sys.version_info < (3, ):
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.translation import gettext_lazy as _
 
 
 try:
@@ -39,17 +44,19 @@ CAS_COMPONENT_URLS = {
     "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
     "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
     "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
+    "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
+    "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
     "jquery": "//code.jquery.com/jquery.min.js",
 }
 #: Path to the template showed on /login then the user is not autenticated.
-CAS_LOGIN_TEMPLATE = 'cas_server/login.html'
+CAS_LOGIN_TEMPLATE = 'cas_server/bs4/login.html'
 #: Path to the template showed on /login?service=... then the user is authenticated and has asked
 #: to be warned before being connected to a service.
-CAS_WARN_TEMPLATE = 'cas_server/warn.html'
+CAS_WARN_TEMPLATE = 'cas_server/bs4/warn.html'
 #: Path to the template showed on /login then to user is authenticated.
-CAS_LOGGED_TEMPLATE = 'cas_server/logged.html'
+CAS_LOGGED_TEMPLATE = 'cas_server/bs4/logged.html'
 #: Path to the template showed on /logout then to user is being disconnected.
-CAS_LOGOUT_TEMPLATE = 'cas_server/logout.html'
+CAS_LOGOUT_TEMPLATE = 'cas_server/bs4/logout.html'
 #: Should we redirect users to /login after they logged out instead of displaying
 #: :obj:`CAS_LOGOUT_TEMPLATE`.
 CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False

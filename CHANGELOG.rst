@@ -6,6 +6,38 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v1.2.0 - 2020-07-05
+===================
+
+Added
+-----
+
+* Bootstrap 4 templates
+* Support for Django 2.2 and 3.0
+
+Fixes
+-----
+
+* Replace calls to add_description_unit. As of Sphinx 2.4, the deprecated
+  add_description_unit function has been removed.
+* Fix CRYPT-DES hash method for LDAP
+* Fix various spelling miskate in README.rst
+* Service URL: keep blank GET arguments
+
+Changed
+-------
+
+* Use python3 for flake8, check_rst and coverage
+* Update README.rst quickstart for using python3 by default
+
+Removed
+-------
+
+* Drop support for Django 2.0 and 2.1 as it reached end of life.
+  We still keep Django 1.11 as it is the last supported release
+  by python2 AND the currently packaged version of Django in
+  Debian Buster (current stable).
+
 v1.1.0 - 2019-03-02
 ===================
 

@@ -136,13 +136,13 @@ Quick start
     )
 
    For internationalization support, add "django.middleware.locale.LocaleMiddleware"
-   to your MIDDLEWARE_CLASSES setting like this::
+   to your MIDDLEWARE setting like this::
 
-    MIDDLEWARE_CLASSES = (
+    MIDDLEWARE = [
         ...
         'django.middleware.locale.LocaleMiddleware',
         ...
-    )
+    ]
 
 2. Include the cas_server URLconf in your project urls.py like this::
 

@@ -27,6 +27,46 @@ matrix:
     env: TOX_ENV=py38-django30
   - python: "3.8"
     env: TOX_ENV=coverage
+  - python: "3.8"
+    env: TOX_ENV=flake8
+    arch: ppc64le
+  - python: "3.8"
+    env: TOX_ENV=check_rst
+    arch: ppc64le
+  - python: "2.7"
+    env: TOX_ENV=py27-django111
+    arch: ppc64le
+  - python: "3.5"
+    env: TOX_ENV=py35-django111
+    arch: ppc64le
+  - python: "3.6"
+    env: TOX_ENV=py36-django111
+    arch: ppc64le
+  - python: "3.5"
+    env: TOX_ENV=py35-django20
+    arch: ppc64le
+  - python: "3.6"
+    env: TOX_ENV=py36-django20
+    arch: ppc64le
+  - python: "3.5"
+    env: TOX_ENV=py35-django21
+    arch: ppc64le
+  - python: "3.6"
+    env: TOX_ENV=py36-django21
+    arch: ppc64le
+  - python: "3.7"
+    env: TOX_ENV=py37-django22
+    arch: ppc64le
+  - python: "3.8"
+    env: TOX_ENV=py38-django22
+    arch: ppc64le
+  - python: "3.8"
+    env: TOX_ENV=py38-django30
+    arch: ppc64le
+  - python: "3.8"
+    env: TOX_ENV=coverage
+    arch: ppc64le
+
 cache:
   directories:
     - $HOME/.cache/pip/http/

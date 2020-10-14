@@ -180,7 +180,7 @@ class FederatedUser(JsonAttributes):
     #: The last ticket used to authenticate :attr:`username` against :attr:`provider`
     ticket = models.CharField(max_length=255)
     #: Last update timespampt. Usually, the last time :attr:`ticket` has been set.
-    last_update = models.DateTimeField(auto_now=True)
+    last_update = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.federated_username

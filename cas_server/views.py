@@ -288,7 +288,8 @@ class FederateAuth(CsrfExemptView):
         # else, a User is trying to log in using an identity provider
         except FederatedIendityProvider.DoesNotExist:
             # Manually checking for csrf to protect the code below
-            reason = CsrfViewMiddleware().process_view(request, None, (), {})
+            reason = CsrfViewMiddleware(lambda request: HttpResponse()) \
+                    .process_view(request, None, (), {})
             if reason is not None:  # pragma: no cover (csrf checks are disabled during tests)
                 return reason  # Failed the test, stop here.
             form = forms.FederateSelect(request.POST)

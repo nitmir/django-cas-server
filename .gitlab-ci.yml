@@ -2,7 +2,7 @@ before_script:
 - pip install tox setuptools
 
 flake8:
-  image: "python:2.7"
+  image: "python:3.9"
   cache:
     key: flake8
     paths:
@@ -11,7 +11,7 @@ flake8:
   - tox -e flake8
 
 check_rst:
-  image: "python:2.7"
+  image: "python:3.9"
   cache:
     key: check_rst
     paths:
@@ -19,107 +19,98 @@ check_rst:
   script:
   - tox -e check_rst
 
-py27-django17:
+py27-django111:
   image: "python:2.7"
   cache:
-    key: py27-django17
+    key: py27-django111
     paths:
-    - .tox/py27-django17
+    - .tox/py27-django111
   script:
-  - tox -e py27-django17
+  - tox -e py27-django111
 
-py27-django18:
-  image: "python:2.7"
-  cache:
-    key: py27-django18
-    paths:
-    - .tox/py27-django18
-  script:
-  - tox -e py27-django18
-
-py27-django19:
-  image: "python:2.7"
-  cache:
-    key: py27-django19
-    paths:
-    - .tox/py27-django19
-  script:
-  - tox -e py27-django19
-
-py27-django110:
-  image: "python:2.7"
-  cache:
-    key: py27-django110
-    paths:
-    - .tox/py27-django110
-  script:
-  - tox -e py27-django110
-
-py34-django17:
-  image: "python:3.4"
-  cache:
-    key: py34-django17
-    paths:
-    - .tox/py34-django17
-  script:
-  - tox -e py34-django17
-
-py34-django18:
-  image: "python:3.4"
-  cache:
-    key: py34-django18
-    paths:
-    - .tox/py34-django18
-  script:
-  - tox -e py34-django18
-
-py34-django19:
-  image: "python:3.4"
-  cache:
-    key: py34-django19
-    paths:
-    - .tox/py34-django19
-  script:
-  - tox -e py34-django19
-
-py34-django110:
-  image: "python:3.4"
-  cache:
-    key: py34-django110
-    paths:
-    - .tox/py34-django110
-  script:
-  - tox -e py34-django110
-
-py35-django18:
+py35-django111:
   image: "python:3.5"
   cache:
-    key: py35-django18
+    key: py35-django111
     paths:
-    - .tox/py35-django18
+    - .tox/py35-django111
   script:
-  - tox -e py35-django18
+  - tox -e py35-django111
 
-py35-django19:
-  image: "python:3.5"
+py36-django111:
+  image: "python:3.6"
   cache:
-    key: py35-django19
+    key: py36-django111
     paths:
-    - .tox/py35-django19
+    - .tox/py36-django111
   script:
-  - tox -e py35-django19
+  - tox -e py36-django111
 
-py35-django110:
-  image: "python:3.5"
+py37-django22:
+  image: "python:3.7"
   cache:
-    key: py35-django110
+    key: py37-django22
     paths:
-    - .tox/py35-django110
+    - .tox/py37-django22
   script:
-  - tox -e py35-django110
+  - tox -e py37-django22
+
+py38-django22:
+  image: "python:3.8"
+  cache:
+    key: py38-django22
+    paths:
+    - .tox/py38-django22
+  script:
+  - tox -e py38-django22
+
+py38-django30:
+  image: "python:3.8"
+  cache:
+    key: py38-django30
+    paths:
+    - .tox/py38-django30
+  script:
+  - tox -e py38-django30
+
+py38-django31:
+  image: "python:3.8"
+  cache:
+    key: py38-django31
+    paths:
+    - .tox/py38-django31
+  script:
+  - tox -e py38-django31
+
+py39-django22:
+  image: "python:3.9"
+  cache:
+    key: py39-django22
+    paths:
+    - .tox/py39-django22
+  script:
+  - tox -e py39-django22
+
+py39-django30:
+  image: "python:3.9"
+  cache:
+    key: py39-django30
+    paths:
+    - .tox/py39-django30
+  script:
+  - tox -e py39-django30
+
+py39-django31:
+  image: "python:3.9"
+  cache:
+    key: py39-django31
+    paths:
+    - .tox/py39-django31
+  script:
+  - tox -e py39-django31
 
 coverage:
-  image: "python:2.7"
+  image: "python:3.9"
   cache:
     key: coverage
     paths:

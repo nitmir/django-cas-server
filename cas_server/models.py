@@ -939,7 +939,7 @@ class Ticket(JsonAttributes):
             :rtype: :obj:`list` of :obj:`tuple` of :obj:`unicode`
         """
         attributes = []
-        for key, value in self.attributs.items():
+        for key, value in self.user.attributs.items():
             if isinstance(value, list):
                 for elt in value:
                     attributes.append((key, elt))

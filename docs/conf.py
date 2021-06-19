@@ -350,7 +350,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "python": ('https://docs.python.org/', None),
-    "django": ('https://docs.djangoproject.com/en/1.9/', 'django.inv'),
+    "django": ('https://docs.djangoproject.com/en/3.2/', 'django.inv'),
 }
 
 autodoc_member_order = 'bysource'
@@ -360,8 +360,8 @@ locale_dirs = ['../test_venv/lib/python2.7/site-packages/django/conf/locale/']
 
 def _download_django_inv():
     import requests
-    with open(_download_django_inv.path, 'w') as f:
-        r = requests.get("https://docs.djangoproject.com/en/1.9/_objects")
+    with open(_download_django_inv.path, 'wb') as f:
+        r = requests.get("https://docs.djangoproject.com/en/3.2/_objects")
         f.write(r.content)
 _download_django_inv.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "django.inv"))
 

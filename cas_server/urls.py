@@ -13,12 +13,12 @@
 
 import django
 
-if django.VERSION < (2,):
-    from django.conf.urls import url
-    re_path = url
-else:
-    from django.urls import re_path
 
+try:
+    from django.urls import re_path
+except ImportError:
+    # re_path is not available in Django 2
+    from django.conf.urls import url as re_path
 
 from django.conf.urls import url
 from django.views.generic import RedirectView

@@ -16,12 +16,11 @@ Including another URLconf
 
 import django
 
-if django.VERSION < (2,):
-    from django.conf.urls import url
-    re_path = url
-else:
+try:
     from django.urls import re_path
-
+except ImportError:
+    # re_path is not available in Django 2
+    from django.conf.urls import url as re_pa
 
 from django.conf.urls import url, include
 from django.contrib import admin

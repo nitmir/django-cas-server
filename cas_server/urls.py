@@ -11,16 +11,12 @@
 # (c) 2015-2016 Valentin Samir
 """urls for the app"""
 
-import django
-
-
 try:
     from django.urls import re_path
 except ImportError:
     # re_path is not available in Django 2
     from django.conf.urls import url as re_path
 
-from django.conf.urls import url
 from django.views.generic import RedirectView
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 

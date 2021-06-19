@@ -14,15 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 
-import django
-
 try:
     from django.urls import re_path
 except ImportError:
     # re_path is not available in Django 2
-    from django.conf.urls import url as re_pa
+    from django.conf.urls import url as re_path
 
-from django.conf.urls import url, include
+from django.conf.urls import include
 from django.contrib import admin
 
 urlpatterns = [

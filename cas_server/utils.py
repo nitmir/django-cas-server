@@ -409,7 +409,10 @@ def crypt_salt_is_valid(salt):
                 if '$' not in salt[1:]:
                     return False
                 else:
-                    hashed = crypt.crypt("", salt)
+                    try:
+                        hashed = crypt.crypt("", salt)
+                    except OSError:
+                        return False
                     if not hashed or '$' not in hashed[1:]:
                         return False
                     else:

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: cas_server\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-18 11:29+0200\n"
-"PO-Revision-Date: 2016-09-18 11:30+0200\n"
+"PO-Revision-Date: 2020-07-05 16:05+0200\n"
 "Last-Translator: Valentin Samir <valentin.samir@crans.org>\n"
 "Language-Team: django <LL@li.org>\n"
 "Language: fr\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: apps.py:25 templates/cas_server/base.html:7
 #: templates/cas_server/base.html:26
@@ -36,7 +36,7 @@ msgstr ""
 
 #: forms.py:85
 msgid "Identity provider"
-msgstr "fournisseur d'identité"
+msgstr "Fournisseur d'identité"
 
 #: forms.py:89 forms.py:111
 msgid "Warn me before logging me into other sites."
@@ -112,7 +112,7 @@ msgstr "Version du protocole CAS"
 msgid ""
 "Version of the CAS protocol to use when sending requests the the backend CAS."
 msgstr ""
-"Version du protocole CAS à utiliser lorsque l'on envoie des requête au CAS "
+"Version du protocole CAS à utiliser lorsque l'on envoie des requêtes au CAS "
 "du fournisseur d'identité."
 
 #: models.py:106
@@ -158,7 +158,7 @@ msgstr "Motifs de services"
 
 #: models.py:447
 msgid "service patterns are sorted using the position attribute"
-msgstr "Les motifs de service sont trié selon l'attribut position"
+msgstr "Les motifs de service sont triés selon l'attribut position"
 
 #: models.py:455 models.py:620
 msgid "name"
@@ -179,7 +179,7 @@ msgid ""
 "character must be escaped with a '\\'."
 msgstr ""
 "Une expression rationnelle reconnaissant un service. Devrait généralement "
-"ressemblé à '^https://un\\.serveur\\.fr/chemin/.*$'. Comme il s'agit d'une "
+"ressembler à '^https://un\\.serveur\\.fr/chemin/.*$'. Comme il s'agit d'une "
 "expression rationnelle, les caractères spéciaux doivent être échappés avec "
 "un '\\'."
 
@@ -200,7 +200,7 @@ msgstr "limiter les noms d'utilisateurs"
 #: models.py:484
 msgid "Limit username allowed to connect to the list provided bellow"
 msgstr ""
-"Limiter les noms d'utilisateurs autorisé à se connecter à la liste fournie "
+"Limiter les noms d'utilisateurs autorisés à se connecter à la liste fournie "
 "ci-dessous"
 
 #: models.py:489
@@ -376,7 +376,7 @@ msgstr ""
 
 #: views.py:500
 msgid "Invalid login ticket, please try to log in again"
-msgstr "Ticket de connexion invalide, merci de réessayé de vous connecter"
+msgstr "Ticket de connexion invalide, merci de réessayer de vous connecter"
 
 #: views.py:692
 #, python-format

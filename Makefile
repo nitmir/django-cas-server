@@ -1,15 +1,15 @@
 .PHONY: build dist docs
-VERSION=`python setup.py -V`
+VERSION=`python3 setup.py -V`
 
 build:
-	python setup.py build
+	python3 setup.py build
 
 install: dist
-	pip -V
-	pip install --no-cache-dir --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
+	pip3 -V
+	pip3 install --no-cache-dir --no-deps --upgrade --force-reinstall --find-links ./dist/django-cas-server-${VERSION}.tar.gz django-cas-server
 
 uninstall:
-	pip uninstall django-cas-server || true
+	pip3 uninstall django-cas-server || true
 
 clean_pyc:
 	find ./ -name '*.pyc' -delete
@@ -34,11 +34,11 @@ clean: clean_pyc clean_build clean_coverage clean_tild_backup
 clean_all: clean clean_tox clean_test_venv clean_docs clean_eggs
 
 dist:
-	python setup.py sdist
+	python3 setup.py sdist
 
 test_venv/bin/python:
 	python3 -m venv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=2.0,<2.1'
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=3.2,<3.3'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
@@ -61,7 +61,7 @@ run_server: test_project
 	test_venv/bin/python test_venv/cas/manage.py runserver
 
 run_tests: test_venv
-	python setup.py check --restructuredtext --stric
+	python3 setup.py check --restructuredtext --stric
 	test_venv/bin/py.test -rw -x --cov=cas_server --cov-report html --cov-report term
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
@@ -72,4 +72,4 @@ docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"
 
 publish_pypi_release:
-	python setup.py sdist bdist_wheel upload --sign
+	python3 setup.py sdist bdist_wheel upload --sign

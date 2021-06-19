@@ -6,6 +6,34 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v1.3.0 - 2021-06-19
+===================
+
+Added
+-----
+
+* Support for Dango 3.1 and 3.2
+* Implement CAS_LDAP_ATTRS_VIEW set to 0: then using ldap bind mode, user
+  attributes can be retreive either using CAS_LDAP_USER or using the
+  binded user credentials.
+* Added ppc64le architecture support on travis-ci (django-cas-server is
+  included in the ppc64le versions of RHEL and Ubuntu)
+* Python 3.9 support
+
+Fixes
+-----
+
+* Allow to use user attributes if auth by ldap bind
+* Fix spelling mistakes in french translation
+* Fix bug model datefield Form (Federated User Admin)
+* django.conf.urls is deprecated and will be removed in Django 4.0.
+  Use django.urls.re_path instead
+
+Removed
+-------
+
+* Drop support for Django 3.0 as it reached end of life.
+
 v1.2.0 - 2020-07-05
 ===================
 

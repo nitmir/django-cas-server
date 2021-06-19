@@ -10,7 +10,13 @@
 #
 # (c) 2015-2016 Valentin Samir
 """urls for the app"""
-from django.conf.urls import url
+
+try:
+    from django.urls import re_path
+except ImportError:
+    # re_path is not available in Django 2
+    from django.conf.urls import url as re_path
+
 from django.views.generic import RedirectView
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
@@ -19,42 +25,42 @@ from cas_server import views
 app_name = "cas_server"
 
 urlpatterns = [
-    url(
+    re_path(
         r'^$',
         RedirectView.as_view(pattern_name="cas_server:login", permanent=False, query_string=True)
     ),
-    url(
+    re_path(
         '^login$',
         sensitive_post_parameters('password')(
             views.LoginView.as_view()
         ),
         name='login'
     ),
-    url('^logout$', views.LogoutView.as_view(), name='logout'),
-    url('^validate$', views.Validate.as_view(), name='validate'),
-    url(
+    re_path('^logout$', views.LogoutView.as_view(), name='logout'),
+    re_path('^validate$', views.Validate.as_view(), name='validate'),
+    re_path(
         '^serviceValidate$',
         views.ValidateService.as_view(allow_proxy_ticket=False),
         name='serviceValidate'
     ),
-    url(
+    re_path(
         '^proxyValidate$',
         views.ValidateService.as_view(allow_proxy_ticket=True),
         name='proxyValidate'
     ),
-    url('^proxy$', views.Proxy.as_view(), name='proxy'),
-    url(
+    re_path('^proxy$', views.Proxy.as_view(), name='proxy'),
+    re_path(
         '^p3/serviceValidate$',
         views.ValidateService.as_view(allow_proxy_ticket=False),
         name='p3_serviceValidate'
     ),
-    url(
+    re_path(
         '^p3/proxyValidate$',
         views.ValidateService.as_view(allow_proxy_ticket=True),
         name='p3_proxyValidate'
     ),
-    url('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
-    url(
+    re_path('^samlValidate$', views.SamlValidate.as_view(), name='samlValidate'),
+    re_path(
         '^auth$',
         sensitive_variables('password', 'secret')(
             sensitive_post_parameters('password', 'secret')(
@@ -63,5 +69,6 @@ urlpatterns = [
         ),
         name='auth'
     ),
-    url("^federate(?:/(?P<provider>([^/]+)))?$", views.FederateAuth.as_view(), name='federateAuth'),
+    re_path("^federate(?:/(?P<provider>([^/]+)))?$",
+            views.FederateAuth.as_view(), name='federateAuth'),
 ]

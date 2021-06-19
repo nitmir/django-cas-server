@@ -21,15 +21,15 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2 and 3.0
-* Supports Python 2.7, 3.5+
+* Supports Django 1.11, 2.2, 3.1 and 3.2
+* Supports Python 3.5+
 
 Dependencies
 ============
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 3.1
+* Django >= 1.11 < 3.3
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -136,13 +136,13 @@ Quick start
     )
 
    For internationalization support, add "django.middleware.locale.LocaleMiddleware"
-   to your MIDDLEWARE_CLASSES setting like this::
+   to your MIDDLEWARE setting like this::
 
-    MIDDLEWARE_CLASSES = (
+    MIDDLEWARE = [
         ...
         'django.middleware.locale.LocaleMiddleware',
         ...
-    )
+    ]
 
 2. Include the cas_server URLconf in your project urls.py like this::
 
@@ -423,16 +423,18 @@ Only useful if you are using the ldap authentication backend:
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
-  * ``"bind``, the user credentials are used to bind to the ldap database and retreive the user
+  * ``"bind"``, the user credentials are used to bind to the ldap database and retreive the user
     attribute. In this mode, the settings ``CAS_LDAP_PASSWORD_ATTR`` and ``CAS_LDAP_PASSWORD_CHARSET``
-    are ignored, and it is the ldap server that performs the password check. The counterpart is that
-    the user attributes are only available upon user password check and so are cached for later
-    use. All the other modes directly fetch the user attributes from the database whenever they
-    are needed. This mean that is you use this mode, there can be some differences between the
-    attributes in database and the cached ones if changes happen in the database after the user
-    authentiates. See the parameter ``CAS_TGT_VALIDITY`` to force user to reauthenticate periodically.
+    are ignored, and it is the ldap server that performs the password check.
 
   The default is ``"ldap"``.
+* ``CAS_LDAP_ATTRS_VIEW``: This parameter is only used then ``CAS_LDAP_PASSWORD_CHECK`` is set to
+  ``"bind"``. If ``0`` the user attributes are retrieved by connecting to the ldap as ``CAS_LDAP_USER``.
+  If ``1`` the user attributes are retrieve then the user authenticate using the user credentials and
+  are cached for later use. It means there can be some differences between the attributes in database
+  and the cached ones. See the parameter ``CAS_TGT_VALIDITY`` to force user to reauthenticate
+  periodically.
+  The default is ``0``.
 * ``CAS_LDAP_PASSWORD_CHARSET``: Charset the LDAP users passwords was hashed with. This is needed to
   encode the user submitted password before hashing it for comparison. The default is ``"utf-8"``.
 
@@ -642,8 +644,8 @@ You could for example do as below::
 
 
 
-.. |travis| image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
-    :target: https://travis-ci.org/nitmir/django-cas-server
+.. |travis| image:: https://badges.genua.fr/travis/com/nitmir/django-cas-server/master.svg
+    :target: https://travis-ci.com/nitmir/django-cas-server
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.org/project/django-cas-server/

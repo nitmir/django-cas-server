@@ -1,39 +1,63 @@
 language: python
 matrix:
   include:
-  - python: "3.8"
+  # generic checks
+  - python: "3.9"
     env: TOX_ENV=flake8
-  - python: "3.8"
+  - python: "3.9"
     env: TOX_ENV=check_rst
-  - python: "2.7"
-    env: TOX_ENV=py27-django111
+  - python: "3.9"
+    env: TOX_ENV=coverage
+  # Debian strech support
   - python: "3.5"
     env: TOX_ENV=py35-django111
+  - python: "3.5"
+    env: TOX_ENV=py35-django111
+    arch: ppc64le
+  # Ubuntu bionic and EPEL 7 support
   - python: "3.6"
     env: TOX_ENV=py36-django111
-  - python: "3.5"
-    env: TOX_ENV=py35-django20
   - python: "3.6"
-    env: TOX_ENV=py36-django20
-  - python: "3.5"
-    env: TOX_ENV=py35-django21
+    env: TOX_ENV=py36-django111
+    arch: ppc64le
+  # RHEL 8 support
   - python: "3.6"
-    env: TOX_ENV=py36-django21
+    env: TOX_ENV=py36-django22
+  - python: "3.6"
+    env: TOX_ENV=py36-django22
+    arch: ppc64le
+  # Debian buster support
   - python: "3.7"
-    env: TOX_ENV=py37-django22
+    env: TOX_ENV=py37-django111
+  - python: "3.7"
+    env: TOX_ENV=py37-django111
+    arch: ppc64le
+  # Ubuntu focal and Ubuntu groovy support
   - python: "3.8"
     env: TOX_ENV=py38-django22
   - python: "3.8"
-    env: TOX_ENV=py38-django30
-  - python: "3.8"
-    env: TOX_ENV=coverage
+    env: TOX_ENV=py38-django22
+    arch: ppc64le
+  # Debian bullseye and Ubuntu hirsute support
+  - python: "3.9"
+    env: TOX_ENV=py39-django22
+  - python: "3.9"
+    env: TOX_ENV=py39-django22
+    arch: ppc64le
+  # Django additional supported version
+  - python: "3.9"
+    env: TOX_ENV=py39-django31
+  - python: "3.9"
+    env: TOX_ENV=py39-django32
+
 cache:
   directories:
     - $HOME/.cache/pip/http/
     - $HOME/build/nitmir/django-cas-server/.tox/$TOX_ENV/
 install:
-  - "travis_retry pip install setuptools --upgrade"
-  - "pip install tox"
+  - travis_retry pip install setuptools --upgrade
+  - pip install tox $PKGS
+  - pip freeze
 script:
   - tox -e $TOX_ENV
 after_script:

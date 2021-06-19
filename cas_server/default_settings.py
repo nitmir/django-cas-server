@@ -165,10 +165,17 @@ CAS_LDAP_USERNAME_ATTR = "uid"
 CAS_LDAP_PASSWORD_ATTR = "userPassword"
 #: The method used to check the user password. Must be one of ``"crypt"``, ``"ldap"``,
 #: ``"hex_md5"``, ``"hex_sha1"``, ``"hex_sha224"``, ``"hex_sha256"``, ``"hex_sha384"``,
-#: ``"hex_sha512"``, ``"plain"``.
+#: ``"hex_sha512"``, ``"plain"``, ``"bind"``.
 CAS_LDAP_PASSWORD_CHECK = "ldap"
 #: charset the LDAP users passwords was hash with
 CAS_LDAP_PASSWORD_CHARSET = "utf-8"
+#: This parameter is only used then ``CAS_LDAP_PASSWORD_CHECK`` is set to ``"bind"``.
+#: * if ``0`` the user attributes are retrieved by connecting to the ldap as
+#:   ``CAS_LDAP_USER``.
+#: * if ``1`` the user attributes are retrieve then the user authenticate using
+#:   the user credentials. These attributes are then cached for the session.
+#: The default is ``0``.
+CAS_LDAP_ATTRS_VIEW = 0
 
 
 #: Username of the test user.

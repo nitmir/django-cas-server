@@ -391,11 +391,13 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 or :class:`list` of :func:`unicode`. If the user do not exists, the returned
                 :class:`dict` is empty.
             :rtype: dict
-            :raises NotImplementedError: if the password check method in `CAS_LDAP_PASSWORD_CHECK`
-                do not allow to fetch the attributes without the user credentials.
         """
         if settings.CAS_LDAP_PASSWORD_CHECK == "bind":
-            raise NotImplementedError()
+            if settings.CAS_LDAP_ATTRS_VIEW == 1:
+                user = UserAttributes.objects.get(username=self.username)
+                return user.attributs
+            else:
+                return self.user
         else:
             return super(LdapAuthUser, self).attributs()
 

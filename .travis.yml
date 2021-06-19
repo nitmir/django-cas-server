@@ -8,13 +8,6 @@ matrix:
     env: TOX_ENV=check_rst
   - python: "3.9"
     env: TOX_ENV=coverage
-  # Python 2 support. Not officialy supported but nice to known
-  # then it will break
-  - python: "2.7"
-    env: TOX_ENV=py27-django111
-  - python: "2.7"
-    env: TOX_ENV=py27-django111
-    arch: ppc64le
   # Debian strech support
   - python: "3.5"
     env: TOX_ENV=py35-django111
@@ -62,8 +55,9 @@ cache:
     - $HOME/.cache/pip/http/
     - $HOME/build/nitmir/django-cas-server/.tox/$TOX_ENV/
 install:
-  - "travis_retry pip install setuptools --upgrade"
-  - "pip install tox"
+  - travis_retry pip install setuptools --upgrade
+  - pip install tox $PKGS
+  - pip freeze
 script:
   - tox -e $TOX_ENV
 after_script:

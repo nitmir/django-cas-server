@@ -228,7 +228,7 @@ class FederateSLO(models.Model):
     """
     class Meta:
         unique_together = ("username", "session_key", "ticket")
-    #: the federated username with the ``@``component
+    #: the federated username with the ``@`` component
     username = models.CharField(max_length=30)
     #: the session key for the session :attr:`username` has been authenticated using :attr:`ticket`
     session_key = models.CharField(max_length=40, blank=True, null=True)

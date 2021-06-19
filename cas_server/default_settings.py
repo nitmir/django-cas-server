@@ -170,10 +170,11 @@ CAS_LDAP_PASSWORD_CHECK = "ldap"
 #: charset the LDAP users passwords was hash with
 CAS_LDAP_PASSWORD_CHARSET = "utf-8"
 #: This parameter is only used then ``CAS_LDAP_PASSWORD_CHECK`` is set to ``"bind"``.
-#: * if ``0`` the user attributes are retrieved by connecting to the ldap as
-#:   ``CAS_LDAP_USER``.
-#: * if ``1`` the user attributes are retrieve then the user authenticate using
-#:   the user credentials. These attributes are then cached for the session.
+#:
+#:  * if ``0`` the user attributes are retrieved by connecting to the ldap as ``CAS_LDAP_USER``.
+#:  * if ``1`` the user attributes are retrieve then the user authenticate using
+#:    the user credentials. These attributes are then cached for the session.
+#:
 #: The default is ``0``.
 CAS_LDAP_ATTRS_VIEW = 0
 
@@ -215,10 +216,12 @@ CAS_SHOW_SERVICE_MESSAGES = True
 #: Messages displayed in a info-box on the html pages of the default templates.
 #: ``CAS_INFO_MESSAGES`` is a :class:`dict` mapping message name to a message :class:`dict`.
 #: A message :class:`dict` has 3 keys:
-#:  * ``message``: A :class:`unicode`, the message to display, potentially wrapped around
-#:    ugettex_lazy
-#:  * ``discardable``: A :class:`bool`, specify if the users can close the message info-box
-#:  * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+#:
+#: * ``message``: A :class:`unicode`, the message to display, potentially wrapped around
+#:   ugettex_lazy
+#: * ``discardable``: A :class:`bool`, specify if the users can close the message info-box
+#: * ``type``: One of info, success, info, warning, danger. The type of the info-box.
+#:
 #: ``CAS_INFO_MESSAGES`` contains by default one message, ``cas_explained``, which explain
 #: roughly the purpose of a CAS.
 CAS_INFO_MESSAGES = {

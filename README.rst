@@ -644,8 +644,8 @@ You could for example do as below::
 
 
 
-.. |travis| image:: https://badges.genua.fr/travis/nitmir/django-cas-server/master.svg
-    :target: https://travis-ci.org/nitmir/django-cas-server
+.. |travis| image:: https://badges.genua.fr/travis/com/nitmir/django-cas-server/master.svg
+    :target: https://travis-ci.com/nitmir/django-cas-server
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.org/project/django-cas-server/

@@ -1,9 +1,9 @@
 language: python
 matrix:
   include:
-  - python: "3.8"
+  - python: "3.9"
     env: TOX_ENV=flake8
-  - python: "3.8"
+  - python: "3.9"
     env: TOX_ENV=check_rst
   - python: "2.7"
     env: TOX_ENV=py27-django111
@@ -11,14 +11,6 @@ matrix:
     env: TOX_ENV=py35-django111
   - python: "3.6"
     env: TOX_ENV=py36-django111
-  - python: "3.5"
-    env: TOX_ENV=py35-django20
-  - python: "3.6"
-    env: TOX_ENV=py36-django20
-  - python: "3.5"
-    env: TOX_ENV=py35-django21
-  - python: "3.6"
-    env: TOX_ENV=py36-django21
   - python: "3.7"
     env: TOX_ENV=py37-django22
   - python: "3.8"
@@ -26,6 +18,14 @@ matrix:
   - python: "3.8"
     env: TOX_ENV=py38-django30
   - python: "3.8"
+    env: TOX_ENV=py38-django31
+  - python: "3.9"
+    env: TOX_ENV=py39-django22
+  - python: "3.9"
+    env: TOX_ENV=py39-django30
+  - python: "3.9"
+    env: TOX_ENV=py39-django31
+  - python: "3.9"
     env: TOX_ENV=coverage
   - python: "3.8"
     env: TOX_ENV=flake8

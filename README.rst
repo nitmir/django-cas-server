@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2 and 3.0
+* Supports Django 1.11, 2.2 and 3.1
 * Supports Python 2.7, 3.5+
 
 Dependencies
@@ -29,7 +29,7 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 3.1
+* Django >= 1.11 < 3.2
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4

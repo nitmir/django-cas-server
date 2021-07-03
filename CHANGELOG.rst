@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v1.3.1 - 2021-07-03
+===================
+
+Fixes
+-----
+
+* Documentation generation to works with latest Django and sphinx version
+* Update classifier and dependencies versions in setup.py
+
 v1.3.0 - 2021-06-19
 ===================
 

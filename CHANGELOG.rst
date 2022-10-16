@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Added
+-----
+* Support for Django 4.0 and 4.1
+
 Removed
 -------
 * Drop support for Django 1.11  (now deprecated for more than 2 years)

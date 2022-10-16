@@ -61,7 +61,7 @@ if __name__ == '__main__':
         },
         keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
         install_requires=[
-            'Django >= 2.2,<3.3', 'requests >= 2.4', 'requests_futures >= 0.9.5',
+            'Django >= 2.2,<4.2', 'requests >= 2.4', 'requests_futures >= 0.9.5',
             'lxml >= 3.4', 'six >= 1'
         ],
         url="https://github.com/nitmir/django-cas-server",

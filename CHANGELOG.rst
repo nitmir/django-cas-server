@@ -13,6 +13,10 @@ Added
 -----
 * Support for Django 4.0 and 4.1
 
+Fixes
+-----
+* Fix unicode sandwich issue in cas_server.utils.update_url
+
 Removed
 -------
 * Drop support for Django 1.11  (now deprecated for more than 2 years)

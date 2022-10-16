@@ -337,6 +337,16 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertFalse(b"Service https://www.example.net not allowed" in response.content)
 
     def test_view_login_get_auth_allowed_service(self):
+        """Request a ticket for an allowed service by an authenticated client containing non ascii char in url"""
+        # get a client that is already authenticated
+        client = get_auth_client()
+        # ask for a ticket for https://www.example.com
+        response = client.get("/login?service=https://www.example.com/é")
+        # as https://www.example.com/é is a valid service a ticket should be created and the
+        # user redirected to the service url
+        self.assert_service_ticket(client, response)
+
+    def test_view_login_get_auth_allowed_service_non_ascii(self):
         """Request a ticket for an allowed service by an authenticated client"""
         # get a client that is already authenticated
         client = get_auth_client()

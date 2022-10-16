@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Removed
+-------
+* Drop support for Django 1.11  (now deprecated for more than 2 years)
+* Drop support for python 2.7 (now deprecated for more than 2 years)
+
+
 v1.3.1 - 2021-07-03
 ===================
 

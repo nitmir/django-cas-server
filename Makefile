@@ -1,6 +1,11 @@
 .PHONY: build dist docs
 VERSION=`python3 setup.py -V`
 
+WHL_FILES := $(wildcard dist/*.whl)
+WHL_ASC := $(WHL_FILES:=.asc)
+DIST_FILE := $(wildcard dist/*.tar.gz)
+DIST_ASC := $(DIST_FILE:=.asc)
+
 build:
 	python3 setup.py build
 
@@ -35,6 +40,7 @@ clean_all: clean clean_tox clean_test_venv clean_docs clean_eggs
 
 dist:
 	python3 setup.py sdist
+	python3 setup.py bdist_wheel
 
 test_venv/bin/python:
 	python3 -m venv test_venv
@@ -71,5 +77,13 @@ test_venv/bin/sphinx-build: test_venv
 docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"
 
-publish_pypi_release:
-	python3 setup.py sdist bdist_wheel upload --sign
+sign_release: $(WHL_ASC) $(DIST_ASC)
+
+dist/%.asc:
+	gpg --detach-sign -a $(@:.asc=)
+
+test_venv/bin/twine: test_venv
+	test_venv/bin/pip install twine
+
+publish_pypi_release: test_venv test_venv/bin/twine dist sign_release
+	test_venv/bin/twine upload --sign dist/*

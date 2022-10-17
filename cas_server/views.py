@@ -153,6 +153,16 @@ class LogoutView(View, LogoutMixin):
         self.url = request.GET.get('url')
         self.ajax = settings.CAS_ENABLE_AJAX_AUTH and 'HTTP_X_AJAX' in request.META
 
+    @staticmethod
+    def delete_cookies(response):
+        if settings.CAS_REMOVE_DJANGO_SESSION_COOKIE_ON_LOGOUT:
+            response.delete_cookie(settings.SESSION_COOKIE_NAME)
+        if settings.CAS_REMOVE_DJANGO_CSRF_COOKIE_ON_LOGOUT:
+            response.delete_cookie(settings.CSRF_COOKIE_NAME)
+        if settings.CAS_REMOVE_DJANGO_LANGUAGE_COOKIE_ON_LOGOUT:
+            response.delete_cookie(settings.LANGUAGE_COOKIE_NAME)
+        return response
+
     def get(self, request, *args, **kwargs):
         """
             method called on GET request on this view
@@ -181,15 +191,15 @@ class LogoutView(View, LogoutMixin):
                 response = HttpResponseRedirect(utils.update_url(url, params))
                 if request.GET.get("forget_provider"):
                     response.delete_cookie("remember_provider")
-                return response
+                return self.delete_cookies(response)
         # if service is set, redirect to service after logout
         if self.service:
             list(messages.get_messages(request))  # clean messages before leaving the django app
-            return HttpResponseRedirect(self.service)
+            return self.delete_cookies(HttpResponseRedirect(self.service))
         # if service is not set but url is set, redirect to url after logout
         elif self.url:
             list(messages.get_messages(request))  # clean messages before leaving the django app
-            return HttpResponseRedirect(self.url)
+            return self.delete_cookies(HttpResponseRedirect(self.url))
         else:
             # build logout message depending of the number of sessions the user logs out
             if session_nb == 1:
@@ -224,19 +234,19 @@ class LogoutView(View, LogoutMixin):
                         'url': url,
                         'session_nb': session_nb
                     }
-                    return json_response(request, data)
+                    return self.delete_cookies(json_response(request, data))
                 else:
-                    return redirect("cas_server:login")
+                    return self.delete_cookies(redirect("cas_server:login"))
             else:
                 if self.ajax:
                     data = {'status': 'success', 'detail': 'logout', 'session_nb': session_nb}
-                    return json_response(request, data)
+                    return self.delete_cookies(json_response(request, data))
                 else:
-                    return render(
+                    return self.delete_cookies(render(
                         request,
                         settings.CAS_LOGOUT_TEMPLATE,
                         utils.context({'logout_msg': logout_msg})
-                    )
+                    ))
 
 
 class FederateAuth(CsrfExemptView):

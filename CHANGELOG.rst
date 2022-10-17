@@ -12,6 +12,7 @@ Unreleased
 Added
 -----
 * Support for Django 4.0 and 4.1
+* Add settings to allow deletings Django cookies upon logout
 
 Fixes
 -----

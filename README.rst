@@ -285,6 +285,17 @@ Authentication settings
   
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
 
+* ``CAS_REMOVE_DJANGO_SESSION_COOKIE_ON_LOGOUT``: If `True` Django session cookie will be removed
+  on logout from CAS server (default `False`). Note that Django session middleware will generate
+  a new session cookie.
+
+* ``CAS_REMOVE_DJANGO_CSRF_COOKIE_ON_LOGOUT``: If `True` Django csrf cookie will be removed on
+  logout from CAS server (default `False`). Note that Django csrf middleware will generate a new
+  csrf token cookie.
+
+* ``CAS_REMOVE_DJANGO_LANGUAGE_COOKIE_ON_LOGOUT``: If `True` Django language cookie will be
+  removed on logout from CAS server (default `False`).
+
 
 Federation settings
 -------------------

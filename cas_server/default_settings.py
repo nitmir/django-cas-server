@@ -239,6 +239,13 @@ CAS_INFO_MESSAGES = {
 #: Let the list empty to disable messages display.
 CAS_INFO_MESSAGES_ORDER = []
 
+#: :class:`bool` If `True` Django session cookie will be removed on logout from CAS server
+CAS_REMOVE_DJANGO_SESSION_COOKIE_ON_LOGOUT = False
+#: :class:`bool` If `True` Django csrf cookie will be removed on logout from CAS server
+CAS_REMOVE_DJANGO_CSRF_COOKIE_ON_LOGOUT = False
+#: :class:`bool` If `True` Django language cookie will be removed on logout from CAS server
+CAS_REMOVE_DJANGO_LANGUAGE_COOKIE_ON_LOGOUT = False
+
 
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():

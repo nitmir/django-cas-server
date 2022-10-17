@@ -16,6 +16,7 @@ Added
 Fixes
 -----
 * Fix unicode sandwich issue in cas_server.utils.update_url
+* Fix DeprecationWarning about default_app_config in Django 3.2
 
 Removed
 -------

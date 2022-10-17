@@ -9,9 +9,11 @@
 #
 # (c) 2015-2016 Valentin Samir
 """A django CAS server application"""
+import django
 
 #: version of the application
 VERSION = '1.3.1'
 
-#: path the the application configuration class
-default_app_config = 'cas_server.apps.CasAppConfig'
+if django.VERSION < (3, 2):
+    #: path the the application configuration class
+    default_app_config = 'cas_server.apps.CasAppConfig'

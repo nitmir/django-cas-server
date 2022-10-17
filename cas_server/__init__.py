@@ -9,11 +9,14 @@
 #
 # (c) 2015-2016 Valentin Samir
 """A django CAS server application"""
-import django
+try:
+    import django
+except ModuleNotFoundError:
+    django = None
 
 #: version of the application
-VERSION = '1.3.1'
+VERSION = '2.0.0'
 
-if django.VERSION < (3, 2):
+if django is None or django.VERSION < (3, 2):
     #: path the the application configuration class
     default_app_config = 'cas_server.apps.CasAppConfig'

@@ -9,11 +9,23 @@ matrix:
     env: TOX_ENV=check_rst
   - python: "3.9"
     env: TOX_ENV=coverage
+  # REHL 7 support and Ubuntu bionic
+  - python: "3.6"
+    env: TOX_ENV=py36-django111
+  - python: "3.6"
+    env: TOX_ENV=py36-django111
+    arch: ppc64le
   # RHEL 8 support
   - python: "3.6"
     env: TOX_ENV=py36-django22
   - python: "3.6"
     env: TOX_ENV=py36-django22
+    arch: ppc64le
+  # Debian buster support
+  - python: "3.7"
+    env: TOX_ENV=py37-django111
+  - python: "3.7"
+    env: TOX_ENV=py37-django111
     arch: ppc64le
   # Ubuntu focal and Ubuntu groovy support
   - python: "3.8"
@@ -21,13 +33,13 @@ matrix:
   - python: "3.8"
     env: TOX_ENV=py38-django22
     arch: ppc64le
-  # Debian bullseye and Ubuntu hirsute support
+  # Debian bullseye and Ubuntu hirsute and impish support
   - python: "3.9"
     env: TOX_ENV=py39-django22
   - python: "3.9"
     env: TOX_ENV=py39-django22
     arch: ppc64le
-  # Ubuntu jammy support
+  # Ubuntu jammy and kinetic support
   - python: "3.10"
     env: TOX_ENV=py310-django32
   - python: "3.10"

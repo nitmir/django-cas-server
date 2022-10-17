@@ -19,8 +19,8 @@ Fixes
 
 Removed
 -------
-* Drop support for Django 1.11  (now deprecated for more than 2 years)
 * Drop support for python 2.7 (now deprecated for more than 2 years)
+* Drop support for python 3.5
 
 
 v1.3.1 - 2021-07-03

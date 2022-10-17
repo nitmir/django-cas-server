@@ -12,7 +12,13 @@ Unreleased
 Added
 -----
 * Support for Django 4.0 and 4.1
+* Add locale for zh_Hans
+* Add a unit test with a non ascii char in service url
 * Add settings to allow deletings Django cookies upon logout
+
+Changed
+-------
+* Update CI: require pytest >= 7 and remove pytest-pythonpath dependancy
 
 Fixes
 -----
@@ -22,8 +28,10 @@ Fixes
 
 Removed
 -------
-* Drop support for python 2.7 (now deprecated for more than 2 years)
-* Drop support for python 3.5
+* Drop support for python 2.7 (now deprecated for more than 2 years,
+  expect it to break now or in a near future)
+* Drop support for python 3.5 (but it should keep working for a while.
+  pytest >= 7 do not support python 3.5 and Debian Stretch support ended)
 
 
 v1.3.1 - 2021-07-03

@@ -21,15 +21,15 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2, 3.1 and 3.2
-* Supports Python 3.5+
+* Supports Django 1.11, 2.2, 3.2, 4.0 and 4.1
+* Supports Python 3.6+
 
 Dependencies
 ============
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 3.3
+* Django >= 1.11 < 4.2
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -284,6 +284,17 @@ Authentication settings
   If more requests need to be sent, they are queued. The default is ``10``.
   
 * ``CAS_SLO_TIMEOUT``: Timeout for a single SLO request in seconds. The default is ``5``.
+
+* ``CAS_REMOVE_DJANGO_SESSION_COOKIE_ON_LOGOUT``: If `True` Django session cookie will be removed
+  on logout from CAS server (default `False`). Note that Django session middleware will generate
+  a new session cookie.
+
+* ``CAS_REMOVE_DJANGO_CSRF_COOKIE_ON_LOGOUT``: If `True` Django csrf cookie will be removed on
+  logout from CAS server (default `False`). Note that Django csrf middleware will generate a new
+  csrf token cookie.
+
+* ``CAS_REMOVE_DJANGO_LANGUAGE_COOKIE_ON_LOGOUT``: If `True` Django language cookie will be
+  removed on logout from CAS server (default `False`).
 
 
 Federation settings

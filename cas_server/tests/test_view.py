@@ -262,7 +262,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         # check that the service pattern registered on the ticket is the on we use for tests
         self.assertEqual(ticket.service_pattern, self.service_pattern)
 
-    def assert_service_ticket(self, client, response):
+    def assert_service_ticket(self, client, response, service="https://www.example.com"):
         """check that a ticket is well emited when requested on a allowed service"""
         # On ticket emission, we should be redirected to the service url, setting the ticket
         # GET parameter
@@ -270,7 +270,7 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertTrue(response.has_header('Location'))
         self.assertTrue(
             response['Location'].startswith(
-                "https://www.example.com?ticket=%s-" % settings.CAS_SERVICE_TICKET_PREFIX
+                "%s?ticket=%s-" % (service, settings.CAS_SERVICE_TICKET_PREFIX)
             )
         )
         # check that the value of the ticket GET parameter match the value of the ticket
@@ -337,6 +337,19 @@ class LoginTestCase(TestCase, BaseServicePattern, CanLogin):
         self.assertFalse(b"Service https://www.example.net not allowed" in response.content)
 
     def test_view_login_get_auth_allowed_service(self):
+        """
+        Request a ticket for an allowed service by an authenticated client containing
+        non ascii char in url
+        """
+        # get a client that is already authenticated
+        client = get_auth_client()
+        # ask for a ticket for https://www.example.com
+        response = client.get("/login?service=https://www.example.com/é")
+        # as https://www.example.com/é is a valid service a ticket should be created and the
+        # user redirected to the service url
+        self.assert_service_ticket(client, response, service="https://www.example.com/%C3%A9")
+
+    def test_view_login_get_auth_allowed_service_non_ascii(self):
         """Request a ticket for an allowed service by an authenticated client"""
         # get a client that is already authenticated
         client = get_auth_client()

@@ -10,6 +10,7 @@
 #
 # (c) 2016 Valentin Samir
 """Tests module for utils"""
+import django
 from django.test import TestCase, RequestFactory
 from django.db import connection
 
@@ -173,10 +174,11 @@ class UtilsTestCase(TestCase):
             utils.import_attr('cas_server.utils.toto')
         with self.assertRaises(ValueError):
             utils.import_attr('toto')
-        self.assertEqual(
-            utils.import_attr('cas_server.default_app_config'),
-            'cas_server.apps.CasAppConfig'
-        )
+        if django.VERSION < (3, 2):
+            self.assertEqual(
+                utils.import_attr('cas_server.default_app_config'),
+                'cas_server.apps.CasAppConfig'
+            )
         self.assertEqual(utils.import_attr(utils), utils)
 
     def test_update_url(self):

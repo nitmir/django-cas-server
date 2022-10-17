@@ -6,6 +6,34 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v2.0.0 - 2022-10-17
+===================
+
+Added
+-----
+* Support for Django 4.0 and 4.1
+* Add locale for zh_Hans
+* Add a unit test with a non ascii char in service url
+* Add settings to allow deletings Django cookies upon logout
+
+Changed
+-------
+* Update CI: require pytest >= 7 and remove pytest-pythonpath dependancy
+
+Fixes
+-----
+* Fix unicode sandwich issue in cas_server.utils.update_url
+* Fix DeprecationWarning about default_app_config in Django 3.2
+* Fix DeprecationWarning about USE_L10N in Django 4.0
+
+Removed
+-------
+* Drop support for python 2.7 (now deprecated for more than 2 years,
+  expect it to break now or in a near future)
+* Drop support for python 3.5 (but it should keep working for a while.
+  pytest >= 7 do not support python 3.5 and Debian Stretch support ended)
+
+
 v1.3.1 - 2021-07-03
 ===================
 

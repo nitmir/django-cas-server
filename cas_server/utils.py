@@ -249,15 +249,25 @@ def update_url(url, params):
         :return: The URL with an updated querystring
         :rtype: unicode
     """
-    if not isinstance(url, bytes):
-        url = url.encode('utf-8')
-    for key, value in list(params.items()):
-        if not isinstance(key, bytes):
-            del params[key]
-            key = key.encode('utf-8')
-        if not isinstance(value, bytes):
-            value = value.encode('utf-8')
-        params[key] = value
+    def to_unicode(data):
+        if isinstance(data, bytes):
+            return data.decode('utf-8')
+        else:
+            return data
+
+    def to_bytes(data):
+        if not isinstance(data, bytes):
+            return data.encode('utf-8')
+        else:
+            return data
+
+    if six.PY3:
+        url = to_unicode(url)
+        params = {to_unicode(key): to_unicode(value) for (key, value) in params.items()}
+    else:
+        url = to_bytes(url)
+        params = {to_bytes(key): to_bytes(value) for (key, value) in params.items()}
+
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4], keep_blank_values=True))
     query.update(params)
@@ -265,10 +275,12 @@ def update_url(url, params):
     query = list(query.items())
     query.sort()
     url_query = urlencode(query)
-    if not isinstance(url_query, bytes):  # pragma: no cover in python3 urlencode return an unicode
-        url_query = url_query.encode("utf-8")
     url_parts[4] = url_query
-    return urlunparse(url_parts).decode('utf-8')
+    url = urlunparse(url_parts)
+
+    if isinstance(url, bytes):
+        url = url.decode('utf-8')
+    return url
 
 
 def unpack_nested_exception(error):

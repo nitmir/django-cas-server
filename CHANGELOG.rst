@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Added
+-----
+
+* Support for Django 4.2
+
+
 v2.0.0 - 2022-10-17
 ===================
 

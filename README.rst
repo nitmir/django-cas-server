@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2, 3.2, 4.0 and 4.1
+* Supports Django 1.11, 2.2, 3.2, 4.2
 * Supports Python 3.6+
 
 Dependencies
@@ -29,7 +29,7 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 4.2
+* Django >= 1.11 < 4.3
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -146,12 +146,12 @@ Quick start
 
 2. Include the cas_server URLconf in your project urls.py like this::
 
-    from django.conf.urls import url, include
+    from django.urls import path, include
 
     urlpatterns = [
-        url(r'^admin/', admin.site.urls),
+        path('admin/', admin.site.urls),
         ...
-        url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
+        path('cas/', include('cas_server.urls', namespace="cas_server")),
     ]
 
 3. Run ``python manage.py migrate`` to create the cas_server models.

@@ -44,7 +44,7 @@ dist:
 
 test_venv/bin/python:
 	python3 -m venv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=3.2,<3.3'
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=4.2,<4.3'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
@@ -52,8 +52,8 @@ test_venv/cas/manage.py: test_venv
 	ln -s ../../cas_server test_venv/cas/cas_server
 	sed -i "s/'django.contrib.staticfiles',/'django.contrib.staticfiles',\n    'cas_server',/" test_venv/cas/cas/settings.py
 	sed -i "s/'django.middleware.clickjacking.XFrameOptionsMiddleware',/'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.locale.LocaleMiddleware',/" test_venv/cas/cas/settings.py
-	sed -i 's/from django.conf.urls import url/from django.conf.urls import url, include/' test_venv/cas/cas/urls.py
-	sed -i "s@url(r'^admin/', admin.site.urls),@url(r'^admin/', admin.site.urls),\n    url(r'^', include('cas_server.urls', namespace='cas_server')),@" test_venv/cas/cas/urls.py
+	sed -i 's/from django.urls import path/from django.urls import path, include/' test_venv/cas/cas/urls.py
+	sed -i "s@path('admin/', admin.site.urls),@path('admin/', admin.site.urls),\n    path('', include('cas_server.urls', namespace='cas_server')),@" test_venv/cas/cas/urls.py
 	test_venv/bin/python test_venv/cas/manage.py migrate
 	test_venv/bin/python test_venv/cas/manage.py createsuperuser
 

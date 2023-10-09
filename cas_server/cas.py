@@ -22,10 +22,9 @@
 # at commit ec1f2d4779625229398547b9234d0e9e874a2c9a
 # some modifications have been made to be unicode coherent between python2 and python2
 
-import six
-from six.moves.urllib import parse as urllib_parse
-from six.moves.urllib import request as urllib_request
-from six.moves.urllib.request import Request
+import urllib.parse as urllib_parse
+import urllib.request as urllib_request
+from urllib.request import Request
 from uuid import uuid4
 import datetime
 
@@ -37,7 +36,7 @@ class CASError(ValueError):
 class ReturnUnicode(object):
     @staticmethod
     def u(string, charset):
-        if not isinstance(string, six.text_type):
+        if not isinstance(string, str):
             return string.decode(charset)
         else:
             return string

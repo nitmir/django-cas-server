@@ -17,7 +17,7 @@ from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
 
 import logging
-from six.moves import urllib
+import urllib
 
 #: logger facility
 logger = logging.getLogger(__name__)

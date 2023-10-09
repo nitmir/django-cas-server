@@ -10,14 +10,14 @@
 #
 # (c) 2016 Valentin Samir
 """tests for the CAS federate mode"""
+import importlib
+
 from cas_server import default_settings
 from cas_server.default_settings import settings
 
 import django
 from django.test import TestCase, Client
 from django.test.utils import override_settings
-
-from six.moves import reload_module
 
 from cas_server import utils, models
 from cas_server.tests.mixin import BaseServicePattern, CanLogin, FederatedIendityProviderModel
@@ -49,7 +49,7 @@ class FederateAuthLoginLogoutTestCase(
     def test_default_settings(self):
         """default settings should populated some default variable then CAS_FEDERATE is True"""
         del settings.CAS_AUTH_CLASS
-        reload_module(default_settings)
+        importlib.reload(default_settings)
         self.assertEqual(settings.CAS_AUTH_CLASS, "cas_server.auth.CASFederateAuth")
 
     def test_login_get_provider(self):

@@ -22,7 +22,6 @@ import random
 import json
 import mock
 from lxml import etree
-from six.moves import range
 
 from cas_server import models
 from cas_server import utils

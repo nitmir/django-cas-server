@@ -14,7 +14,6 @@ import django
 from django.test import TestCase, RequestFactory
 from django.db import connection
 
-import six
 import warnings
 import datetime
 
@@ -66,15 +65,12 @@ class CheckPasswordCase(TestCase):
         salts = ["$6$UVVAQvrMyXMF3FF3", "aa"]
         hashed_password1 = []
         for salt in salts:
-            if six.PY3:
-                hashed_password1.append(
-                    utils.crypt.crypt(
-                        self.password1.decode("utf8"),
-                        salt
-                    ).encode("utf8")
-                )
-            else:
-                hashed_password1.append(utils.crypt.crypt(self.password1, salt))
+            hashed_password1.append(
+                utils.crypt.crypt(
+                    self.password1.decode("utf8"),
+                    salt
+                ).encode("utf8")
+            )
 
         for hp1 in hashed_password1:
             self.assertTrue(utils.check_password("crypt", self.password1, hp1, "utf8"))
@@ -240,7 +236,7 @@ class UtilsTestCase(TestCase):
             )
         else:
             version = utils.last_version()
-            self.assertIsInstance(version, six.text_type)
+            self.assertIsInstance(version, str)
             self.assertEqual(len(version.split('.')), 3)
 
             # version is cached 24h so calling it a second time should return the save value

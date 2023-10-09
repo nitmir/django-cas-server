@@ -18,11 +18,10 @@ from django.template import loader
 from django.utils import timezone
 
 import cgi
-import six
 from threading import Thread
 from lxml import etree
-from six.moves import BaseHTTPServer
-from six.moves.urllib.parse import urlparse, parse_qsl, parse_qs
+import http.server as BaseHTTPServer
+from urllib.parse import urlparse, parse_qsl, parse_qs
 from datetime import timedelta
 
 from cas_server import models
@@ -43,7 +42,7 @@ else:
 
 def return_unicode(string, charset):
     """make `string` a unicode if `string` is a unicode or bytes encoded with `charset`"""
-    if not isinstance(string, six.text_type):
+    if not isinstance(string, str):
         return string.decode(charset)
     else:
         return string
@@ -54,7 +53,7 @@ def return_bytes(string, charset):
         make `string` a bytes encoded with `charset` if `string` is a unicode
         or bytes encoded with `charset`
     """
-    if isinstance(string, six.text_type):
+    if isinstance(string, str):
         return string.encode(charset)
     else:
         return string

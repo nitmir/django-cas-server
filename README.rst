@@ -33,7 +33,6 @@ Dependencies
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
-* six >= 1.8
 
 Minimal version of package dependencies are just indicative and means that ``django-cas-server`` has
 been tested with it. Previous versions of dependencies may or may not work.
@@ -51,7 +50,6 @@ them on debian like systems and centos like systems.
 You should try as much as possible to use system packages as they are automatically updated when
 you update your system. You can then install Not Available (N/A)
 packages on your system using pip3 inside a virtualenv as described in the `Installation`_ section.
-For use with python2, just replace python3(6) in the table by python.
 
 +------------------+--------------------------+---------------------+
 | python package   | debian like systems      | centos like systems |
@@ -63,8 +61,6 @@ For use with python2, just replace python3(6) in the table by python.
 | requests_futures | python3-requests-futures | N/A                 |
 +------------------+--------------------------+---------------------+
 | lxml             | python3-lxml             | python36-lxml       |
-+------------------+--------------------------+---------------------+
-| six              | python3-six              | python36-six        |
 +------------------+--------------------------+---------------------+
 | ldap3            | python3-ldap3            | python36-ldap3      |
 +------------------+--------------------------+---------------------+
@@ -84,14 +80,14 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python3-django python3-requests python3-six python3-lxml python3-requests-futures
+    $ sudo apt-get install python3-django python3-requests python3-lxml python3-requests-futures
 
    On debian jessie, you can use the version of python-django available in the
    `backports <https://backports.debian.org/Instructions/>`_.
 
    On centos like systems with epel enabled::
 
-    $ sudo yum install python36-django python36-requests python36-six python36-lxml
+    $ sudo yum install python36-django python36-requests python36-lxml
 
 3. Create a virtualenv::
 

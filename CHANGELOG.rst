@@ -13,6 +13,7 @@ Added
 -----
 
 * Support for Django 4.2
+* Allow forms to be overridden from settings
 
 
 v2.0.0 - 2022-10-17

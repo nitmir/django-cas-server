@@ -15,7 +15,7 @@ from django.contrib import admin
 from .models import ServiceTicket, ProxyTicket, ProxyGrantingTicket, User, ServicePattern
 from .models import Username, ReplaceAttributName, ReplaceAttributValue, FilterAttributValue
 from .models import FederatedIendityProvider, FederatedUser, UserAttributes
-from .forms import TicketForm
+from .utils import import_attr
 
 
 class BaseInlines(admin.TabularInline):
@@ -36,7 +36,7 @@ class UserAdminInlines(BaseInlines):
         Base class for inlines in :class:`UserAdmin` interface
     """
     #: The form :class:`TicketForm<cas_server.forms.TicketForm>` used to display tickets.
-    form = TicketForm
+    form = import_attr(settings.CAS_TICKET_FORM)
     #: Fields to display on a object that are read only (not editable).
     readonly_fields = (
         'validate', 'service', 'service_pattern',

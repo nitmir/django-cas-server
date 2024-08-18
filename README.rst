@@ -352,6 +352,19 @@ Tickets miscellaneous settings
 * ``CAS_PROXY_GRANTING_TICKET_PREFIX``: Prefix of proxy granting ticket. The default is ``"PGT"``.
 * ``CAS_PROXY_GRANTING_TICKET_IOU_PREFIX``: Prefix of proxy granting ticket IOU. The default is ``"PGTIOU"``.
 
+Forms settings
+--------------
+
+* ``CAS_USER_CREDENTIAL_FORM``:  A dotted path to a form or a form used on the login page to retrieve
+  user credentials. The default is ``"cas_server.forms.UserCredential"``.
+* ``CAS_WARN_FORM``: A dotted path to a form or a form used on warn page before emitting a ticket.
+  The default is ``"cas_server.forms.WarnForm"``.
+* ``CAS_FEDERATE_SELECT_FORM``: A dotted path to a form or a form used on the login page to select
+  another CAS in federated mode. The default is ``"cas_server.forms.FederateSelect"``
+* ``CAS_FEDERATE_USER_CREDENTIAL_FORM``: A dotted path to a form or a form used on the login page in
+  federated mode. The default is ``"cas_server.forms.FederateUserCredential"``
+* ``CAS_TICKET_FORM``: A dotted path to a form or a form for Tickets in the admin interface.
+  The default is ``"cas_server.forms.TicketForm"``
 
 Mysql backend settings
 ----------------------

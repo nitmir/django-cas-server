@@ -383,16 +383,17 @@ Only useful if you are using the mysql authentication backend:
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated
+    and will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
-  The default is ``"crypt"``.
+  The default is ``"crypt"``. This default is deprecated and will stop to work in python 3.13.
 
 
 Sql backend settings
@@ -409,16 +410,18 @@ used by the sql backend.
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated
+    and will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
-  The default is ``"crypt"``.
+  The default is ``"crypt"``. This default is deprecated and will stop to work in python 3.13.
+
 * ``CAS_SQL_PASSWORD_CHARSET``: Charset the SQL users passwords was hash with. This is needed to
   encode the user submitted password before hashing it for comparison. The default is ``"utf-8"``.
 
@@ -439,10 +442,11 @@ Only useful if you are using the ldap authentication backend:
 * ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated and
+    will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.

@@ -15,6 +15,16 @@ Added
 * Support for Django 4.2
 * Allow forms to be overridden from settings
 
+Deprecated
+----------
+
+* Make the crypt module optional and deprecate it's usage.
+  The python stdlid crypt module is deprecated since version 3.11 and
+  will be removed in version 3.13. Check for the availability of the
+  crypt module.
+  All password checks using the crypt module will stop to work on
+  python 3.13.
+
 
 v2.0.0 - 2022-10-17
 ===================

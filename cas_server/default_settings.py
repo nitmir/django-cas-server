@@ -246,6 +246,16 @@ CAS_REMOVE_DJANGO_CSRF_COOKIE_ON_LOGOUT = False
 #: :class:`bool` If `True` Django language cookie will be removed on logout from CAS server
 CAS_REMOVE_DJANGO_LANGUAGE_COOKIE_ON_LOGOUT = False
 
+#: A dotted path to a form or a form used on the login page to retrieve user credentials
+CAS_USER_CREDENTIAL_FORM = "cas_server.forms.UserCredential"
+#: A dotted path to a form or a form used on warn page before emitting a ticket
+CAS_WARN_FORM = "cas_server.forms.WarnForm"
+#: A dotted path to a form or a form used on the login page to select another CAS in federated mode
+CAS_FEDERATE_SELECT_FORM = "cas_server.forms.FederateSelect"
+#: A dotted path to a form or a form used on the login page in federated mode
+CAS_FEDERATE_USER_CREDENTIAL_FORM = "cas_server.forms.FederateUserCredential"
+#: A dotted path to a form or a form for Tickets in the admin interface
+CAS_TICKET_FORM = "cas_server.forms.TicketForm"
 
 GLOBALS = globals().copy()
 for name, default_value in GLOBALS.items():
@@ -253,7 +263,7 @@ for name, default_value in GLOBALS.items():
     if name.startswith("CAS_"):
         # get the current setting value, falling back to default_value
         value = getattr(settings, name, default_value)
-        # set the setting value to its value if defined, ellse to the default_value.
+        # set the setting value to its value if defined, else to the default_value.
         setattr(settings, name, value)
 
 # Allow the user defined CAS_COMPONENT_URLS to omit not changed values

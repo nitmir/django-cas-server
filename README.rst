@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2, 3.2, 4.0 and 4.1
+* Supports Django 1.11, 2.2, 3.2, 4.2
 * Supports Python 3.6+
 
 Dependencies
@@ -29,7 +29,7 @@ Dependencies
 
 ``django-cas-server`` depends on the following python packages:
 
-* Django >= 1.11 < 4.2
+* Django >= 1.11 < 4.3
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
@@ -146,12 +146,12 @@ Quick start
 
 2. Include the cas_server URLconf in your project urls.py like this::
 
-    from django.conf.urls import url, include
+    from django.urls import path, include
 
     urlpatterns = [
-        url(r'^admin/', admin.site.urls),
+        path('admin/', admin.site.urls),
         ...
-        url(r'^cas/', include('cas_server.urls', namespace="cas_server")),
+        path('cas/', include('cas_server.urls', namespace="cas_server")),
     ]
 
 3. Run ``python manage.py migrate`` to create the cas_server models.
@@ -352,6 +352,19 @@ Tickets miscellaneous settings
 * ``CAS_PROXY_GRANTING_TICKET_PREFIX``: Prefix of proxy granting ticket. The default is ``"PGT"``.
 * ``CAS_PROXY_GRANTING_TICKET_IOU_PREFIX``: Prefix of proxy granting ticket IOU. The default is ``"PGTIOU"``.
 
+Forms settings
+--------------
+
+* ``CAS_USER_CREDENTIAL_FORM``:  A dotted path to a form or a form used on the login page to retrieve
+  user credentials. The default is ``"cas_server.forms.UserCredential"``.
+* ``CAS_WARN_FORM``: A dotted path to a form or a form used on warn page before emitting a ticket.
+  The default is ``"cas_server.forms.WarnForm"``.
+* ``CAS_FEDERATE_SELECT_FORM``: A dotted path to a form or a form used on the login page to select
+  another CAS in federated mode. The default is ``"cas_server.forms.FederateSelect"``
+* ``CAS_FEDERATE_USER_CREDENTIAL_FORM``: A dotted path to a form or a form used on the login page in
+  federated mode. The default is ``"cas_server.forms.FederateUserCredential"``
+* ``CAS_TICKET_FORM``: A dotted path to a form or a form for Tickets in the admin interface.
+  The default is ``"cas_server.forms.TicketForm"``
 
 Mysql backend settings
 ----------------------
@@ -370,16 +383,17 @@ Only useful if you are using the mysql authentication backend:
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated
+    and will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
-  The default is ``"crypt"``.
+  The default is ``"crypt"``. This default is deprecated and will stop to work in python 3.13.
 
 
 Sql backend settings
@@ -396,16 +410,18 @@ used by the sql backend.
 * ``CAS_SQL_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated
+    and will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.
   * ``"plain"``, the password in the database must be in clear.
 
-  The default is ``"crypt"``.
+  The default is ``"crypt"``. This default is deprecated and will stop to work in python 3.13.
+
 * ``CAS_SQL_PASSWORD_CHARSET``: Charset the SQL users passwords was hash with. This is needed to
   encode the user submitted password before hashing it for comparison. The default is ``"utf-8"``.
 
@@ -426,10 +442,11 @@ Only useful if you are using the ldap authentication backend:
 * ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
-    should begin with $
+    should begin with $. This method is deprecated and will stop to work in python 3.13.
   * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
-    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}.
+    {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated and
+    will stop to work in python 3.13.
   * ``"hex_HASH_NAME"`` with ``HASH_NAME`` in md5, sha1, sha224, sha256, sha384, sha512.
     The hashed password in the database is compared to the hexadecimal digest of the clear
     password hashed with the corresponding algorithm.

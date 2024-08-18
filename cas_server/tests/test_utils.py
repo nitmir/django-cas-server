@@ -63,6 +63,9 @@ class CheckPasswordCase(TestCase):
 
     def test_crypt(self):
         """test the crypt auth method"""
+        # Only run test if crypt is available
+        if utils.crypt is None:
+            return
         salts = ["$6$UVVAQvrMyXMF3FF3", "aa"]
         hashed_password1 = []
         for salt in salts:

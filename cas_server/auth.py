@@ -296,7 +296,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 conn = self.get_conn()
                 if conn.search(
                     settings.CAS_LDAP_BASE_DN,
-                    settings.CAS_LDAP_USER_QUERY % ldap3.utils.conv.escape_bytes(username),
+                    settings.CAS_LDAP_USER_QUERY % {'username': ldap3.utils.conv.escape_bytes(username)},
                     attributes=ldap3.ALL_ATTRIBUTES
                 ) and len(conn.entries) == 1:
                     # try the new ldap3>=2 API
@@ -345,7 +345,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                     # fetch the user attribute
                     if conn.search(
                         settings.CAS_LDAP_BASE_DN,
-                        settings.CAS_LDAP_USER_QUERY % ldap3.utils.conv.escape_bytes(self.username),
+                        settings.CAS_LDAP_USER_QUERY % {'username': ldap3.utils.conv.escape_bytes(self.username)},
                         attributes=ldap3.ALL_ATTRIBUTES
                     ) and len(conn.entries) == 1:
                         # try the ldap3>=2 API

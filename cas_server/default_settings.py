@@ -158,7 +158,7 @@ CAS_LDAP_PASSWORD = None
 CAS_LDAP_BASE_DN = None
 #: LDAP search filter for searching user by username. User inputed usernames are escaped using
 #: :func:`ldap3.utils.conv.escape_bytes`.
-CAS_LDAP_USER_QUERY = "(uid=%s)"
+CAS_LDAP_USER_QUERY = "(uid=%(username)s)"
 #: LDAP attribute used for users usernames
 CAS_LDAP_USERNAME_ATTR = "uid"
 #: LDAP attribute used for users passwords

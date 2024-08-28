@@ -436,7 +436,7 @@ Only useful if you are using the ldap authentication backend:
 * ``CAS_LDAP_PASSWORD``: Password for connecting to the LDAP server.
 * ``CAS_LDAP_BASE_DN``: LDAP search base DN, for example ``"ou=data,dc=crans,dc=org"``.
 * ``CAS_LDAP_USER_QUERY``: Search filter for searching user by username. User entered usernames are
-  escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%s)"``
+  escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%(username)s)"``
 * ``CAS_LDAP_USERNAME_ATTR``: Attribute used for user's usernames. The default is ``"uid"``
 * ``CAS_LDAP_PASSWORD_ATTR``: Attribute used for user's passwords. The default is ``"userPassword"``
 * ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:

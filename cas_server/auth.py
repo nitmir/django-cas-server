@@ -17,7 +17,6 @@ from django.db import connections, DatabaseError
 
 import warnings
 from datetime import timedelta
-from six.moves import range
 try:  # pragma: no cover
     import MySQLdb
     import MySQLdb.cursors

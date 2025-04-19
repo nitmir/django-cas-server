@@ -14,9 +14,11 @@ import django
 from django.test import TestCase, RequestFactory
 from django.db import connection
 
+import sys
 import six
 import warnings
 import datetime
+import unittest
 
 from cas_server import utils
 
@@ -86,6 +88,7 @@ class CheckPasswordCase(TestCase):
         with self.assertRaises(ValueError):
             utils.check_password("crypt", self.password1, b"$truc$s$dsdsd", "utf8")
 
+    @unittest.skipIf(sys.version_info >= (3,13), "crypt module removed from python 3.13")
     def test_ldap_password_valid(self):
         """test the ldap auth method with all the schemes"""
         salt = b"UVVAQvrMyXMF3FF3"
@@ -113,6 +116,7 @@ class CheckPasswordCase(TestCase):
             self.assertTrue(utils.check_password("ldap", self.password1, hp1, "utf8"))
             self.assertFalse(utils.check_password("ldap", self.password2, hp1, "utf8"))
 
+    @unittest.skipIf(sys.version_info >= (3,13), "crypt module removed from python 3.13")
     def test_ldap_password_fail(self):
         """test the ldap auth method with malformed hash or bad schemes"""
         salt = b"UVVAQvrMyXMF3FF3"

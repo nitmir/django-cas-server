@@ -30,6 +30,13 @@ Deprecated
 * Using %s in your CAS_LDAP_USER_QUERY is deprecated.
   Please upgrade your config to use %(username)s instead
 
+Fix
+---
+
+* datetime.datetime.utcnow() is deprecated and scheduled for removal.
+  Use timezone-aware objects to represent datetimes in UTC:
+  datetime.datetime.now(datetime.timezone.UTC).
+
 
 v2.1.0 - 2024-08-18
 ===================

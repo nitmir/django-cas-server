@@ -43,7 +43,7 @@ except ImportError:
     crypt = None
 
 from importlib import import_module
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as tz
 from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 from . import VERSION
@@ -209,7 +209,7 @@ def set_cookie(response, key, value, max_age):
         :param int max_age: the maximum validity age of the cookie
     """
     expires = datetime.strftime(
-        datetime.utcnow() + timedelta(seconds=max_age),
+        datetime.now(tz.utc) + timedelta(seconds=max_age),
         "%a, %d-%b-%Y %H:%M:%S GMT"
     )
     response.set_cookie(

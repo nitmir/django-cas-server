@@ -35,6 +35,7 @@ if __name__ == '__main__':
             'Framework :: Django :: 2.2',
             'Framework :: Django :: 3.2',
             'Framework :: Django :: 4.2',
+            'Framework :: Django :: 5.2',
             'Intended Audience :: Developers',
             'Intended Audience :: System Administrators',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

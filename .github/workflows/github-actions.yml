@@ -52,20 +52,25 @@ jobs:
             env: "py38-django22"
           # Debian bullseye
           - python: "3.9"
-            env: py39-django22
+            env: "py39-django22"
           # Ubuntu jammy
           - python: "3.10"
             env: "py310-django32"
           # Debian bookworm
           - python: "3.11"
-            env: py311-django32
+            env: "py311-django32"
+          # Ubuntu noble
+          - python: "3.12"
+            env: "py312-django42"
           # Django additional supported version
-          - python: "3.9"
-            env: py39-django42
           - python: "3.10"
-            env: py310-django42
+            env: "py310-django52"
           - python: "3.11"
-            env: py311-django42
+            env: "py311-django52"
+          - python: "3.12"
+            env: "py312-django52"
+          - python: "3.13"
+            env: "py313-django52"
     steps:
       - uses: actions/checkout@v3
       - if: matrix.arch != 'amd64'

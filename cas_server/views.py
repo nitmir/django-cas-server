@@ -44,10 +44,9 @@ from lxml import etree
 from datetime import timedelta
 
 import cas_server.utils as utils
-import cas_server.forms as forms
 import cas_server.models as models
 
-from .utils import json_response
+from .utils import json_response, import_attr
 from .models import Ticket, ServiceTicket, ProxyTicket, ProxyGrantingTicket
 from .models import ServicePattern, FederatedIendityProvider, FederatedUser
 from .federate import CASFederateValidateUser
@@ -302,7 +301,7 @@ class FederateAuth(CsrfExemptView):
                     .process_view(request, None, (), {})
             if reason is not None:  # pragma: no cover (csrf checks are disabled during tests)
                 return reason  # Failed the test, stop here.
-            form = forms.FederateSelect(request.POST)
+            form = import_attr(settings.CAS_FEDERATE_SELECT_FORM)(request.POST)
             if form.is_valid():
                 params = utils.copy_params(
                     request.POST,
@@ -677,14 +676,16 @@ class LoginView(View, LogoutMixin):
                 form_initial['username'] = self.username
                 form_initial['password'] = self.ticket
                 form_initial['ticket'] = self.ticket
-                self.form = forms.FederateUserCredential(
+                self.form = import_attr(settings.CAS_FEDERATE_USER_CREDENTIAL_FORM)(
                     values,
                     initial=form_initial
                 )
             else:
-                self.form = forms.FederateSelect(values, initial=form_initial)
+                self.form = import_attr(
+                    settings.CAS_FEDERATE_SELECT_FORM
+                )(values, initial=form_initial)
         else:
-            self.form = forms.UserCredential(
+            self.form = import_attr(settings.CAS_USER_CREDENTIAL_FORM)(
                 values,
                 initial=form_initial
             )
@@ -720,7 +721,7 @@ class LoginView(View, LogoutMixin):
                     data = {"status": "error", "detail": "confirmation needed"}
                     return json_response(self.request, data)
                 else:
-                    warn_form = forms.WarnForm(initial={
+                    warn_form = import_attr(settings.CAS_WARN_FORM)(initial={
                         'service': self.service,
                         'renew': self.renew,
                         'gateway': self.gateway,
@@ -999,7 +1000,7 @@ class Auth(CsrfExemptView):
             return HttpResponse(u"no\n", content_type="text/plain; charset=utf-8")
         if not username or not password or not service:
             return HttpResponse(u"no\n", content_type="text/plain; charset=utf-8")
-        form = forms.UserCredential(
+        form = import_attr(settings.CAS_USER_CREDENTIAL_FORM)(
             request.POST,
             initial={
                 'service': service,

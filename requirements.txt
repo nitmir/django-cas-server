@@ -1,4 +1,4 @@
-Django >= 1.11,<4.2
+Django >= 1.11,<4.3
 setuptools>=5.5
 requests>=2.4
 requests_futures>=0.9.5

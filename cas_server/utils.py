@@ -30,12 +30,16 @@ import random
 import string
 import json
 import hashlib
-import crypt
 import base64
 import requests
 import time
 import logging
 import binascii
+# The crypt module is deprecated and will be removed in version 3.13
+try:
+    import crypt
+except ImportError:
+    crypt = None
 
 from importlib import import_module
 from datetime import datetime, timedelta
@@ -406,6 +410,8 @@ def crypt_salt_is_valid(salt):
         :return: ``True`` if ``salt`` is a valid crypt salt on this system, ``False`` otherwise
         :rtype: bool
     """
+    if crypt is None:
+        return False
     if len(salt) < 2:
         return False
     else:
@@ -562,6 +568,8 @@ class LdapHashUserPassword(object):
                 cls._schemes_to_hash[scheme](password + salt).digest() + salt
             )
         except KeyError:
+            if crypt is None:
+                raise cls.BadScheme("Crypt is not available on the system")
             password = password.decode(charset)
             salt = salt.decode(charset)
             if not crypt_salt_is_valid(salt):
@@ -639,6 +647,8 @@ def check_password(method, password, hashed_password, charset):
     if method == "plain":
         return password == hashed_password
     elif method == "crypt":
+        if crypt is None:
+            raise ValueError("Crypt is not available on the system")
         if hashed_password.startswith(b'$'):
             salt = b'$'.join(hashed_password.split(b'$', 3)[:-1])
         elif hashed_password.startswith(b'_'):  # pragma: no cover old BSD format not supported

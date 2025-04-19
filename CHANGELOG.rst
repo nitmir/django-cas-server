@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Changed
+-------
+
+* Allow more complex LDAP user queries
+
+Deprecated
+----------
+
+* Using %s in your CAS_LDAP_USER_QUERY is deprecated.
+  Please upgrade your config to use %(username)s instead
+
 v2.1.0 - 2024-08-18
 ===================
 

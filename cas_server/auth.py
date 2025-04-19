@@ -283,6 +283,21 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
             cls._conn = conn
         return conn
 
+    @staticmethod
+    def get_ldap_user_query(username):
+        if '%s' in settings.CAS_LDAP_USER_QUERY:
+            warnings.warn(
+                r'Using %s in your CAS_LDAP_USER_QUERY is deprecated. '
+                r'Please upgrade your config to use %(username)s instead',
+                DeprecationWarning,
+                stacklevel=0
+            )
+            return settings.CAS_LDAP_USER_QUERY % (ldap3.utils.conv.escape_bytes(username), )
+        else:
+            return settings.CAS_LDAP_USER_QUERY % {
+                'username': ldap3.utils.conv.escape_bytes(username)
+            }
+
     def __init__(self, username):
         if not ldap3:
             raise RuntimeError("Please install ldap3 before using the LdapAuthUser backend")
@@ -296,7 +311,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                 conn = self.get_conn()
                 if conn.search(
                     settings.CAS_LDAP_BASE_DN,
-                    settings.CAS_LDAP_USER_QUERY % {'username': ldap3.utils.conv.escape_bytes(username)},
+                    self.get_ldap_user_query(username),
                     attributes=ldap3.ALL_ATTRIBUTES
                 ) and len(conn.entries) == 1:
                     # try the new ldap3>=2 API
@@ -345,7 +360,7 @@ class LdapAuthUser(DBAuthUser):  # pragma: no cover
                     # fetch the user attribute
                     if conn.search(
                         settings.CAS_LDAP_BASE_DN,
-                        settings.CAS_LDAP_USER_QUERY % {'username': ldap3.utils.conv.escape_bytes(self.username)},
+                        self.get_ldap_user_query(self.username),
                         attributes=ldap3.ALL_ATTRIBUTES
                     ) and len(conn.entries) == 1:
                         # try the ldap3>=2 API

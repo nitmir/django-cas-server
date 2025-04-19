@@ -64,7 +64,7 @@ class FederateAuthLoginLogoutTestCase(
             ) in response.content.decode("utf-8"))
         self.assertEqual(response.context['post_url'], '/federate')
 
-    def test_login_post_provider(self, remember=False):
+    def test_login_post_provider(self, remember=False, ret=False):
         """test a successful login wrokflow"""
         tickets = []
         # choose the example.com provider
@@ -157,12 +157,13 @@ class FederateAuthLoginLogoutTestCase(
             response = client.get("/login", {'service': self.service})
             self.assertEqual(response.status_code, 302)
             self.assertTrue(response["Location"].startswith("%s?ticket=" % self.service))
-        return tickets
+        if ret:
+            return tickets
 
     def test_login_twice(self):
         """Test that user id db is used for the second login (cf coverage)"""
         self.test_login_post_provider()
-        tickets = self.test_login_post_provider()
+        tickets = self.test_login_post_provider(ret=True)
         # trying to authenticated while being already authenticated should redirect to /login
         for (provider, _, client) in tickets:
             response = client.get("/federate/%s" % provider.suffix)
@@ -256,7 +257,7 @@ class FederateAuthLoginLogoutTestCase(
     def test_auth_federate_slo(self):
         """test that SLO receive from backend CAS log out the users"""
         # get tickets and connected clients
-        tickets = self.test_login_post_provider()
+        tickets = self.test_login_post_provider(ret=True)
         for (provider, ticket, client) in tickets:
             # SLO for an unkown ticket should do nothing
             response = client.post(
@@ -307,7 +308,7 @@ class FederateAuthLoginLogoutTestCase(
             and redirected to his CAS logout page
         """
         # get tickets and connected clients, then follow normal logout
-        tickets = self.test_login_post_provider()
+        tickets = self.test_login_post_provider(ret=True)
         for (provider, _, client) in tickets:
             response = client.get("/logout")
             self.assertEqual(response.status_code, 302)
@@ -328,7 +329,7 @@ class FederateAuthLoginLogoutTestCase(
                 ) in response.content
             )
 
-        tickets = self.test_login_post_provider()
+        tickets = self.test_login_post_provider(ret=True)
         if django.VERSION >= (1, 8):
             # assume the username session variable has been tempered (should not happend)
             for (provider, _, client) in tickets:
@@ -345,7 +346,7 @@ class FederateAuthLoginLogoutTestCase(
             If the user check remember, next login should not offer the chose of the backend CAS
             and use the one store in the cookie
         """
-        tickets = self.test_login_post_provider(remember=True)
+        tickets = self.test_login_post_provider(remember=True, ret=True)
         for (provider, _, client) in tickets:
             client.get("/logout")
             response = client.get("/login")
@@ -357,7 +358,7 @@ class FederateAuthLoginLogoutTestCase(
 
     def test_forget_provider(self):
         """Test the logout option to forget remembered provider"""
-        tickets = self.test_login_post_provider(remember=True)
+        tickets = self.test_login_post_provider(remember=True, ret=True)
         for (provider, _, client) in tickets:
             self.assertIn("remember_provider", client.cookies)
             self.assertEqual(client.cookies["remember_provider"].value, provider.suffix)
@@ -369,7 +370,7 @@ class FederateAuthLoginLogoutTestCase(
         """
             Test authentication renewal with federation mode
         """
-        tickets = self.test_login_post_provider()
+        tickets = self.test_login_post_provider(ret=True)
         for (provider, _, client) in tickets:
             # Try to renew authentication(client already authenticated in test_login_post_provider
             response = client.get("/login?renew=true")

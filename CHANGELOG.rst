@@ -6,6 +6,38 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+Unreleased
+==========
+
+Added
+-----
+
+* Support for Django 5.2
+
+Changed
+-------
+
+* Allow more complex LDAP user queries
+
+Removed
+-------
+
+* Drop support for Django 4.0 and 4.1 as it reached end of life.
+
+Deprecated
+----------
+
+* Using %s in your CAS_LDAP_USER_QUERY is deprecated.
+  Please upgrade your config to use %(username)s instead
+
+Fix
+---
+
+* datetime.datetime.utcnow() is deprecated and scheduled for removal.
+  Use timezone-aware objects to represent datetimes in UTC:
+  datetime.datetime.now(datetime.timezone.UTC).
+
+
 v2.1.0 - 2024-08-18
 ===================
 

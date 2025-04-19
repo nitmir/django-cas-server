@@ -44,7 +44,7 @@ dist:
 
 test_venv/bin/python:
 	python3 -m venv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=4.2,<4.3'
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=5.2,<5.3'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas

@@ -46,28 +46,28 @@ python packages:
 
 
 Here is a table with the name of python packages and the corresponding packages providing
-them on debian like systems and centos like systems.
+them on debian like systems.
 You should try as much as possible to use system packages as they are automatically updated when
 you update your system. You can then install Not Available (N/A)
 packages on your system using pip3 inside a virtualenv as described in the `Installation`_ section.
 
-+------------------+--------------------------+---------------------+
-| python package   | debian like systems      | centos like systems |
-+==================+==========================+=====================+
-| Django           | python3-django           | python36-django     |
-+------------------+--------------------------+---------------------+
-| requests         | python3-requests         | python36-requests   |
-+------------------+--------------------------+---------------------+
-| requests_futures | python3-requests-futures | N/A                 |
-+------------------+--------------------------+---------------------+
-| lxml             | python3-lxml             | python36-lxml       |
-+------------------+--------------------------+---------------------+
-| ldap3            | python3-ldap3            | python36-ldap3      |
-+------------------+--------------------------+---------------------+
-| psycopg2         | python3-psycopg2         | python36-psycopg2   |
-+------------------+--------------------------+---------------------+
-| mysql-python     | python3-mysqldb          | python36-mysql      |
-+------------------+--------------------------+---------------------+
++------------------+--------------------------+
+| python package   | debian like systems      |
++==================+==========================+
+| Django           | python3-django           |
++------------------+--------------------------+
+| requests         | python3-requests         |
++------------------+--------------------------+
+| requests_futures | python3-requests-futures |
++------------------+--------------------------+
+| lxml             | python3-lxml             |
++------------------+--------------------------+
+| ldap3            | python3-ldap3            |
++------------------+--------------------------+
+| psycopg2         | python3-psycopg2         |
++------------------+--------------------------+
+| mysql-python     | python3-mysqldb          |
++------------------+--------------------------+
 
 Installation
 ============
@@ -81,13 +81,6 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
    On debian like systems::
 
     $ sudo apt-get install python3-django python3-requests python3-lxml python3-requests-futures
-
-   On debian jessie, you can use the version of python-django available in the
-   `backports <https://backports.debian.org/Instructions/>`_.
-
-   On centos like systems with epel enabled::
-
-    $ sudo yum install python36-django python36-requests python36-lxml
 
 3. Create a virtualenv::
 

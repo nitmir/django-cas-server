@@ -8,13 +8,12 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2016 Valentin Samir
+# (c) 2016-2025 Valentin Samir
 """Tests module for utils"""
 import django
 from django.test import TestCase, RequestFactory
 from django.db import connection
 
-import six
 import warnings
 import datetime
 
@@ -69,15 +68,12 @@ class CheckPasswordCase(TestCase):
         salts = ["$6$UVVAQvrMyXMF3FF3", "aa"]
         hashed_password1 = []
         for salt in salts:
-            if six.PY3:
-                hashed_password1.append(
-                    utils.crypt.crypt(
-                        self.password1.decode("utf8"),
-                        salt
-                    ).encode("utf8")
-                )
-            else:
-                hashed_password1.append(utils.crypt.crypt(self.password1, salt))
+            hashed_password1.append(
+                utils.crypt.crypt(
+                    self.password1.decode("utf8"),
+                    salt
+                ).encode("utf8")
+            )
 
         for hp1 in hashed_password1:
             self.assertTrue(utils.check_password("crypt", self.password1, hp1, "utf8"))
@@ -100,14 +96,15 @@ class CheckPasswordCase(TestCase):
             hashed_password1.append(
                 utils.LdapHashUserPassword.hash(scheme, self.password1, charset="utf8")
             )
-        hashed_password1.append(
-            utils.LdapHashUserPassword.hash(
-                b"{CRYPT}",
-                self.password1,
-                b"$6$UVVAQvrMyXMF3FF3",
-                charset="utf8"
+        if utils.crypt is not None:
+            hashed_password1.append(
+                utils.LdapHashUserPassword.hash(
+                    b"{CRYPT}",
+                    self.password1,
+                    b"$6$UVVAQvrMyXMF3FF3",
+                    charset="utf8"
+                )
             )
-        )
         for hp1 in hashed_password1:
             self.assertIsInstance(hp1, bytes)
             self.assertTrue(utils.check_password("ldap", self.password1, hp1, "utf8"))
@@ -128,8 +125,9 @@ class CheckPasswordCase(TestCase):
         for scheme in schemes_salt:
             with self.assertRaises(utils.LdapHashUserPassword.BadScheme):
                 utils.LdapHashUserPassword.hash(scheme, self.password1)
-        with self.assertRaises(utils.LdapHashUserPassword.BadSalt):
-            utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, b"$truc$toto")
+        if utils.crypt is not None:
+            with self.assertRaises(utils.LdapHashUserPassword.BadSalt):
+                utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, b"$truc$toto")
 
         # then try to check hash with bad hashes
         with self.assertRaises(utils.LdapHashUserPassword.BadHash):
@@ -243,7 +241,7 @@ class UtilsTestCase(TestCase):
             )
         else:
             version = utils.last_version()
-            self.assertIsInstance(version, six.text_type)
+            self.assertIsInstance(version, str)
             self.assertEqual(len(version.split('.')), 3)
 
             # version is cached 24h so calling it a second time should return the save value

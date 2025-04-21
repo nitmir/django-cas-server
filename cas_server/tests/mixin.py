@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2016 Valentin Samir
+# (c) 2016-2019 Valentin Samir
 """Some mixin classes for tests"""
 from cas_server.default_settings import settings
 from django.utils import timezone

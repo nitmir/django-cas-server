@@ -35,6 +35,7 @@ if __name__ == '__main__':
             'Framework :: Django :: 2.2',
             'Framework :: Django :: 3.2',
             'Framework :: Django :: 4.2',
+            'Framework :: Django :: 5.2',
             'Intended Audience :: Developers',
             'Intended Audience :: System Administrators',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -62,11 +63,11 @@ if __name__ == '__main__':
         keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
         install_requires=[
             'Django >= 1.11,<4.3', 'requests >= 2.4', 'requests_futures >= 0.9.5',
-            'lxml >= 3.4', 'six >= 1'
+            'lxml >= 3.4'
         ],
         url="https://github.com/nitmir/django-cas-server",
         download_url="https://github.com/nitmir/django-cas-server/releases/latest",
         zip_safe=False,
-        setup_requires=['pytest-runner'],
+        setup_requires=[],
         tests_require=['pytest', 'pytest-django', 'pytest-pythonpath', 'pytest-warnings', 'mock>=1'],
     )

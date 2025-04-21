@@ -7,7 +7,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015-2016 Valentin Samir
+# (c) 2015-2025 Valentin Samir
 """A django CAS server application"""
 try:
     import django
@@ -15,7 +15,7 @@ except ModuleNotFoundError:
     django = None
 
 #: version of the application
-VERSION = '2.1.0'
+VERSION = '3.0.0'
 
 if django is None or django.VERSION < (3, 2):
     #: path the the application configuration class

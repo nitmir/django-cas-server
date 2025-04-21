@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2016 Valentin Samir
+# (c) 2016-2025 Valentin Samir
 """federated mode helper classes"""
 from .default_settings import SessionStore
 from django.db import IntegrityError
@@ -17,7 +17,7 @@ from .cas import CASClient
 from .models import FederatedUser, FederateSLO, User
 
 import logging
-from six.moves import urllib
+import urllib
 
 #: logger facility
 logger = logging.getLogger(__name__)

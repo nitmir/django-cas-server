@@ -21,7 +21,7 @@ Features
 * Possibility to rename/rewrite attributes per service
 * Possibility to require some attribute values per service
 * Federated mode between multiple CAS
-* Supports Django 1.11, 2.2, 3.2, 4.2
+* Supports Django 1.11, 2.2, 3.2, 4.2, 5.2
 * Supports Python 3.6+
 
 Dependencies
@@ -33,7 +33,6 @@ Dependencies
 * requests >= 2.4
 * requests_futures >= 0.9.5
 * lxml >= 3.4
-* six >= 1.8
 
 Minimal version of package dependencies are just indicative and means that ``django-cas-server`` has
 been tested with it. Previous versions of dependencies may or may not work.
@@ -42,36 +41,36 @@ Additionally, depending on the `Authentication backend`_ you plan to use, you ma
 python packages:
 
 * ldap3
+* gssapi
 * psycopg2
 * mysql-python
 
 
 Here is a table with the name of python packages and the corresponding packages providing
-them on debian like systems and centos like systems.
+them on debian like systems.
 You should try as much as possible to use system packages as they are automatically updated when
 you update your system. You can then install Not Available (N/A)
 packages on your system using pip3 inside a virtualenv as described in the `Installation`_ section.
-For use with python2, just replace python3(6) in the table by python.
 
-+------------------+--------------------------+---------------------+
-| python package   | debian like systems      | centos like systems |
-+==================+==========================+=====================+
-| Django           | python3-django           | python36-django     |
-+------------------+--------------------------+---------------------+
-| requests         | python3-requests         | python36-requests   |
-+------------------+--------------------------+---------------------+
-| requests_futures | python3-requests-futures | N/A                 |
-+------------------+--------------------------+---------------------+
-| lxml             | python3-lxml             | python36-lxml       |
-+------------------+--------------------------+---------------------+
-| six              | python3-six              | python36-six        |
-+------------------+--------------------------+---------------------+
-| ldap3            | python3-ldap3            | python36-ldap3      |
-+------------------+--------------------------+---------------------+
-| psycopg2         | python3-psycopg2         | python36-psycopg2   |
-+------------------+--------------------------+---------------------+
-| mysql-python     | python3-mysqldb          | python36-mysql      |
-+------------------+--------------------------+---------------------+
++------------------+--------------------------+
+| python package   | debian like systems      |
++==================+==========================+
+| Django           | python3-django           |
++------------------+--------------------------+
+| requests         | python3-requests         |
++------------------+--------------------------+
+| requests_futures | python3-requests-futures |
++------------------+--------------------------+
+| lxml             | python3-lxml             |
++------------------+--------------------------+
+| ldap3            | python3-ldap3            |
++------------------+--------------------------+
+| psycopg2         | python3-psycopg2         |
++------------------+--------------------------+
+| mysql-python     | python3-mysqldb          |
++------------------+--------------------------+
+| gssapi           | python3-gssapi           |
++------------------+--------------------------+
 
 Installation
 ============
@@ -84,14 +83,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    On debian like systems::
 
-    $ sudo apt-get install python3-django python3-requests python3-six python3-lxml python3-requests-futures
-
-   On debian jessie, you can use the version of python-django available in the
-   `backports <https://backports.debian.org/Instructions/>`_.
-
-   On centos like systems with epel enabled::
-
-    $ sudo yum install python36-django python36-requests python36-six python36-lxml
+    $ sudo apt-get install python3-django python3-requests python3-lxml python3-requests-futures
 
 3. Create a virtualenv::
 
@@ -265,6 +257,17 @@ Authentication settings
   Available classes bundled with ``django-cas-server`` are listed below in the
   `Authentication backend`_ section.
 
+* ``CAS_AUTH_GSSAPI_ENABLE``: Activate Kerberos authentication (not compatible with
+  federate mode or auth class requiring access to the user credential to retrieve
+  user attributes).
+  See https://web.mit.edu/kerberos/krb5-1.13/doc/admin/env_variables.html for environment
+  variables allowing to configure the underlying GSSAPI C library.
+  Username retrieved form kerberos auth MUST match username used by the  ``CAS_AUTH_CLASS``
+  The default is ``False``
+
+* ``CAS_AUTH_GSSAPI_SERVICENAME``: Service Principal Name to use for Kerberos authentication
+  (must be available in the server keytab).
+
 * ``SESSION_COOKIE_AGE``: This is a django setting. Here, it controls the delay in seconds after
   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should
   reduce it to something like ``86400`` seconds (1 day).
@@ -436,7 +439,7 @@ Only useful if you are using the ldap authentication backend:
 * ``CAS_LDAP_PASSWORD``: Password for connecting to the LDAP server.
 * ``CAS_LDAP_BASE_DN``: LDAP search base DN, for example ``"ou=data,dc=crans,dc=org"``.
 * ``CAS_LDAP_USER_QUERY``: Search filter for searching user by username. User entered usernames are
-  escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%s)"``
+  escaped using ``ldap3.utils.conv.escape_bytes``. The default is ``"(uid=%(username)s)"``
 * ``CAS_LDAP_USERNAME_ATTR``: Attribute used for user's usernames. The default is ``"uid"``
 * ``CAS_LDAP_PASSWORD_ATTR``: Attribute used for user's passwords. The default is ``"userPassword"``
 * ``CAS_LDAP_PASSWORD_CHECK``: The method used to check the user password. Must be one of the following:

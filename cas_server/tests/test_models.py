@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2016 Valentin Samir
+# (c) 2016-205 Valentin Samir
 """Tests module for models"""
 from cas_server.default_settings import settings
 
@@ -18,7 +18,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from django.core import mail
 
-import mock
+from unittest import mock
 from datetime import timedelta
 from importlib import import_module
 

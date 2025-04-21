@@ -1,6 +1,5 @@
-Django >= 1.11,<4.3
+Django >= 1.11,<5.3
 setuptools>=5.5
 requests>=2.4
 requests_futures>=0.9.5
 lxml>=3.4
-six>=1.8

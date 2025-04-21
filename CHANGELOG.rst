@@ -6,6 +6,45 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v3.0.0 - 2025-04-21
+===================
+
+Added
+-----
+
+* Support for Django 5.2
+* Support for Kerberos/GSSAPI authentication
+
+Changed
+-------
+
+* Allow more complex LDAP user queries
+* Prefer local inventory for intersphinx
+* Replace mock test module with the one from unittest
+
+Removed
+-------
+
+* Drop support for Django 4.0 and 4.1 as it reached end of life.
+* Removed six transitional dependency. This break for sure
+  python 2.7 if it was still working
+* Remove pytest-runner as it's deprecated
+
+Deprecated
+----------
+
+* Using %s in your CAS_LDAP_USER_QUERY is deprecated.
+  Please upgrade your config to use %(username)s instead
+
+Fix
+---
+
+* datetime.datetime.utcnow() is deprecated and scheduled for removal.
+  Use timezone-aware objects to represent datetimes in UTC:
+  datetime.datetime.now(datetime.timezone.UTC).
+* Skip tests using crypt module if module is not available
+
+
 v2.1.0 - 2024-08-18
 ===================
 

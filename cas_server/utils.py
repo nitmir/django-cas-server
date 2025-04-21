@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015-2016 Valentin Samir
+# (c) 2015-2025 Valentin Samir
 """Some util function for the app"""
 from .default_settings import settings
 
@@ -31,7 +31,6 @@ import string
 import json
 import hashlib
 import base64
-import six
 import requests
 import time
 import logging
@@ -43,8 +42,8 @@ except ImportError:
     crypt = None
 
 from importlib import import_module
-from datetime import datetime, timedelta
-from six.moves.urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+from datetime import datetime, timedelta, timezone as tz
+from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 from . import VERSION
 
@@ -57,7 +56,7 @@ def json_encode(obj):
     try:
         return json_encode.encoder.encode(obj)
     except AttributeError:
-        json_encode.encoder = DjangoJSONEncoder(default=six.text_type)
+        json_encode.encoder = DjangoJSONEncoder(default=str)
         return json_encode(obj)
 
 
@@ -96,7 +95,7 @@ def context(params):
                     # make box discardable by default
                     msg["discardable"] = msg.get("discardable", True)
                     msg_hash = (
-                        six.text_type(msg["message"]).encode("utf-8") +
+                        str(msg["message"]).encode("utf-8") +
                         msg["type"].encode("utf-8")
                     )
                     # hash depend of the rendering language
@@ -129,10 +128,10 @@ def import_attr(path):
         :return: The python object pointed by the dotted path or the python object unchanged
     """
     # if we got a str, decode it to unicode (normally it should only contain ascii)
-    if isinstance(path, six.binary_type):
+    if isinstance(path, bytes):
         path = path.decode("utf-8")
     # if path is not an unicode, return it unchanged (may be it is already the attribute to import)
-    if not isinstance(path, six.text_type):
+    if not isinstance(path, str):
         return path
     if u"." not in path:
         ValueError("%r should be of the form `module.attr` and we just got `attr`" % path)
@@ -209,7 +208,7 @@ def set_cookie(response, key, value, max_age):
         :param int max_age: the maximum validity age of the cookie
     """
     expires = datetime.strftime(
-        datetime.utcnow() + timedelta(seconds=max_age),
+        datetime.now(tz.utc) + timedelta(seconds=max_age),
         "%a, %d-%b-%Y %H:%M:%S GMT"
     )
     response.set_cookie(
@@ -265,12 +264,8 @@ def update_url(url, params):
         else:
             return data
 
-    if six.PY3:
-        url = to_unicode(url)
-        params = {to_unicode(key): to_unicode(value) for (key, value) in params.items()}
-    else:
-        url = to_bytes(url)
-        params = {to_bytes(key): to_bytes(value) for (key, value) in params.items()}
+    url = to_unicode(url)
+    params = {to_unicode(key): to_unicode(value) for (key, value) in params.items()}
 
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4], keep_blank_values=True))
@@ -575,14 +570,12 @@ class LdapHashUserPassword(object):
         except KeyError:
             if crypt is None:
                 raise cls.BadScheme("Crypt is not available on the system")
-            if six.PY3:
-                password = password.decode(charset)
-                salt = salt.decode(charset)
+            password = password.decode(charset)
+            salt = salt.decode(charset)
             if not crypt_salt_is_valid(salt):
                 raise cls.BadSalt("System crypt implementation do not support the salt %r" % salt)
             hashed_password = crypt.crypt(password, salt)
-            if six.PY3:
-                hashed_password = hashed_password.encode(charset)
+            hashed_password = hashed_password.encode(charset)
             return scheme + hashed_password
 
     @classmethod
@@ -647,9 +640,9 @@ def check_password(method, password, hashed_password, charset):
             ``False`` otherwise
         :rtype: bool
     """
-    if not isinstance(password, six.binary_type):
+    if not isinstance(password, bytes):
         password = password.encode(charset)
-    if not isinstance(hashed_password, six.binary_type):
+    if not isinstance(hashed_password, bytes):
         hashed_password = hashed_password.encode(charset)
     if method == "plain":
         return password == hashed_password
@@ -662,10 +655,9 @@ def check_password(method, password, hashed_password, charset):
             salt = hashed_password[:9]
         else:
             salt = hashed_password[:2]
-        if six.PY3:
-            password = password.decode(charset)
-            salt = salt.decode(charset)
-            hashed_password = hashed_password.decode(charset)
+        password = password.decode(charset)
+        salt = salt.decode(charset)
+        hashed_password = hashed_password.decode(charset)
         if not crypt_salt_is_valid(salt):
             raise ValueError("System crypt implementation do not support the salt %r" % salt)
         crypted_password = crypt.crypt(password, salt)

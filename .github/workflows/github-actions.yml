@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ["amd64", "ppc64le"]
+        arch: ["amd64"]
         tox:
           # REHL 7 support and Ubuntu bionic
           - python: "3.6"
@@ -52,27 +52,49 @@ jobs:
             env: "py38-django22"
           # Debian bullseye
           - python: "3.9"
-            env: py39-django22
-          # Ubuntu jammy
-          - python: "3.10"
-            env: "py310-django32"
+            env: "py39-django22"
           # Debian bookworm
           - python: "3.11"
-            env: py311-django32
+            env: "py311-django32"
           # Django additional supported version
-          - python: "3.9"
-            env: py39-django42
           - python: "3.10"
-            env: py310-django42
+            env: "py310-django52"
           - python: "3.11"
-            env: py311-django42
+            env: "py311-django52"
+          - python: "3.12"
+            env: "py312-django52"
+          - python: "3.13"
+            env: "py313-django52"
     steps:
       - uses: actions/checkout@v3
       - if: matrix.arch != 'amd64'
         name: "Install docker multiarch support"
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y qemu qemu-user-static
+          sudo docker run --rm --privileged tonistiigi/binfmt --install ${{ matrix.arch }}
+          sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+      - name: "Check docker arch ${{ matrix.arch }} support"
+        run: sudo docker run --platform linux/${{ matrix.arch }} --rm ${{ matrix.arch }}/python:${{ matrix.tox.python }} /bin/bash -c "echo -n \"Running with arch \"; uname -m;"
+      - name: "Run tests on arch ${{ matrix.arch }}"
+        run: sudo docker run --platform linux/${{ matrix.arch }} --rm -v $(pwd):$(pwd) ${{ matrix.arch }}/python:${{ matrix.tox.python }} /bin/bash -c "cd $(pwd); uname -m; pip install tox; tox -e ${{ matrix.tox.env }}"
+  tests-ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ["amd64", "ppc64le"]
+        tox:
+          # Ubuntu jammy
+          - python: "3.10"
+            env: "py310-django32"
+          # Ubuntu noble
+          - python: "3.12"
+            env: "py312-django42"
+    steps:
+      - uses: actions/checkout@v3
+      - if: matrix.arch != 'amd64'
+        name: "Install docker multiarch support"
+        run: |
+          sudo docker run --rm --privileged tonistiigi/binfmt --install ${{ matrix.arch }}
           sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
       - name: "Check docker arch ${{ matrix.arch }} support"
         run: sudo docker run --platform linux/${{ matrix.arch }} --rm ${{ matrix.arch }}/python:${{ matrix.tox.python }} /bin/bash -c "echo -n \"Running with arch \"; uname -m;"

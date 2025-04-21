@@ -30,7 +30,7 @@ clean_coverage:
 clean_tild_backup:
 	find ./ -name '*~' -delete
 clean_docs:
-	rm -rf docs/_build/ docs/django.inv
+	rm -rf docs/_build/ docs/django.inv docs/python.inv
 clean_eggs:
 	rm -rf .eggs/
 
@@ -44,7 +44,7 @@ dist:
 
 test_venv/bin/python:
 	python3 -m venv test_venv
-	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=4.2,<4.3'
+	test_venv/bin/pip install -U --requirement requirements-dev.txt 'Django>=5.2,<5.3'
 
 test_venv/cas/manage.py: test_venv
 	mkdir -p test_venv/cas
@@ -72,7 +72,7 @@ run_tests: test_venv
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
 test_venv/bin/sphinx-build: test_venv
-	test_venv/bin/pip install Sphinx sphinx_rtd_theme
+	test_venv/bin/pip install -r docs/requirements.txt
 
 docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"

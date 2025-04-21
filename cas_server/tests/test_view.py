@@ -8,7 +8,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2016 Valentin Samir
+# (c) 2016-2025 Valentin Samir
 """Tests module for views"""
 from cas_server.default_settings import settings
 
@@ -20,9 +20,8 @@ from django.utils import timezone
 
 import random
 import json
-import mock
+from unittest import mock
 from lxml import etree
-from six.moves import range
 
 from cas_server import models
 from cas_server import utils

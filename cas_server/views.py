@@ -655,7 +655,7 @@ class LoginView(View, LogoutMixin):
                 try:
                     server_creds = gssapi.Credentials(
                         usage='accept',
-                        name=gssapi.Name(settings.GSSAPI_AUTH_SERVICENAME)
+                        name=gssapi.Name(settings.CAS_AUTH_GSSAPI_SERVICENAME)
                     )
                 except gssapi.exceptions.GSSError as error:
                     logger.error("Fail to create GSSAPI credentials objects: %s" % (error,))

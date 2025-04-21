@@ -81,7 +81,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -348,22 +348,45 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    "python": ('https://docs.python.org/', None),
-    "django": ('https://docs.djangoproject.com/en/3.2/', 'django.inv'),
-}
+intersphinx_mapping_download_missing = True
+
+def check_object_path(key, url, path, fallback=None):
+    if os.path.isfile(path):
+        return {key: (url, path)}
+    if fallback is not None:
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), "{}.inv".format(key)))
+        if not os.path.isfile(path) and intersphinx_mapping_download_missing:
+            import requests
+            r = requests.get(fallback)
+            with open(path + '.new', 'wb') as f:
+                f.write(r.content)
+            os.rename(path + '.new', path)
+        if os.path.isfile(path):
+            return {key: (url, path)}
+    return {}
+
+intersphinx_mapping = {}
+intersphinx_mapping.update(check_object_path(
+    'python',
+    'https://docs.python.org/{v}/'.format(
+        v='.'.join(map(str, sys.version_info[0:2]))
+    ),
+    '/usr/share/doc/python{v}/html/objects.inv'.format(
+        v='.'.join(map(str, sys.version_info[0:2]))
+    ),
+    'https://docs.python.org/{v}/objects.inv'.format(
+        v='.'.join(map(str, sys.version_info[0:2]))
+    )
+))
+
+intersphinx_mapping.update(check_object_path(
+    'django',
+    'https://docs.djangoproject.com/en/stable/',
+    '/usr/share/doc/python-django-doc/html/objects.inv',
+    "https://docs.djangoproject.com/en/stable/_objects"
+))
 
 autodoc_member_order = 'bysource'
 
 locale_dirs = ['../test_venv/lib/python2.7/site-packages/django/conf/locale/']
 
-
-def _download_django_inv():
-    import requests
-    with open(_download_django_inv.path, 'wb') as f:
-        r = requests.get("https://docs.djangoproject.com/en/3.2/_objects")
-        f.write(r.content)
-_download_django_inv.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "django.inv"))
-
-if not os.path.isfile(_download_django_inv.path):
-    _download_django_inv()

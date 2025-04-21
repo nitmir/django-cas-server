@@ -30,7 +30,7 @@ clean_coverage:
 clean_tild_backup:
 	find ./ -name '*~' -delete
 clean_docs:
-	rm -rf docs/_build/ docs/django.inv
+	rm -rf docs/_build/ docs/django.inv docs/python.inv
 clean_eggs:
 	rm -rf .eggs/
 

@@ -19,6 +19,7 @@ Changed
 -------
 
 * Allow more complex LDAP user queries
+* Prefer local inventory for intersphinx
 
 Removed
 -------

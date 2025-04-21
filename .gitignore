@@ -11,6 +11,7 @@ manage.py
 coverage.xml
 docs/_build/
 docs/django.inv
+docs/python.inv
 
 .tox
 test_venv

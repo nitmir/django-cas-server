@@ -42,6 +42,7 @@ Fix
 * datetime.datetime.utcnow() is deprecated and scheduled for removal.
   Use timezone-aware objects to represent datetimes in UTC:
   datetime.datetime.now(datetime.timezone.UTC).
+* Skip tests using crypt module if module is not available
 
 
 v2.1.0 - 2024-08-18

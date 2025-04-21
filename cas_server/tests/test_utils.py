@@ -14,10 +14,8 @@ import django
 from django.test import TestCase, RequestFactory
 from django.db import connection
 
-import sys
 import warnings
 import datetime
-import unittest
 
 from cas_server import utils
 
@@ -84,7 +82,6 @@ class CheckPasswordCase(TestCase):
         with self.assertRaises(ValueError):
             utils.check_password("crypt", self.password1, b"$truc$s$dsdsd", "utf8")
 
-    @unittest.skipIf(sys.version_info >= (3, 13), "crypt module removed from python 3.13")
     def test_ldap_password_valid(self):
         """test the ldap auth method with all the schemes"""
         salt = b"UVVAQvrMyXMF3FF3"
@@ -99,20 +96,20 @@ class CheckPasswordCase(TestCase):
             hashed_password1.append(
                 utils.LdapHashUserPassword.hash(scheme, self.password1, charset="utf8")
             )
-        hashed_password1.append(
-            utils.LdapHashUserPassword.hash(
-                b"{CRYPT}",
-                self.password1,
-                b"$6$UVVAQvrMyXMF3FF3",
-                charset="utf8"
+        if utils.crypt is not None:
+            hashed_password1.append(
+                utils.LdapHashUserPassword.hash(
+                    b"{CRYPT}",
+                    self.password1,
+                    b"$6$UVVAQvrMyXMF3FF3",
+                    charset="utf8"
+                )
             )
-        )
         for hp1 in hashed_password1:
             self.assertIsInstance(hp1, bytes)
             self.assertTrue(utils.check_password("ldap", self.password1, hp1, "utf8"))
             self.assertFalse(utils.check_password("ldap", self.password2, hp1, "utf8"))
 
-    @unittest.skipIf(sys.version_info >= (3, 13), "crypt module removed from python 3.13")
     def test_ldap_password_fail(self):
         """test the ldap auth method with malformed hash or bad schemes"""
         salt = b"UVVAQvrMyXMF3FF3"
@@ -128,8 +125,9 @@ class CheckPasswordCase(TestCase):
         for scheme in schemes_salt:
             with self.assertRaises(utils.LdapHashUserPassword.BadScheme):
                 utils.LdapHashUserPassword.hash(scheme, self.password1)
-        with self.assertRaises(utils.LdapHashUserPassword.BadSalt):
-            utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, b"$truc$toto")
+        if utils.crypt is not None:
+            with self.assertRaises(utils.LdapHashUserPassword.BadSalt):
+                utils.LdapHashUserPassword.hash(b'{CRYPT}', self.password1, b"$truc$toto")
 
         # then try to check hash with bad hashes
         with self.assertRaises(utils.LdapHashUserPassword.BadHash):

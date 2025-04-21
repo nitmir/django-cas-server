@@ -1,7 +1,7 @@
 CAS Server
 ##########
 
-|travis| |coverage| |licence| |github_version| |pypi_version| |codacy| |doc|
+|gh_action| |coverage| |licence| |github_version| |pypi_version| |doc|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
 <https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
@@ -675,8 +675,8 @@ You could for example do as below::
 
 
 
-.. |travis| image:: https://badges.genua.fr/travis/com/nitmir/django-cas-server/master.svg
-    :target: https://travis-ci.com/nitmir/django-cas-server
+.. |gh_action| image:: https://badges.genua.fr/github/actions/workflow/status/nitmir/django-cas-server/github-actions.yml?branch=master
+    :target: https://github.com/nitmir/django-cas-server/actions/workflows/github-actions.yml?query=branch%3Amaster
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.org/project/django-cas-server/
@@ -687,10 +687,7 @@ You could for example do as below::
 .. |licence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
-.. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
-
-.. |coverage| image:: https://intranet.genua.fr/coverage/badge/django-cas-server/master.svg
+.. |coverage| image:: https://badges.genua.fr/coverage/badge/django-cas-server/master.svg
     :target: https://badges.genua.fr/coverage/django-cas-server/master
 
 .. |doc| image:: https://badges.genua.fr/local/readthedocs/?version=latest

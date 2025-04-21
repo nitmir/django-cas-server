@@ -28,6 +28,7 @@ Removed
 * Drop support for Django 4.0 and 4.1 as it reached end of life.
 * Removed six transitional dependency. This break for sure
   python 2.7 if it was still working
+* Remove pytest-runner as it's deprecated
 
 Deprecated
 ----------

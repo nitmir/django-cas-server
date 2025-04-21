@@ -7,7 +7,7 @@
 # along with this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# (c) 2015-2016 Valentin Samir
+# (c) 2015-2024 Valentin Samir
 """module for the admin interface of the app"""
 from .default_settings import settings
 

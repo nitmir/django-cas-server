@@ -64,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'django-cas-server'
-copyright = u'2016, Valentin Samir'
+copyright = u'2016-2025, Valentin Samir'
 author = u'Valentin Samir'
 
 # The version info for the project you're documenting, acts as replacement for

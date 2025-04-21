@@ -13,6 +13,7 @@ Added
 -----
 
 * Support for Django 5.2
+* Support for Kerberos/GSSAPI authentication
 
 Changed
 -------

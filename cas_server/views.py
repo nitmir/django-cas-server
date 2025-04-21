@@ -37,11 +37,18 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 import re
+import base64
 import logging
 import pprint
 import requests
 from lxml import etree
 from datetime import timedelta
+
+if settings.CAS_AUTH_GSSAPI_ENABLE:
+    try:
+        import gssapi
+    except ImportError:
+        raise RuntimeError("Please install gssapi before using the Kerberos auth")
 
 import cas_server.utils as utils
 import cas_server.models as models
@@ -522,14 +529,7 @@ class LoginView(View, LogoutMixin):
                 _(u"Invalid login ticket, please try to log in again")
             )
         elif ret == self.USER_LOGIN_OK:
-            # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
-            # attribute by saving it. (``auto_now=True``)
-            self.user = models.User.objects.get_or_create(
-                username=self.request.session['username'],
-                session_key=self.request.session.session_key
-            )[0]
-            self.user.last_login = timezone.now()
-            self.user.save()
+            pass
         elif ret == self.USER_LOGIN_FAILURE:  # bad user login
             if settings.CAS_FEDERATE:
                 self.ticket = None
@@ -558,6 +558,25 @@ class LoginView(View, LogoutMixin):
             response.delete_cookie("warn")
         return response
 
+    def user_login(self, username, warn, warned=True):
+        self.request.session.set_expiry(0)
+        self.request.session["username"] = username
+        self.request.session["warn"] = warn
+        self.request.session["authenticated"] = True
+        self.renewed = True
+        self.warned = warned
+
+        # On successful login, update the :class:`models.User<cas_server.models.User>` ``date``
+        # attribute by saving it. (``auto_now=True``)
+        self.user = models.User.objects.get_or_create(
+            username=self.request.session['username'],
+            session_key=self.request.session.session_key
+        )[0]
+        self.user.last_login = timezone.now()
+        self.user.save()
+
+        logger.info("User %s successfully authenticated" % username)
+
     def process_post(self):
         """
             Analyse the POST request:
@@ -583,13 +602,11 @@ class LoginView(View, LogoutMixin):
             # authentication request receive, initialize the form to use
             self.init_form(self.request.POST)
             if self.form.is_valid():
-                self.request.session.set_expiry(0)
-                self.request.session["username"] = self.form.cleaned_data['username']
-                self.request.session["warn"] = True if self.form.cleaned_data.get("warn") else False
-                self.request.session["authenticated"] = True
-                self.renewed = True
-                self.warned = True
-                logger.info("User %s successfully authenticated" % self.request.session["username"])
+                self.user_login(
+                    self.form.cleaned_data['username'],
+                    True if self.form.cleaned_data.get("warn") else False,
+                    warned=True
+                )
                 return self.USER_LOGIN_OK
             else:
                 logger.warning("A login attempt failed")
@@ -621,6 +638,57 @@ class LoginView(View, LogoutMixin):
             if self.ticket:
                 del request.session["federate_ticket"]
 
+    def gssapi_auth(self):
+        self.request.session['GSSAPI'] = False
+        # read http header Authorization
+        auth_header = self.request.META.get('HTTP_AUTHORIZATION', None)
+        # if header is missing or do not match SPNEGO, start GSSAPI auth
+        if auth_header is None or not auth_header.startswith('Negotiate '):
+            # call the GET/POST common part
+            response = self.common()
+            response.status_code = 401
+            # demande la négo GSSAPI
+            response['WWW-Authenticate'] = 'Negotiate '
+            return response
+        else:
+            try:
+                try:
+                    server_creds = gssapi.Credentials(
+                        usage='accept',
+                        name=gssapi.Name(settings.GSSAPI_AUTH_SERVICENAME)
+                    )
+                except gssapi.exceptions.GSSError as error:
+                    logger.error("Fail to create GSSAPI credentials objects: %s" % (error,))
+                    server_creds = None
+                # decode and check auth header
+                tok = base64.b64decode(auth_header[len('Negotiate '):])
+                ctx = gssapi.SecurityContext(creds=server_creds, usage='accept')
+                server_tok = ctx.step(tok)
+                b64tok = base64.b64encode(server_tok)
+                # If GSSAPI auth is successful
+                if ctx.complete:
+                    # retreive the user username (remove the realm part)
+                    username = str(ctx.initiator_name).split('@', 1)[0]
+                    self.user_login(
+                        username,
+                        warn=False,
+                        warned=False
+                    )
+                    self.request.session['GSSAPI'] = True
+                    # call the GET/POST common part
+                    return self.common()
+                # sinon, ou la négo continue, ou l'utilisateur peut utiliser le form login/pass
+                else:
+                    # call the GET/POST common part
+                    response = self.common()
+                    response.status_code = 401
+                    response['WWW-Authenticate'] = 'Negotiate ' + b64tok.decode('ascii')
+                    return response
+            except gssapi.exceptions.GSSError as error:
+                logger.error("Error during GSSAPI handshake: %s" % (error,))
+                # call the GET/POST common part
+                return self.common()
+
     def get(self, request, *args, **kwargs):
         """
             method called on GET request on this view
@@ -631,8 +699,15 @@ class LoginView(View, LogoutMixin):
         self.init_get(request)
         # process the GET request
         self.process_get()
-        # call the GET/POST common part
-        return self.common()
+        if (
+            not settings.CAS_FEDERATE and
+            settings.CAS_AUTH_GSSAPI_ENABLE and
+            not request.session.get("authenticated")
+        ):
+            return self.gssapi_auth()
+        else:
+            # call the GET/POST common part
+            return self.common()
 
     def process_get(self):
         """

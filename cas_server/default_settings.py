@@ -64,6 +64,14 @@ CAS_REDIRECT_TO_LOGIN_AFTER_LOGOUT = False
 
 #: A dotted path to a class or a class implementing cas_server.auth.AuthUser.
 CAS_AUTH_CLASS = 'cas_server.auth.DjangoAuthUser'
+#: Activate Kerberos authentication (not compatible with federate mode or auth class
+#: requiring access to the user credential to retrieve user attributes).
+#: See https://web.mit.edu/kerberos/krb5-1.13/doc/admin/env_variables.html
+#: for environment variables allowing to configure the underlying GSSAPI C library
+#: Username retrieved form kerberos auth MUST match username used by the  ``CAS_AUTH_CLASS``
+CAS_AUTH_GSSAPI_ENABLE = False
+#: SPN to use for Kerberos authentication (must be available in the loaded keytab)
+CAS_AUTH_GSSAPI_SERVICENAME = "host/myhost.example.com@AD.EXAMPLE.COM"
 #: Path to certificate authorities file. Usually on linux the local CAs are in
 #: /etc/ssl/certs/ca-certificates.crt. ``True`` tell requests to use its internal certificat
 #: authorities.

@@ -41,6 +41,7 @@ Additionally, depending on the `Authentication backend`_ you plan to use, you ma
 python packages:
 
 * ldap3
+* gssapi
 * psycopg2
 * mysql-python
 
@@ -67,6 +68,8 @@ packages on your system using pip3 inside a virtualenv as described in the `Inst
 | psycopg2         | python3-psycopg2         |
 +------------------+--------------------------+
 | mysql-python     | python3-mysqldb          |
++------------------+--------------------------+
+| gssapi           | python3-gssapi           |
 +------------------+--------------------------+
 
 Installation
@@ -253,6 +256,17 @@ Authentication settings
   ``cas_server.auth.AuthUser``. The default is ``"cas_server.auth.DjangoAuthUser"``
   Available classes bundled with ``django-cas-server`` are listed below in the
   `Authentication backend`_ section.
+
+* ``CAS_AUTH_GSSAPI_ENABLE``: Activate Kerberos authentication (not compatible with
+  federate mode or auth class requiring access to the user credential to retrieve
+  user attributes).
+  See https://web.mit.edu/kerberos/krb5-1.13/doc/admin/env_variables.html for environment
+  variables allowing to configure the underlying GSSAPI C library.
+  Username retrieved form kerberos auth MUST match username used by the  ``CAS_AUTH_CLASS``
+  The default is ``False``
+
+* ``CAS_AUTH_GSSAPI_SERVICENAME``: Service Principal Name to use for Kerberos authentication
+  (must be available in the server keytab).
 
 * ``SESSION_COOKIE_AGE``: This is a django setting. Here, it controls the delay in seconds after
   which inactive users are logged out. The default is ``1209600`` (2 weeks). You probably should

@@ -72,7 +72,7 @@ run_tests: test_venv
 	rm htmlcov/coverage_html.js  # I am really pissed off by those keybord shortcuts
 
 test_venv/bin/sphinx-build: test_venv
-	test_venv/bin/pip install Sphinx sphinx_rtd_theme
+	test_venv/bin/pip install -r docs/requirements.txt
 
 docs: test_venv/bin/sphinx-build
 	bash -c "source test_venv/bin/activate; cd docs; make html"

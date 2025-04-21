@@ -18,7 +18,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from django.core import mail
 
-import mock
+from unittest import mock
 from datetime import timedelta
 from importlib import import_module
 

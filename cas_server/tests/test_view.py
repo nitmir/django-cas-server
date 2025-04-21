@@ -20,7 +20,7 @@ from django.utils import timezone
 
 import random
 import json
-import mock
+from unittest import mock
 from lxml import etree
 
 from cas_server import models

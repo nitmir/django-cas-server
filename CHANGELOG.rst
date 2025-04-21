@@ -20,6 +20,7 @@ Changed
 
 * Allow more complex LDAP user queries
 * Prefer local inventory for intersphinx
+* Replace mock test module with the one from unittest
 
 Removed
 -------

@@ -437,7 +437,7 @@ def crypt_salt_is_valid(salt):
 class LdapHashUserPassword(object):
     """
         Class to deal with hashed password as defined at
-        https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html
+        https://datatracker.ietf.org/doc/html/draft-stroeder-hashed-userpassword-values
     """
 
     #: valide schemes that require a salt

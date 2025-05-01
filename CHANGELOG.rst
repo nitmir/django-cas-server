@@ -14,6 +14,11 @@ Fix
 
 * Django version requirement in setup.py
 
+Changed
+-------
+
+* Update URL in doc and default settings (css and js CDN urls)
+
 
 v3.0.0 - 2025-04-21
 ===================

@@ -369,7 +369,7 @@ class CASClientWithSAMLV1(CASClientV2, SingleLogoutMixin):
     @classmethod
     def get_saml_assertion(cls, ticket):
         """
-        http://www.jasig.org/cas/protocol#samlvalidate-cas-3.0
+        https://apereo.github.io/cas/7.0.x/protocol/CAS-Protocol-Specification.html#42-samlvalidate-cas-30
 
         SAML request values:
 

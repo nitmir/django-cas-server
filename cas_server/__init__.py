@@ -15,7 +15,7 @@ except ModuleNotFoundError:
     django = None
 
 #: version of the application
-VERSION = '3.0.0'
+VERSION = '3.1.0'
 
 if django is None or django.VERSION < (3, 2):
     #: path the the application configuration class

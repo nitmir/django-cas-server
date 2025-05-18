@@ -13,6 +13,7 @@ Fix
 ---
 
 * Django version requirement in setup.py
+* Add python 3.12 and 3.13 classifier to setup.py
 
 Changed
 -------

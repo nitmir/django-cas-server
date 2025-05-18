@@ -1,10 +1,10 @@
 CAS Server
 ##########
 
-|travis| |coverage| |licence| |github_version| |pypi_version| |codacy| |doc|
+|gh_action| |coverage| |licence| |github_version| |pypi_version| |doc|
 
 CAS Server is a Django application implementing the `CAS Protocol 3.0 Specification
-<https://apereo.github.io/cas/4.2.x/protocol/CAS-Protocol-Specification.html>`_.
+<https://apereo.github.io/cas/7.0.x/protocol/CAS-Protocol-Specification.html>`_.
 
 By default, the authentication process uses django internal users but you can easily
 use any source (see the `Authentication backend`_ section and auth classes in the auth.py file)
@@ -89,7 +89,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
     $ virtualenv -p python3 --system-site-packages cas_venv
 
-4. And `activate it <https://virtualenv.pypa.io/en/stable/userguide/#activate-script>`__::
+4. And `activate it <https://virtualenv.pypa.io/en/latest/user_guide.html>`__::
 
     $ cd cas_venv/; . bin/activate
 
@@ -110,7 +110,7 @@ The recommended installation mode is to use a virtualenv with ``--system-site-pa
 
    Then, either run ``make install`` to create a python package using the sources of the repository
    and install it with pip, or place the ``cas_server`` directory into your
-   `PYTHONPATH <https://docs.python.org/2/using/cmdline.html#envvar-PYTHONPATH>`_
+   `PYTHONPATH <https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH>`_
    (for instance by symlinking ``cas_server`` to the root of your django project).
 
 7. Open ``cas_project/settings.py`` in your favourite editor and follow the quick start section.
@@ -198,13 +198,13 @@ Template settings
   The default is::
 
         {
-            "bootstrap3_css": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
-            "bootstrap3_js": "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
-            "html5shiv": "//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js",
-            "respond": "//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js",
-            "bootstrap4_css": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css",
-            "bootstrap4_js": "//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js",
-            "jquery": "//code.jquery.com/jquery.min.js",
+            "bootstrap3_css": "https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css",
+            "bootstrap3_js": "https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js",
+            "html5shiv": "https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js",
+            "respond": "https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js",
+            "bootstrap4_css": "https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css",
+            "bootstrap4_js": "https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js",
+            "jquery": "https://code.jquery.com/jquery.min.js",
         }
 
   if you omit some keys of the dictionary, the default value for these keys is used.
@@ -387,7 +387,7 @@ Only useful if you are using the mysql authentication backend:
 
   * ``"crypt"`` (see <https://en.wikipedia.org/wiki/Crypt_(C)>), the password in the database
     should begin with $. This method is deprecated and will stop to work in python 3.13.
-  * ``"ldap"`` (see https://tools.ietf.org/id/draft-stroeder-hashed-userpassword-values-01.html)
+  * ``"ldap"`` (see https://datatracker.ietf.org/doc/html/draft-stroeder-hashed-userpassword-values)
     the password in the database must begin with one of {MD5}, {SMD5}, {SHA}, {SSHA}, {SHA256},
     {SSHA256}, {SHA384}, {SSHA384}, {SHA512}, {SSHA512}, {CRYPT}. {CRYPT} is deprecated
     and will stop to work in python 3.13.
@@ -675,8 +675,8 @@ You could for example do as below::
 
 
 
-.. |travis| image:: https://badges.genua.fr/travis/com/nitmir/django-cas-server/master.svg
-    :target: https://travis-ci.com/nitmir/django-cas-server
+.. |gh_action| image:: https://badges.genua.fr/github/actions/workflow/status/nitmir/django-cas-server/github-actions.yml?branch=master
+    :target: https://github.com/nitmir/django-cas-server/actions/workflows/github-actions.yml?query=branch%3Amaster
 
 .. |pypi_version| image:: https://badges.genua.fr/pypi/v/django-cas-server.svg
     :target: https://pypi.org/project/django-cas-server/
@@ -687,11 +687,8 @@ You could for example do as below::
 .. |licence| image:: https://badges.genua.fr/pypi/l/django-cas-server.svg
     :target: https://www.gnu.org/licenses/gpl-3.0.html
 
-.. |codacy| image:: https://badges.genua.fr/codacy/grade/255c21623d6946ef8802fa7995b61366/master.svg
-    :target: https://www.codacy.com/app/valentin-samir/django-cas-server
-
-.. |coverage| image:: https://intranet.genua.fr/coverage/badge/django-cas-server/master.svg
+.. |coverage| image:: https://badges.genua.fr/coverage/badge/django-cas-server/master.svg
     :target: https://badges.genua.fr/coverage/django-cas-server/master
 
 .. |doc| image:: https://badges.genua.fr/local/readthedocs/?version=latest
-    :target: http://django-cas-server.readthedocs.io
+    :target: https://django-cas-server.readthedocs.io

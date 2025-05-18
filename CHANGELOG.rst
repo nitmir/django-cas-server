@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this file.
 .. contents:: Table of Contents
    :depth: 2
 
+v3.1.0 - 2025-05-18
+===================
+
+Fix
+---
+
+* Django version requirement in setup.py
+* Add python 3.12 and 3.13 classifier to setup.py
+
+Changed
+-------
+
+* Update URL in doc and default settings (css and js CDN urls)
+
+
 v3.0.0 - 2025-04-21
 ===================
 
